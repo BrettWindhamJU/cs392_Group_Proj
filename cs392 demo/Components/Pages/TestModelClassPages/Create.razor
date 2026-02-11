@@ -1,0 +1,44 @@
+﻿@page "/testmodelclasses/create"
+@using Microsoft.EntityFrameworkCore
+@using cs392_demo.models
+@inject IDbContextFactory<cs392_demo.Data.cs392_demoContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>TestModelClass</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="TestModelClass" OnValidSubmit="AddTestModelClass" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="testval" class="form-label">testVal:</label> 
+                <Microsoft.AspNetCore.Components.Forms.InputText id="testval" @bind-value="TestModelClass.testVal" class="form-control" /> 
+                <ValidationMessage For="() => TestModelClass.testVal" class="text-danger" /> 
+            </div>        
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/testmodelclasses">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private TestModelClass TestModelClass { get; set; } = new();
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddTestModelClass()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.TestModelClass.Add(TestModelClass);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/testmodelclasses");
+    }
+}

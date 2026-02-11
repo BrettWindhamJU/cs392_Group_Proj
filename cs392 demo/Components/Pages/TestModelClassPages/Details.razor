@@ -1,0 +1,46 @@
+﻿@page "/testmodelclasses/details"
+@using Microsoft.EntityFrameworkCore
+@using cs392_demo.models
+@inject IDbContextFactory<cs392_demo.Data.cs392_demoContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>TestModelClass</h2>
+    <hr />
+    @if (testmodelclass is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">testVal</dt>
+            <dd class="col-sm-10">@testmodelclass.testVal</dd>
+        </dl>
+        <div>
+            <a href="@($"/testmodelclasses/edit?testkey={testmodelclass.testKey}")">Edit</a> |
+            <a href="@($"/testmodelclasses")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private TestModelClass? testmodelclass;
+
+    [SupplyParameterFromQuery]
+    private int testKey { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        testmodelclass = await context.TestModelClass.FirstOrDefaultAsync(m => m.testKey == testKey);
+
+        if (testmodelclass is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

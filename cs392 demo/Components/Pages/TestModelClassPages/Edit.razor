@@ -1,0 +1,90 @@
+﻿@page "/testmodelclasses/edit"
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.EntityFrameworkCore
+@using cs392_demo.models
+@inject IDbContextFactory<cs392_demo.Data.cs392_demoContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>TestModelClass</h2>
+<hr />
+@if (TestModelClass is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="TestModelClass" OnValidSubmit="UpdateTestModelClass" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="TestModelClass.testKey" value="@TestModelClass.testKey" />
+                <div class="mb-3">
+                    <label for="testval" class="form-label">testVal:</label>
+                    <InputText id="testval" @bind-Value="TestModelClass.testVal" class="form-control" />
+                    <ValidationMessage For="() => TestModelClass.testVal" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/testmodelclasses">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int testKey { get; set; }
+
+    [SupplyParameterFromForm]
+    private TestModelClass? TestModelClass { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        TestModelClass ??= await context.TestModelClass.FirstOrDefaultAsync(m => m.testKey == testKey);
+
+        if (TestModelClass is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateTestModelClass()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(TestModelClass!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!TestModelClassExists(TestModelClass!.testKey))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/testmodelclasses");
+    }
+
+    private bool TestModelClassExists(int testkey)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.TestModelClass.Any(e => e.testKey == testkey);
+    }
+}
