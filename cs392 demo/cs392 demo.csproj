@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Pages\cs360\" />
+    <Folder Include="Components\" />
   </ItemGroup>
 
 </Project>
