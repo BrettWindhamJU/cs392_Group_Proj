@@ -15,5 +15,6 @@ namespace cs392_demo.Data
         }
 
         public DbSet<cs392_demo.models.TestModelClass> TestModelClass { get; set; } = default!;
+        public DbSet<cs392_demo.models.Inventory_Location> Inventory_Location { get; set; } = default!;
     }
 }

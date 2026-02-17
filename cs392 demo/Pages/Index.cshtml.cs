@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,11 +19,11 @@ namespace cs392_demo.Pages
             _context = context;
         }
 
-        public IList<TestModelClass> TestModelClass { get;set; } = default!;
+        public IList<Inventory_Location> Inventory_Location { get;set; } = default!;
 
         public async Task OnGetAsync()
         {
-            TestModelClass = await _context.TestModelClass.ToListAsync();
+            Inventory_Location = await _context.Inventory_Location.ToListAsync();
         }
     }
 }

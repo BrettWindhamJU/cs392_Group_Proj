@@ -1,0 +1,45 @@
+﻿@page
+@model cs392_demo.Pages.cs360.Inventory_Location.EditModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Inventory_Location</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Inventory_Location.location_id" />
+            <div class="form-group">
+                <label asp-for="Inventory_Location.Location_name" class="control-label"></label>
+                <input asp-for="Inventory_Location.Location_name" class="form-control" />
+                <span asp-validation-for="Inventory_Location.Location_name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Inventory_Location.Address_Location" class="control-label"></label>
+                <input asp-for="Inventory_Location.Address_Location" class="form-control" />
+                <span asp-validation-for="Inventory_Location.Address_Location" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Inventory_Location.Owner_User_ID" class="control-label"></label>
+                <input asp-for="Inventory_Location.Owner_User_ID" class="form-control" />
+                <span asp-validation-for="Inventory_Location.Owner_User_ID" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="./Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
