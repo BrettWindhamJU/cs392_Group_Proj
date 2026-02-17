@@ -7,9 +7,6 @@
 
 <h1>Index</h1>
 
-<p>
-    <a asp-page="Create">Create New</a>
-</p>
 <table class="table">
     <thead>
         <tr>
@@ -38,9 +35,9 @@
                 @Html.DisplayFor(modelItem => item.Owner_User_ID)
             </td>
             <td>
-                <a asp-page="./Edit" asp-route-id="@item.location_id">Edit</a> |
-                <a asp-page="./Details" asp-route-id="@item.location_id">Details</a> |
-                <a asp-page="./Delete" asp-route-id="@item.location_id">Delete</a>
+                <a asp-page="cs360/Inventory_Location//Edit" asp-route-id="@item.location_id">Edit</a> |
+                <a asp-page="cs360/Inventory_Location//Details" asp-route-id="@item.location_id">Details</a> |
+                <a asp-page="cs360/Inventory_Location/Delete" asp-route-id="@item.location_id">Delete</a>
             </td>
         </tr>
 }

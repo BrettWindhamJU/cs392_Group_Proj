@@ -57,7 +57,7 @@ namespace cs392_demo.Pages.cs360.Inventory_Location
                 await _context.SaveChangesAsync();
             }
 
-            return RedirectToPage("./Index");
+            return RedirectToPage("/Index");
         }
     }
 }
