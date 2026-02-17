@@ -1,0 +1,65 @@
+﻿@page
+@model cs392_demo.Pages.Stock_Page.EditModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Stock</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Stock.Stock_ID" />
+            <div class="form-group">
+                <label asp-for="Stock.Location_Stock_ID" class="control-label"></label>
+                <input asp-for="Stock.Location_Stock_ID" class="form-control" />
+                <span asp-validation-for="Stock.Location_Stock_ID" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Stock.Item_Name" class="control-label"></label>
+                <input asp-for="Stock.Item_Name" class="form-control" />
+                <span asp-validation-for="Stock.Item_Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Stock.SKU" class="control-label"></label>
+                <input asp-for="Stock.SKU" class="form-control" />
+                <span asp-validation-for="Stock.SKU" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Stock.Amount" class="control-label"></label>
+                <input asp-for="Stock.Amount" class="form-control" />
+                <span asp-validation-for="Stock.Amount" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Stock.Danger_Range" class="control-label"></label>
+                <input asp-for="Stock.Danger_Range" class="form-control" />
+                <span asp-validation-for="Stock.Danger_Range" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Stock.Last_Updated" class="control-label"></label>
+                <input asp-for="Stock.Last_Updated" class="form-control" />
+                <span asp-validation-for="Stock.Last_Updated" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Stock.Last_Updated_by" class="control-label"></label>
+                <input asp-for="Stock.Last_Updated_by" class="form-control" />
+                <span asp-validation-for="Stock.Last_Updated_by" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="./Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
