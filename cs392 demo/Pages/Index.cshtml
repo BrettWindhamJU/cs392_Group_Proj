@@ -7,28 +7,37 @@
 
 <h1>Index</h1>
 
-<p>
-    <a asp-page="/cs360/TestModelClass/Create">Create New</a>
-</p>
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.TestModelClass[0].testVal)
+                @Html.DisplayNameFor(model => model.Inventory_Location[0].Location_name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Inventory_Location[0].Address_Location)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Inventory_Location[0].Owner_User_ID)
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model.TestModelClass) {
+@foreach (var item in Model.Inventory_Location) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.testVal)
+                @Html.DisplayFor(modelItem => item.Location_name)
             </td>
             <td>
-                <a asp-page="./Edit" asp-route-id="@item.testKey">Edit</a> |
-                <a asp-page="./Details" asp-route-id="@item.testKey">Details</a> |
-                <a asp-page="./Delete" asp-route-id="@item.testKey">Delete</a>
+                @Html.DisplayFor(modelItem => item.Address_Location)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Owner_User_ID)
+            </td>
+            <td>
+                <a asp-page="cs360/Inventory_Location//Edit" asp-route-id="@item.location_id">Edit</a> |
+                <a asp-page="cs360/Inventory_Location//Details" asp-route-id="@item.location_id">Details</a> |
+                <a asp-page="cs360/Inventory_Location/Delete" asp-route-id="@item.location_id">Delete</a>
             </td>
         </tr>
 }
