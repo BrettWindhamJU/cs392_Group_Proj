@@ -1,0 +1,60 @@
+﻿@page
+@model cs392_demo.Pages.Inventory_Log.IndexModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-page="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Inventory_Activity_Log[0].Log_ID)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Inventory_Activity_Log[0].Quantity_Before)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Inventory_Activity_Log[0].Quantity_After)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Inventory_Activity_Log[0].Changed_By)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Inventory_Activity_Log[0].Changed_At)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.Inventory_Activity_Log) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Log_ID)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Quantity_Before)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Quantity_After)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Changed_By)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Changed_At)
+            </td>
+            <td>
+                <a asp-page="./Edit" asp-route-id="@item.Stock_ID_Log">Edit</a> |
+                <a asp-page="./Details" asp-route-id="@item.Stock_ID_Log">Details</a> |
+                <a asp-page="./Delete" asp-route-id="@item.Stock_ID_Log">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
