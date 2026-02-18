@@ -1,0 +1,55 @@
+﻿@page
+@model cs392_demo.Pages.Inventory_Log.EditModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Inventory_Activity_Log</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Inventory_Activity_Log.Log_ID" class="control-label"></label>
+                <input asp-for="Inventory_Activity_Log.Log_ID" class="form-control" />
+                <span asp-validation-for="Inventory_Activity_Log.Log_ID" class="text-danger"></span>
+            </div>
+            <input type="hidden" asp-for="Inventory_Activity_Log.Stock_ID_Log" />
+            <div class="form-group">
+                <label asp-for="Inventory_Activity_Log.Quantity_Before" class="control-label"></label>
+                <input asp-for="Inventory_Activity_Log.Quantity_Before" class="form-control" />
+                <span asp-validation-for="Inventory_Activity_Log.Quantity_Before" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Inventory_Activity_Log.Quantity_After" class="control-label"></label>
+                <input asp-for="Inventory_Activity_Log.Quantity_After" class="form-control" />
+                <span asp-validation-for="Inventory_Activity_Log.Quantity_After" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Inventory_Activity_Log.Changed_By" class="control-label"></label>
+                <input asp-for="Inventory_Activity_Log.Changed_By" class="form-control" />
+                <span asp-validation-for="Inventory_Activity_Log.Changed_By" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Inventory_Activity_Log.Changed_At" class="control-label"></label>
+                <input asp-for="Inventory_Activity_Log.Changed_At" class="form-control" />
+                <span asp-validation-for="Inventory_Activity_Log.Changed_At" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="./Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

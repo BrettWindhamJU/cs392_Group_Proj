@@ -1,0 +1,50 @@
+﻿@page
+@model cs392_demo.Pages.Users_Page.EditModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Users</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Users.Username" class="control-label"></label>
+                <input asp-for="Users.Username" class="form-control" />
+                <span asp-validation-for="Users.Username" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Users.Password_account" class="control-label"></label>
+                <input asp-for="Users.Password_account" class="form-control" />
+                <span asp-validation-for="Users.Password_account" class="text-danger"></span>
+            </div>
+            <input type="hidden" asp-for="Users.User_ID" />
+            <div class="form-group">
+                <label asp-for="Users.Email" class="control-label"></label>
+                <input asp-for="Users.Email" class="form-control" />
+                <span asp-validation-for="Users.Email" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Users.Role_Database" class="control-label"></label>
+                <input asp-for="Users.Role_Database" class="form-control" />
+                <span asp-validation-for="Users.Role_Database" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="./Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
