@@ -23,7 +23,7 @@ namespace cs392_demo.Pages.Inv_Location
         [BindProperty]
         public Inventory_Location Inventory_Location { get; set; } = default!;
 
-        public async Task<IActionResult> OnGetAsync(char? id)
+        public async Task<IActionResult> OnGetAsync(string? id)
         {
             if (id == null)
             {
@@ -69,7 +69,7 @@ namespace cs392_demo.Pages.Inv_Location
             return RedirectToPage("./Index");
         }
 
-        private bool Inventory_LocationExists(char id)
+        private bool Inventory_LocationExists(string id)
         {
             return _context.Inventory_Location.Any(e => e.Location_ID == id);
         }
