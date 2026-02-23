@@ -20,16 +20,16 @@ namespace cs392_demo.Pages.Users_Page
         }
 
         [BindProperty]
-        public Users Users { get; set; } = default!;
+        public AppUser Users { get; set; } = default!;
 
-        public async Task<IActionResult> OnGetAsync(char? id)
+        public async Task<IActionResult> OnGetAsync(string? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var users = await _context.Users.FirstOrDefaultAsync(m => m.User_ID == id);
+            var users = await _context.Users.FirstOrDefaultAsync(m => m.Id == id);
 
             if (users == null)
             {
@@ -42,7 +42,7 @@ namespace cs392_demo.Pages.Users_Page
             return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync(char? id)
+        public async Task<IActionResult> OnPostAsync(string? id)
         {
             if (id == null)
             {

@@ -21,16 +21,16 @@ namespace cs392_demo.Pages.Users_Page
         }
 
         [BindProperty]
-        public Users Users { get; set; } = default!;
+        public AppUser Users { get; set; } = default!;
 
-        public async Task<IActionResult> OnGetAsync(char? id)
+        public async Task<IActionResult> OnGetAsync(string? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var users =  await _context.Users.FirstOrDefaultAsync(m => m.User_ID == id);
+            var users =  await _context.Users.FirstOrDefaultAsync(m => m.Id == id);
             if (users == null)
             {
                 return NotFound();
@@ -56,7 +56,7 @@ namespace cs392_demo.Pages.Users_Page
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!UsersExists(Users.User_ID))
+                if (!UsersExists(Users.Id))
                 {
                     return NotFound();
                 }
@@ -69,9 +69,9 @@ namespace cs392_demo.Pages.Users_Page
             return RedirectToPage("./Index");
         }
 
-        private bool UsersExists(char id)
+        private bool UsersExists(string id)
         {
-            return _context.Users.Any(e => e.User_ID == id);
+            return _context.Users.Any(e => e.Id == id);
         }
     }
 }
