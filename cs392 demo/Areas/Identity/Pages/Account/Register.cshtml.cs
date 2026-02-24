@@ -85,7 +85,7 @@ namespace cs392_demo.Areas.Identity.Pages.Account
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
             [Required]
-            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+            [StringLength(100, ErrorMessage = "The {0} must be at least {2} characters long.", MinimumLength = 8)]
             [DataType(DataType.Password)]
             [Display(Name = "Password")]
             public string Password { get; set; }
@@ -96,7 +96,7 @@ namespace cs392_demo.Areas.Identity.Pages.Account
             /// </summary>
             [DataType(DataType.Password)]
             [Display(Name = "Confirm password")]
-            [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+            [Compare("Password", ErrorMessage = "Passwords do not match.")]
             public string ConfirmPassword { get; set; }
         }
 
@@ -145,7 +145,19 @@ namespace cs392_demo.Areas.Identity.Pages.Account
                         return LocalRedirect(returnUrl);
                     }
                 }
-                foreach (var error in result.Errors)
+                // Password policy errors added
+                var hasPasswordPolicyError = result.Errors.Any(error =>
+                    error.Code.StartsWith("Password", StringComparison.OrdinalIgnoreCase));
+
+                if (hasPasswordPolicyError)
+                {
+                    ModelState.AddModelError(
+                        string.Empty,
+                        "Password does not meet security requirements. Please ensure it contains at least 8 characters, including uppercase, lowercase, and number.");
+                }
+
+                foreach (var error in result.Errors.Where(error =>
+                             !error.Code.StartsWith("Password", StringComparison.OrdinalIgnoreCase)))
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
