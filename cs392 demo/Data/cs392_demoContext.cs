@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using cs392_demo.models;
+using cs392_demo.viewModels;
 
 namespace cs392_demo.Data
 {

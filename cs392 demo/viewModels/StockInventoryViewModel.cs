@@ -1,4 +1,6 @@
-﻿namespace cs392_demo.viewModels
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace cs392_demo.viewModels
 {
     public class StockInventoryViewModel
     {

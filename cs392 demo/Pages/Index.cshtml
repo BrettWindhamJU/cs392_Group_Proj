@@ -1,48 +1,61 @@
-﻿@model IEnumerable<cs392_demo.viewModels.StockInventoryViewModel>
+﻿@page
+@model IndexModel
 
-@{
-    ViewData["Title"] = "Stock Inventory";
-}
-
-<h2 class="mb-4">Stock Inventory List</h2>
-
-<table class="table table-striped table-bordered">
-    <thead class="table-dark">
-        <tr>
-            <th>Stock ID</th>
-            <th>Item Name</th>
-            <th>SKU</th>
-            <th>Amount</th>
-            <th>Danger Range</th>
-            <th>Last Updated</th>
-            <th>Location Name</th>
-            <th>Address</th>
-            <th>Owner</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Model != null && Model.Any())
-        {
-            foreach (var item in Model)
-            {
-                <tr class="@(item.Amount <= item.Danger_Range ? "table-danger" : "")">
-                    <td>@item.Stock_ID</td>
-                    <td>@item.Item_Name</td>
-                    <td>@item.SKU</td>
-                    <td>@item.Amount</td>
-                    <td>@item.Danger_Range</td>
-                    <td>@item.Last_Updated.ToString("yyyy-MM-dd HH:mm")</td>
-                    <td>@item.Location_Name</td>
-                    <td>@item.Address_Location</td>
-                    <td>@item.Owner_User_ID</td>
-                </tr>
-            }
-        }
-        else
-        {
+@foreach (var location in Model.Locations)
+        
+{
+    <table class="table">
+        <thead>
             <tr>
-                <td colspan="9" class="text-center">No inventory records found.</td>
+                <th>Location Name</th>
+                <th>Location Address</th>
+                <th>Location Options</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            <tr>
+                <td>@location.Location_Name</td>
+                <td>@location.Address_Location</td>
+                <td>
+                    <a asp-page="/cs360/Inventory_Location/Edit" asp-route-id="@location.Location_Id" class="btn btn-sm btn-primary"> Edit </a>
+                    <a asp-page="/cs360/Inventory_Location/Delete" asp-route-id="@location.Location_Id" class="btn btn-sm btn-primary"> Delete </a>
+                    <a asp-page="/Stock_Page/Create" asp-route-Location_Id="@location.Location_Id" class="btn btn-sm btn-primary"> Add Stock </a>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <div class="row">
+                        <div class="col-10 offset-2">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Stock ID</th>
+                                        <th>Amount</th>
+                                        <th>Danger Threshold</th>
+                                        <td>Options</td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var stock in location.Stocks)
+                                    {
+                                        <tr class="@(stock.Amount <= stock.Danger_Range ? "table-danger" : "")">
+                                            <td>@stock.Item_Name</td>
+                                            <td>@stock.Amount</td>
+                                            <td>@stock.Danger_Range</td>
+                                            <td>
+                                                <a asp-page="/Stock/Edit" asp-route-id="@stock.Stock_ID" class="btn btn-sm btn-primary"> Edit </a>
+                                                <a asp-page="/Stock/Delete" asp-route-id="@stock.Stock_ID" class="btn btn-sm btn-primary"> Delete </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+}
+       
+

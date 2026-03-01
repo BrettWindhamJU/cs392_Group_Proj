@@ -19,13 +19,15 @@ namespace cs392_demo.Pages.Stock_Page
             _context = context;
         }
 
-        public IActionResult OnGet()
-        {
-            return Page();
-        }
-
         [BindProperty]
         public Stock Stock { get; set; } = default!;
+
+        [BindProperty(SupportsGet = true)]
+        public string Location_Id { get; set; }
+        public void OnGet(){
+            Stock = new Stock();    
+            Stock.Location_Stock_ID = Location_Id;
+        }
 
         // For more information, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync()
@@ -38,7 +40,7 @@ namespace cs392_demo.Pages.Stock_Page
             _context.Stock.Add(Stock);
             await _context.SaveChangesAsync();
 
-            return RedirectToPage("./Index");
+            return RedirectToPage("/Index");
         }
     }
 }
