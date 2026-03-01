@@ -25,6 +25,7 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
 
                     <ul class="navbar-nav flex-grow-1">
+<<<<<<< HEAD
 
                         @if (User.Identity.IsAuthenticated)
                         {
@@ -152,6 +153,27 @@
                         }
                     </ul>
 
+=======
+                            <!--Add Actual ASP-page links andChange asp-page links to be dropdowns catagorized by what model is being controlled/viewed?-->
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" href="/Index">Dashboard</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-page="/cs360/Inventory_Location/Create">Add Location</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Suppliers">Suppliers</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Orders">Orders</a>
+                            </li>
+                            <li>
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Reports">Reports</a>
+                            </li>
+                    </ul>
+
+                    <partial name="_LoginPartial" />
+>>>>>>> cb32477a7438c7eae29af18f4bdc7795d0615061
                 </div>
             </div>
         </nav>

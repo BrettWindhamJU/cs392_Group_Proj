@@ -13,10 +13,11 @@
     <div class="col-md-4">
         <form method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Stock.Location_Stock_ID" />
             <div class="form-group">
-                <label asp-for="Stock.Location_Stock_ID" class="control-label"></label>
-                <input asp-for="Stock.Location_Stock_ID" class="form-control" />
-                <span asp-validation-for="Stock.Location_Stock_ID" class="text-danger"></span>
+                <label asp-for="Stock.Stock_ID" class="control-label"></label>
+                <input asp-for="Stock.Stock_ID" class="form-control" />
+                <span asp-validation-for="Stock.Stock_ID" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Stock.Item_Name" class="control-label"></label>
