@@ -1,3 +1,15 @@
+/* Teal Color Palette for the entire Inventory Management System */
+:root {
+  --teal-primary: #1a5f6b;
+  --teal-dark: #0f3d44;
+  --teal-light: #2d8a96;
+  --teal-accent: #4db8c4;
+  --neutral-light: #f5f7f7;
+  --neutral-medium: #e8ecec;
+  --text-dark: #1a2c2e;
+  --success-color: #2d7a6e;
+}
+
 html {
   font-size: 14px;
 }
@@ -8,10 +20,6 @@ html {
   }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
 html {
   position: relative;
   min-height: 100%;
@@ -19,4 +27,97 @@ html {
 
 body {
   margin-bottom: 60px;
+  background-color: var(--neutral-light);
+  color: var(--text-dark);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Form Controls */
+.form-control {
+  background-color: white;
+  border: 1px solid var(--neutral-medium);
+  color: var(--text-dark);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control:focus {
+  border-color: var(--teal-primary);
+  box-shadow: 0 0 0 0.2rem rgba(26, 95, 107, 0.15);
+  background-color: white;
+  color: var(--text-dark);
+}
+
+.form-floating > label {
+  color: var(--text-dark);
+}
+
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label {
+  color: var(--teal-primary);
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: var(--teal-primary);
+  border-color: var(--teal-primary);
+  color: white;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: var(--teal-light);
+  border-color: var(--teal-light);
+  box-shadow: 0 4px 12px rgba(26, 95, 107, 0.25);
+  transform: translateY(-1px);
+}
+
+.btn-primary:focus,
+.btn-primary.focus {
+  background-color: var(--teal-dark);
+  border-color: var(--teal-dark);
+  box-shadow: 0 0 0 0.25rem rgba(26, 95, 107, 0.5);
+}
+
+.btn-primary:active,
+.btn-primary.active {
+  background-color: var(--teal-dark);
+  border-color: var(--teal-dark);
+  box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+}
+
+.btn:focus, 
+.btn:active:focus, 
+.btn-link.nav-link:focus, 
+.form-check-input:focus {
+  box-shadow: 0 0 0 0.25rem rgba(26, 95, 107, 0.25);
+}
+
+/* Links */
+a {
+  color: var(--teal-primary);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: var(--teal-light);
+  text-decoration: underline;
+}
+
+/* Validation */
+.text-danger {
+  color: #c82333;
+}
+
+/* Check boxes */
+.form-check-input:checked {
+  background-color: var(--teal-primary);
+  border-color: var(--teal-primary);
+}
+
+.form-check-input:focus {
+  border-color: var(--teal-light);
+  box-shadow: 0 0 0 0.25rem rgba(26, 95, 107, 0.25);
 }

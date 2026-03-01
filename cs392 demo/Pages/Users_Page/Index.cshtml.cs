@@ -19,7 +19,7 @@ namespace cs392_demo.Pages.Users_Page
             _context = context;
         }
 
-        public IList<Users> Users { get;set; } = default!;
+        public IList<AppUser> Users { get;set; } = default!;
 
         public async Task OnGetAsync()
         {

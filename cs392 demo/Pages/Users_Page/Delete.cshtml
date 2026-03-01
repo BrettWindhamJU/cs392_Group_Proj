@@ -13,16 +13,10 @@
     <hr />
     <dl class="row">
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Users.Username)
+            @Html.DisplayNameFor(model => model.Users.UserName)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Users.Username)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Users.Password_account)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Users.Password_account)
+            @Html.DisplayFor(model => model.Users.UserName)
         </dd>
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Users.Email)
@@ -39,7 +33,7 @@
     </dl>
     
     <form method="post">
-        <input type="hidden" asp-for="Users.User_ID" />
+        <input type="hidden" asp-for="Users.Id" />
         <input type="submit" value="Delete" class="btn btn-danger" /> |
         <a asp-page="./Index">Back to List</a>
     </form>
