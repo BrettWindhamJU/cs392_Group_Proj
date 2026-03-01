@@ -13,42 +13,150 @@
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
                 <a class="navbar-brand" href="/Index">StockWise</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                        data-bs-target=".navbar-collapse"
+                        aria-controls="navbarSupportedContent"
+                        aria-expanded="false"
+                        aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
+
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+
                     <ul class="navbar-nav flex-grow-1">
-                            <!--Add Actual ASP-page links andChange asp-page links to be dropdowns catagorized by what model is being controlled/viewed?-->
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" href="/Index">Dashboard</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-page="/cs360/Inventory_Location/Details">Details</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-page="/cs360/Inventory_Location/Create">Add Location</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-page="/Suppliers">Suppliers</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-page="/Orders">Orders</a>
-                            </li>
-                            <li>
-                                <a class="nav-link text-dark" asp-area="" asp-page="/Reports">Reports</a>
-                            </li>
+
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            // ========================
+                            // OWNER NAVIGATION
+                            // ========================
+                            if (User.IsInRole("Owner"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" href="/Index">Owner Dashboard</a>
+                                </li>
+
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" style="color:#c39a4b"
+                                       href="#" role="button" data-bs-toggle="dropdown">
+                                        Owner Tools
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a class="dropdown-item" asp-page="/Inv_Location/Index">
+                                                Inventory Location
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-page="/Inventory_Log/Create">
+                                                Inventory Log
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-page="/Suppliers">
+                                                Suppliers
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-page="/Orders">
+                                                Orders
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-page="/Reports">
+                                                Reports
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            }
+
+                            // ========================
+                            // MANAGER NAVIGATION
+                            // ========================
+                            else if (User.IsInRole("Manager"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" href="/Index">Manager Dashboard</a>
+                                </li>
+
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" style="color:#c39a4b"
+                                       href="#" role="button" data-bs-toggle="dropdown">
+                                        Manager Tools
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a class="dropdown-item" asp-page="/Inv_Location/Index">
+                                                Inventory Location
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-page="/Inventory_Log/Create">
+                                                Inventory Log
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-page="/Suppliers">
+                                                Suppliers
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-page="/Orders">
+                                                Orders
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            }
+
+                            // ========================
+                            // DEFAULT / OPEN USER NAVIGATION
+                            // ========================
+                            else
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" href="/Index">Dashboard</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-page="/cs360/Inventory_Location/Details">
+                                        Details
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-page="/cs360/Inventory_Location/Create">
+                                        Add Location
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-page="/Suppliers">Suppliers</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-page="/Orders">Orders</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-page="/Reports">Reports</a>
+                                </li>
+                            }
+                        }
+
                     </ul>
 
                     <ul class="navbar-nav ms-auto">
-                        <li>
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Account/Account">Account</a>
-                        </li>
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-page="/Account/Account">Account</a>
+                            </li>
+                        }
                     </ul>
+
                 </div>
             </div>
         </nav>
     </header>
+
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
@@ -57,7 +165,8 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2026 - StockWise - <a asp-area="" asp-page="/Privacy">Privacy</a>
+            &copy; 2026 - StockWise -
+            <a asp-page="/Privacy">Privacy</a>
         </div>
     </footer>
 
@@ -66,5 +175,6 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
+
 </body>
 </html>

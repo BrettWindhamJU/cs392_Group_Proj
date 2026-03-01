@@ -22,14 +22,14 @@ namespace cs392_demo.Pages.Inv_Location
         [BindProperty]
         public Inventory_Location Inventory_Location { get; set; } = default!;
 
-        public async Task<IActionResult> OnGetAsync(string? id)
+        public async Task<IActionResult> OnGetAsync(string id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var inventory_location = await _context.Inventory_Location.FirstOrDefaultAsync(m => m.Location_ID == id);
+            var inventory_location = await _context.Inventory_Location.FirstOrDefaultAsync(m => m.location_id == id);
 
             if (inventory_location == null)
             {
@@ -42,7 +42,7 @@ namespace cs392_demo.Pages.Inv_Location
             return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync(string? id)
+        public async Task<IActionResult> OnPostAsync(string id)
         {
             if (id == null)
             {

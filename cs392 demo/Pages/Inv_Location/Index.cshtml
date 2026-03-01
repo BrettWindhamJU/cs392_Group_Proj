@@ -14,7 +14,7 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Inventory_Location[0].Location_Name)
+                @Html.DisplayNameFor(model => model.Inventory_Location[0].Location_name)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Inventory_Location[0].Address_Location)
@@ -29,7 +29,7 @@
 @foreach (var item in Model.Inventory_Location) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.Location_Name)
+                @Html.DisplayFor(modelItem => item.Location_name)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Address_Location)
@@ -38,9 +38,9 @@
                 @Html.DisplayFor(modelItem => item.Owner_User_ID)
             </td>
             <td>
-                <a asp-page="./Edit" asp-route-id="@item.Location_ID">Edit</a> |
-                <a asp-page="./Details" asp-route-id="@item.Location_ID">Details</a> |
-                <a asp-page="./Delete" asp-route-id="@item.Location_ID">Delete</a>
+                <a asp-page="./Edit" asp-route-id="@item.location_id">Edit</a> |
+                <a asp-page="./Details" asp-route-id="@item.location_id">Details</a> |
+                <a asp-page="./Delete" asp-route-id="@item.location_id">Delete</a>
             </td>
         </tr>
 }

@@ -7,9 +7,12 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using cs392_demo.Data;
 using cs392_demo.models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace cs392_demo.Pages.Inv_Location
 {
+    [Authorize(Roles = "Owner, Manager")]
+
     public class IndexModel : PageModel
     {
         private readonly cs392_demo.Data.cs392_demoContext _context;

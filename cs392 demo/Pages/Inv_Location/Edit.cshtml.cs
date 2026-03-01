@@ -23,14 +23,14 @@ namespace cs392_demo.Pages.Inv_Location
         [BindProperty]
         public Inventory_Location Inventory_Location { get; set; } = default!;
 
-        public async Task<IActionResult> OnGetAsync(string? id)
+        public async Task<IActionResult> OnGetAsync(string id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var inventory_location =  await _context.Inventory_Location.FirstOrDefaultAsync(m => m.Location_ID == id);
+            var inventory_location =  await _context.Inventory_Location.FirstOrDefaultAsync(m => m.location_id == id);
             if (inventory_location == null)
             {
                 return NotFound();
@@ -56,7 +56,7 @@ namespace cs392_demo.Pages.Inv_Location
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!Inventory_LocationExists(Inventory_Location.Location_ID))
+                if (!Inventory_LocationExists(Inventory_Location.location_id))
                 {
                     return NotFound();
                 }
@@ -71,7 +71,7 @@ namespace cs392_demo.Pages.Inv_Location
 
         private bool Inventory_LocationExists(string id)
         {
-            return _context.Inventory_Location.Any(e => e.Location_ID == id);
+            return _context.Inventory_Location.Any(e => e.location_id == id);
         }
     }
 }
