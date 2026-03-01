@@ -24,9 +24,6 @@
                                 <a class="nav-link text-dark" href="/Index">Dashboard</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-page="/cs360/Inventory_Location/Details">Details</a>
-                            </li>
-                            <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-page="/cs360/Inventory_Location/Create">Add Location</a>
                             </li>
                             <li class="nav-item">
@@ -40,11 +37,7 @@
                             </li>
                     </ul>
 
-                    <ul class="navbar-nav ms-auto">
-                        <li>
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Account/Account">Account</a>
-                        </li>
-                    </ul>
+                    <partial name="_LoginPartial" />
                 </div>
             </div>
         </nav>
