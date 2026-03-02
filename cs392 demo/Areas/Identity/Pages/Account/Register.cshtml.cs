@@ -1,6 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-#nullable disable
+﻿#nullable disable
 
 using System;
 using System.Collections.Generic;
@@ -60,19 +58,20 @@ namespace cs392_demo.Areas.Identity.Pages.Account
         {
             [Required]
             [EmailAddress]
-            [Display(Name = "Email")]
             public string Email { get; set; }
 
             [Required]
-            [StringLength(100, ErrorMessage = "The {0} must be at least {2} characters long.", MinimumLength = 8)]
+            [StringLength(100, MinimumLength = 8)]
             [DataType(DataType.Password)]
-            [Display(Name = "Password")]
             public string Password { get; set; }
 
             [DataType(DataType.Password)]
-            [Display(Name = "Confirm password")]
             [Compare("Password", ErrorMessage = "Passwords do not match.")]
             public string ConfirmPassword { get; set; }
+
+          
+            [Required]
+            public string Role { get; set; }
         }
 
         public async Task OnGetAsync(string returnUrl = null)
@@ -99,8 +98,16 @@ namespace cs392_demo.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("User created a new account with password.");
 
-                    // 🔥 Automatically assign User role
-                    await _userManager.AddToRoleAsync(user, Roles.User.ToString());
+                    // 🔒 Validate role (only allow User or Owner)
+                    if (Input.Role != Roles.User.ToString() &&
+                        Input.Role != Roles.Owner.ToString())
+                    {
+                        ModelState.AddModelError(string.Empty, "Invalid role selected.");
+                        return Page();
+                    }
+
+                    // 🔥 Assign selected role
+                    await _userManager.AddToRoleAsync(user, Input.Role);
 
                     var userId = await _userManager.GetUserIdAsync(user);
 
@@ -109,9 +116,9 @@ namespace cs392_demo.Areas.Identity.Pages.Account
 
                     var callbackUrl = Url.Page(
                         "/Account/ConfirmEmail",
-                        pageHandler: null,
-                        values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
-                        protocol: Request.Scheme);
+                        null,
+                        new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
+                        Request.Scheme);
 
                     await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
                         $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
@@ -122,7 +129,7 @@ namespace cs392_demo.Areas.Identity.Pages.Account
                     }
                     else
                     {
-                        await _signInManager.SignInAsync(user, isPersistent: false);
+                        await _signInManager.SignInAsync(user, false);
                         return LocalRedirect(returnUrl);
                     }
                 }
@@ -138,23 +145,11 @@ namespace cs392_demo.Areas.Identity.Pages.Account
 
         private Users CreateUser()
         {
-            try
-            {
-                return Activator.CreateInstance<Users>();
-            }
-            catch
-            {
-                throw new InvalidOperationException($"Can't create an instance of '{nameof(Users)}'. " +
-                    $"Ensure that '{nameof(Users)}' is not an abstract class and has a parameterless constructor.");
-            }
+            return Activator.CreateInstance<Users>();
         }
 
         private IUserEmailStore<Users> GetEmailStore()
         {
-            if (!_userManager.SupportsUserEmail)
-            {
-                throw new NotSupportedException("The default UI requires a user store with email support.");
-            }
             return (IUserEmailStore<Users>)_userStore;
         }
     }
