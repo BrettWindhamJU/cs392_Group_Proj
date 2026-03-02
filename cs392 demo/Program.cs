@@ -20,18 +20,14 @@ builder.Services.AddDbContext<cs392_demoContext>(options =>
 );
 
 // Add Identity services
-builder.Services.AddDefaultIdentity<AppUser>(options =>
-{
-    options.SignIn.RequireConfirmedAccount = false;
+builder.Services.AddDbContext<ApplicationContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("cs392_demoContext") ?? throw new InvalidOperationException("Connection string'cs392_demoContext' not found.")));
+builder.Services.AddIdentity<AppUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
+.AddEntityFrameworkStores<ApplicationContext>()
+.AddDefaultUI()
+.AddDefaultTokenProviders();
+builder.Services.AddControllersWithViews();
 
-    // Password policies enforced
-    options.Password.RequiredLength = 8;
-    options.Password.RequireDigit = true;
-    options.Password.RequireLowercase = true;
-    options.Password.RequireUppercase = true;
-    options.Password.RequireNonAlphanumeric = false;
-})
-.AddEntityFrameworkStores<cs392_demoContext>();
+
 
 builder.Services.AddQuickGridEntityFrameworkAdapter();
 
@@ -62,5 +58,11 @@ app.UseAuthorization();
 app.MapGet("/", () => Results.Redirect("/Identity/Account/Login?ReturnUrl=/Index"));
 
 app.MapRazorPages();
+
+using (var scope = app.Services.CreateScope())
+{
+    await DbSeeder.SeedRolesAndAdminAsync(scope.ServiceProvider);
+}
+
 
 app.Run();

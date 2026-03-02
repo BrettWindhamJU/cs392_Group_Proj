@@ -28,6 +28,14 @@
                 <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
                 <label asp-for="Input.ConfirmPassword">Confirm Password</label>
                 <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+
+                <select asp-for="Input.Role" class="form-control">
+                    <option value="">-- Select Role --</option>
+                    <option value="Owner">Owner</option>
+                    <option value="Manager">Manager</option>
+                </select>
+
+
             </div>
             <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
         </form>

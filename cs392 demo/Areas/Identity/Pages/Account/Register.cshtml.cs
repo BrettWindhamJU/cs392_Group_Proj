@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
@@ -98,6 +98,9 @@ namespace cs392_demo.Areas.Identity.Pages.Account
             [Display(Name = "Confirm password")]
             [Compare("Password", ErrorMessage = "Passwords do not match.")]
             public string ConfirmPassword { get; set; }
+
+            [Required]
+            public string Role { get; set; }
         }
 
 
@@ -111,21 +114,31 @@ namespace cs392_demo.Areas.Identity.Pages.Account
         {
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+
             if (ModelState.IsValid)
             {
                 var user = CreateUser();
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
 
+              
+                    if (!string.IsNullOrEmpty(Input.Role))
+                    {
+                        await _userManager.AddToRoleAsync(user, Input.Role);
+                    }
+
                     var userId = await _userManager.GetUserIdAsync(user);
+
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+
                     var callbackUrl = Url.Page(
                         "/Account/ConfirmEmail",
                         pageHandler: null,
@@ -134,6 +147,10 @@ namespace cs392_demo.Areas.Identity.Pages.Account
 
                     await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
                         $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+
+               
+                    await _signInManager.RefreshSignInAsync(user);
+
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {
@@ -145,28 +162,12 @@ namespace cs392_demo.Areas.Identity.Pages.Account
                         return LocalRedirect(returnUrl);
                     }
                 }
-                // Password policy errors added
-                var hasPasswordPolicyError = result.Errors.Any(error =>
-                    error.Code.StartsWith("Password", StringComparison.OrdinalIgnoreCase));
-
-                if (hasPasswordPolicyError)
-                {
-                    ModelState.AddModelError(
-                        string.Empty,
-                        "Password does not meet security requirements. Please ensure it contains at least 8 characters, including uppercase, lowercase, and number.");
-                }
-
-                foreach (var error in result.Errors.Where(error =>
-                             !error.Code.StartsWith("Password", StringComparison.OrdinalIgnoreCase)))
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
             }
 
-            // If we got this far, something failed, redisplay form
             return Page();
         }
 
+        
         private Users CreateUser()
         {
             try
