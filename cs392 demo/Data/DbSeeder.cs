@@ -18,6 +18,9 @@ namespace cs392_demo.Data
             if (!await roleManager.RoleExistsAsync(Roles.Manager.ToString()))
                 await roleManager.CreateAsync(new IdentityRole(Roles.Manager.ToString()));
 
+            if (!await roleManager.RoleExistsAsync(Roles.User.ToString()))
+                await roleManager.CreateAsync(new IdentityRole(Roles.User.ToString()));
+
             var user = await userManager.FindByEmailAsync("sarah@test.com");
 
             if (user == null)

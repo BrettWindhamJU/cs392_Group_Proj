@@ -4,7 +4,8 @@
     public enum Roles
     {
         Owner,
-        Manager
+        Manager,
+        User
 
 
     }
