@@ -12,7 +12,7 @@ public class IndexModel : PageModel
         _context = context;
     }
 
-    public List<LocationStockViewModel> Locations { get; set; }
+    public List<LocationStockViewModel> Locations { get; set; } = new();
     public async Task OnGetAsync()
     {
         Locations = await _context.Inventory_Location
@@ -24,7 +24,7 @@ public class IndexModel : PageModel
                 Owner_User_ID = location.Owner_User_ID,
 
                 Stocks = _context.Stock
-                    .Where(stock => stock.Location_Stock_ID.ToString() == location.location_id)
+                    .Where(stock => stock.Location_Stock_ID == location.location_id)
                     .Select(stock => new StockItemViewModel
                     {
                         Stock_ID = stock.Stock_ID,

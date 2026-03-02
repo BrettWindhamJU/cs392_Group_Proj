@@ -23,7 +23,7 @@ namespace cs392_demo.Pages.Stock_Page
         [BindProperty]
         public Stock Stock { get; set; } = default!;
 
-        public async Task<IActionResult> OnGetAsync(char? id)
+        public async Task<IActionResult> OnGetAsync(string? id)
         {
             if (id == null)
             {
@@ -48,6 +48,16 @@ namespace cs392_demo.Pages.Stock_Page
                 return Page();
             }
 
+            if (Stock.Last_Updated == null)
+            {
+                Stock.Last_Updated = DateTime.Now;
+            }
+
+            if (Stock.Last_Updated_by == null)
+            {
+                Stock.Last_Updated_by = DateTime.Now;
+            }
+
             _context.Attach(Stock).State = EntityState.Modified;
 
             try
@@ -69,7 +79,7 @@ namespace cs392_demo.Pages.Stock_Page
             return RedirectToPage("./Index");
         }
 
-        private bool StockExists(char id)
+        private bool StockExists(string id)
         {
             return _context.Stock.Any(e => e.Stock_ID == id);
         }

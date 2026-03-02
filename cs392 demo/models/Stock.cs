@@ -7,22 +7,26 @@ namespace cs392_demo.models
 
         [Key]
 
-        public char Stock_ID { get; set; }
+        public string Stock_ID { get; set; } = string.Empty;
 
-        public string Location_Stock_ID { get; set; }
+        public string Location_Stock_ID { get; set; } = string.Empty;
 
 
-        public string Item_Name { get; set; }
+        public string Item_Name { get; set; } = string.Empty;
 
-        public char SKU { get; set; }
+        public string SKU { get; set; } = string.Empty;
 
         public int Amount { get; set; }
 
         public int Danger_Range { get; set; }
 
-        public DateTime Last_Updated { get; set; }
+        [DataType(DataType.DateTime)]
+        [DisplayFormat(DataFormatString = "{0:yyyy-MM-ddTHH:mm}", ApplyFormatInEditMode = true)]
+        public DateTime? Last_Updated { get; set; }
 
-        public DateTime Last_Updated_by { get; set; }
+        [DataType(DataType.DateTime)]
+        [DisplayFormat(DataFormatString = "{0:yyyy-MM-ddTHH:mm}", ApplyFormatInEditMode = true)]
+        public DateTime? Last_Updated_by { get; set; }
 
 
     }
