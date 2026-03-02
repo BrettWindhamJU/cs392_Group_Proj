@@ -33,6 +33,10 @@ builder.Services.AddQuickGridEntityFrameworkAdapter();
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+builder.Services.AddRazorPages(options =>
+{
+    options.Conventions.AuthorizeFolder("/");
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -54,8 +58,6 @@ app.UseRouting();
 // Required for Identity authentication
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.MapGet("/", () => Results.Redirect("/Identity/Account/Login?ReturnUrl=/Index"));
 
 app.MapRazorPages();
 
