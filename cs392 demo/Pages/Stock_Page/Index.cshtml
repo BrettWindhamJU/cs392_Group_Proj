@@ -4,9 +4,22 @@
 @{
     ViewData["Title"] = "Stock";
     var canManageStock = User.IsInRole("Owner") || User.IsInRole("Manager");
+    var totalCount = Model.Stock.Count;
+    var lowStockCount = Model.Stock.Count(s => s.Amount <= s.Danger_Range);
+    var inStockCount = totalCount - lowStockCount;
 }
 
-<h1>Stock</h1>
+<div class="inventory-page-header stock-page-header">
+    <div>
+        <h1>Stock</h1>
+        <p class="inventory-subtitle">Total @totalCount item(s) in your inventory</p>
+    </div>
+    <div class="inventory-status-chips">
+        <span class="inventory-chip">All Items (@totalCount)</span>
+        <span class="inventory-chip">Low Stock (@lowStockCount)</span>
+        <span class="inventory-chip">In Stock (@inStockCount)</span>
+    </div>
+</div>
 
 @if (canManageStock)
 {
@@ -14,71 +27,58 @@
         <a asp-page="Create">Add New Inventory Item</a>
     </p>
 }
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Stock[0].Location_Stock_ID)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Stock[0].Item_Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Stock[0].SKU)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Stock[0].Amount)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Stock[0].Danger_Range)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Stock[0].Last_Updated)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Stock[0].Last_Updated_by)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
+
+<div class="inventory-table-card">
+    <table class="table inventory-table">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>SKU</th>
+                <th>Stock</th>
+                <th>Reorder At</th>
+                <th>Last Updated</th>
+                <th>Updated By</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
 @foreach (var item in Model.Stock) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Location_Stock_ID)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Item_Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.SKU)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Amount)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Danger_Range)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Last_Updated)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Last_Updated_by)
-            </td>
-            <td>
-                @if (canManageStock)
-                {
-                    <a asp-page="./Edit" asp-route-id="@item.Stock_ID">Edit</a>
-                    <span> | </span>
-                }
-                <a asp-page="./Details" asp-route-id="@item.Stock_ID">Details</a>
-                @if (canManageStock)
-                {
-                    <span> | </span>
-                    <a asp-page="./Delete" asp-route-id="@item.Stock_ID">Delete</a>
-                }
-            </td>
-        </tr>
+            var stockPercent = item.Danger_Range > 0
+                ? Math.Min(100, (int)Math.Round((double)item.Amount / (item.Danger_Range * 2) * 100))
+                : 100;
+            var stockBarClass = item.Amount <= item.Danger_Range ? "stock-bar-low" : "stock-bar-good";
+            <tr>
+                <td>
+                    <div class="inventory-product-name">@item.Item_Name</div>
+                    <div class="inventory-product-meta">Location @item.Location_Stock_ID</div>
+                </td>
+                <td>@item.SKU</td>
+                <td>
+                    <div class="inventory-stock-cell">
+                        <div class="inventory-stock-track">
+                            <div class="inventory-stock-fill @stockBarClass" style="width:@stockPercent%"></div>
+                        </div>
+                        <span>@item.Amount</span>
+                    </div>
+                </td>
+                <td>@item.Danger_Range</td>
+                <td>@item.Last_Updated</td>
+                <td>@item.Last_Updated_by</td>
+                <td>
+                    @if (canManageStock)
+                    {
+                        <a asp-page="./Edit" asp-route-id="@item.Stock_ID">Edit</a>
+                        <span> | </span>
+                    }
+                    <a asp-page="./Details" asp-route-id="@item.Stock_ID">Details</a>
+                    @if (canManageStock)
+                    {
+                        <span> | </span>
+                        <a asp-page="./Delete" asp-route-id="@item.Stock_ID">Delete</a>
+                    }
+                </td>
+            </tr>
 }
-    </tbody>
-</table>
+        </tbody>
+    </table>
+</div>

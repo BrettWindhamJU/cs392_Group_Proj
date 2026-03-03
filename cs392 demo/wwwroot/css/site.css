@@ -128,3 +128,89 @@ a:hover {
   border-color: var(--teal-light);
   box-shadow: 0 0 0 0.25rem rgba(26, 95, 107, 0.25);
 }
+
+.inventory-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.stock-page-header {
+  margin-bottom: 0.75rem;
+}
+
+.inventory-subtitle {
+  margin: 0;
+  color: #5f6f71;
+}
+
+.inventory-status-chips {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.inventory-chip {
+  background-color: white;
+  border: 1px solid var(--neutral-medium);
+  color: var(--text-dark);
+  border-radius: 999px;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.inventory-table-card {
+  background: white;
+  border: 1px solid var(--neutral-medium);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.inventory-table {
+  margin-bottom: 0;
+}
+
+.inventory-table thead th {
+  border-bottom-width: 1px;
+  font-weight: 700;
+  color: #3d4f51;
+}
+
+.inventory-product-name {
+  font-weight: 700;
+}
+
+.inventory-product-meta {
+  color: #5f6f71;
+  font-size: 0.875rem;
+}
+
+.inventory-stock-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.inventory-stock-track {
+  width: 70px;
+  height: 10px;
+  border-radius: 999px;
+  background-color: var(--neutral-medium);
+  overflow: hidden;
+}
+
+.inventory-stock-fill {
+  height: 100%;
+  border-radius: 999px;
+}
+
+.stock-bar-low {
+  background-color: #ac320c;
+}
+
+.stock-bar-good {
+  background-color: #16a34a;
+}

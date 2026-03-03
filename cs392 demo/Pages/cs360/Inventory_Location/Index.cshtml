@@ -3,25 +3,35 @@
 
 @{
     ViewData["Title"] = "Inventory Locations";
+    var totalLocations = Model.Inventory_Location.Count;
 }
 
-<h1>Inventory Locations</h1>
+<div class="inventory-page-header">
+    <div>
+        <h1>Inventory Locations</h1>
+        <p class="inventory-subtitle">Total @totalLocations location@(totalLocations == 1 ? "" : "s")</p>
+    </div>
+    <div class="inventory-status-chips">
+        <span class="inventory-chip">All Locations (@totalLocations)</span>
+    </div>
+</div>
 
 <p>
     <a asp-page="Create">Add New Location</a>
 </p>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Location ID</th>
-            <th>Location Name</th>
-            <th>Address</th>
-            <th>Owner User ID</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
+<div class="inventory-table-card">
+    <table class="table inventory-table">
+        <thead>
+            <tr>
+                <th>Location ID</th>
+                <th>Location Name</th>
+                <th>Address</th>
+                <th>Owner User ID</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
 @foreach (var item in Model.Inventory_Location)
 {
         <tr>
@@ -37,5 +47,6 @@
             </td>
         </tr>
 }
-    </tbody>
-</table>
+        </tbody>
+    </table>
+</div>
