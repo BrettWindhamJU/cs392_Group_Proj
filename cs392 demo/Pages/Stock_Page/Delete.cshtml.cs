@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ using cs392_demo.models;
 
 namespace cs392_demo.Pages.Stock_Page
 {
+    [Authorize(Roles = "Owner,Manager")]
     public class DeleteModel : PageModel
     {
         private readonly cs392_demo.Data.cs392_demoContext _context;
@@ -22,7 +24,7 @@ namespace cs392_demo.Pages.Stock_Page
         [BindProperty]
         public Stock Stock { get; set; } = default!;
 
-        public async Task<IActionResult> OnGetAsync(char? id)
+        public async Task<IActionResult> OnGetAsync(string? id)
         {
             if (id == null)
             {
@@ -42,7 +44,7 @@ namespace cs392_demo.Pages.Stock_Page
             return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync(char? id)
+        public async Task<IActionResult> OnPostAsync(string? id)
         {
             if (id == null)
             {

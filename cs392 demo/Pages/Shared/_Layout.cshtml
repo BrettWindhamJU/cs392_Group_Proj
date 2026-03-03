@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/cs392_demo.styles.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
     <header>
@@ -40,7 +41,7 @@
                                     </a>
                                     <ul class="dropdown-menu">
                                         <li>
-                                            <a class="dropdown-item" asp-page="cs360/Inventory_Location/Create">Create Inventory Location</a>
+                                            <a class="dropdown-item" asp-page="/cs360/Inventory_Location/Create">Create Inventory Location</a>
                                         </li>
                                         <li>
                                             <a class="dropdown-item" asp-page="/Inventory_Log/Create"> Create Inventory Logs</a>
@@ -73,6 +74,9 @@
                                         Manager Tools
                                     </a>
                                     <ul class="dropdown-menu">
+                                        <li>
+                                            <a class="dropdown-item" asp-page="/cs360/Inventory_Location/Create">Create Inventory Location</a>
+                                        </li>
                                        
                                         <li>
                                             <a class="dropdown-item" asp-page="/Inventory_Log/Create">Inventory Log</a>
@@ -97,10 +101,7 @@
                                     <a class="nav-link text-dark" href="/Index">Dashboard</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-page="/cs360/Inventory_Location/Details">Details</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-page="/cs360/Inventory_Location/Create">Add Location</a>
+                                    <a class="nav-link text-dark" asp-page="/Stock_Page/Index">Inventory</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-page="/Suppliers">Suppliers</a>
@@ -117,15 +118,6 @@
                         {
                             <li class="nav-item">
                                 <a class="nav-link text-dark" href="/Index">Dashboard</a>
-                            </li>
-                        }
-                    </ul>
-
-                    <ul class="navbar-nav ms-auto">
-                        @if (User.Identity.IsAuthenticated)
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-page="/Account/Account">Account</a>
                             </li>
                         }
                     </ul>

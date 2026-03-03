@@ -22,14 +22,14 @@ namespace cs392_demo.Pages.Inventory_Log
         [BindProperty]
         public Inventory_Activity_Log Inventory_Activity_Log { get; set; } = default!;
 
-        public async Task<IActionResult> OnGetAsync(char? id)
+        public async Task<IActionResult> OnGetAsync(string? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var inventory_activity_log = await _context.Inventory_Activity_Log.FirstOrDefaultAsync(m => m.Stock_ID_Log == id);
+            var inventory_activity_log = await _context.Inventory_Activity_Log.FirstOrDefaultAsync(m => m.Log_ID == id);
 
             if (inventory_activity_log == null)
             {
@@ -42,7 +42,7 @@ namespace cs392_demo.Pages.Inventory_Log
             return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync(char? id)
+        public async Task<IActionResult> OnPostAsync(string? id)
         {
             if (id == null)
             {

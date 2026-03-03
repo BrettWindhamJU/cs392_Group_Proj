@@ -5,9 +5,17 @@ namespace cs392_demo.models
 {
     public class Inventory_Location
     {
-        [Key] public string location_id { get; set; } = string.Empty;
+        [Key]
+        [Display(Name = "Location ID")]
+        public string location_id { get; set; } = string.Empty;
+
+        [Display(Name = "Location Name")]
         public string Location_name { get; set; } = string.Empty;
+
+        [Display(Name = "Address")]
         public string Address_Location { get; set; } = string.Empty;
+
+        [Display(Name = "Owner User ID")]
         public string Owner_User_ID { get; set; } = string.Empty;
 
         [NotMapped]

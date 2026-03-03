@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using cs392_demo.Data;
 
@@ -11,9 +12,11 @@ using cs392_demo.Data;
 namespace cs392_demo.Migrations
 {
     [DbContext(typeof(cs392_demoContext))]
-    partial class cs392_demoContextModelSnapshot : ModelSnapshot
+    [Migration("20260303020518_FixStockFieldTypesAndDates")]
+    partial class FixStockFieldTypesAndDates
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -225,17 +228,20 @@ namespace cs392_demo.Migrations
 
             modelBuilder.Entity("cs392_demo.models.Inventory_Activity_Log", b =>
                 {
-                    b.Property<string>("Log_ID")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                    b.Property<string>("Stock_ID_Log")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(1)");
 
                     b.Property<DateTime>("Changed_At")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Changed_By")
                         .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("nvarchar(1)");
+
+                    b.Property<string>("Log_ID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(1)");
 
                     b.Property<int>("Quantity_After")
                         .HasColumnType("int");
@@ -243,14 +249,7 @@ namespace cs392_demo.Migrations
                     b.Property<int>("Quantity_Before")
                         .HasColumnType("int");
 
-                    b.Property<string>("Stock_ID_Log")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("Log_ID");
-
-                    b.HasIndex("Stock_ID_Log");
+                    b.HasKey("Stock_ID_Log");
 
                     b.ToTable("Inventory_Activity_Log");
                 });
@@ -296,9 +295,8 @@ namespace cs392_demo.Migrations
                     b.Property<DateTime?>("Last_Updated")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Last_Updated_by")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                    b.Property<DateTime?>("Last_Updated_by")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Location_Stock_ID")
                         .IsRequired()
@@ -380,22 +378,6 @@ namespace cs392_demo.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("cs392_demo.models.Inventory_Activity_Log", b =>
-                {
-                    b.HasOne("cs392_demo.models.Stock", "Stock")
-                        .WithMany("Inventory_Activity_Logs")
-                        .HasForeignKey("Stock_ID_Log")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Stock");
-                });
-
-            modelBuilder.Entity("cs392_demo.models.Stock", b =>
-                {
-                    b.Navigation("Inventory_Activity_Logs");
                 });
 #pragma warning restore 612, 618
         }

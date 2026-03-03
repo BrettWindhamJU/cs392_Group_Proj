@@ -17,6 +17,9 @@
                 @Html.DisplayNameFor(model => model.Inventory_Activity_Log[0].Log_ID)
             </th>
             <th>
+                @Html.DisplayNameFor(model => model.Inventory_Activity_Log[0].Stock_ID_Log)
+            </th>
+            <th>
                 @Html.DisplayNameFor(model => model.Inventory_Activity_Log[0].Quantity_Before)
             </th>
             <th>
@@ -38,6 +41,9 @@
                 @Html.DisplayFor(modelItem => item.Log_ID)
             </td>
             <td>
+                @Html.DisplayFor(modelItem => item.Stock_ID_Log)
+            </td>
+            <td>
                 @Html.DisplayFor(modelItem => item.Quantity_Before)
             </td>
             <td>
@@ -50,9 +56,9 @@
                 @Html.DisplayFor(modelItem => item.Changed_At)
             </td>
             <td>
-                <a asp-page="./Edit" asp-route-id="@item.Stock_ID_Log">Edit</a> |
-                <a asp-page="./Details" asp-route-id="@item.Stock_ID_Log">Details</a> |
-                <a asp-page="./Delete" asp-route-id="@item.Stock_ID_Log">Delete</a>
+                <a asp-page="./Edit" asp-route-id="@item.Log_ID">Edit</a> |
+                <a asp-page="./Details" asp-route-id="@item.Log_ID">Details</a> |
+                <a asp-page="./Delete" asp-route-id="@item.Log_ID">Delete</a>
             </td>
         </tr>
 }

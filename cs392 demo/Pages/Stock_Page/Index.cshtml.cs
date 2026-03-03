@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace cs392_demo.Pages.Stock_Page
 {
 
-    [Authorize(Roles = "Owner, Manager")]
+    [Authorize]
     public class IndexModel : PageModel
     {
 

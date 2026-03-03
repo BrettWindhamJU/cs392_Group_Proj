@@ -2,14 +2,18 @@
 @model cs392_demo.Pages.Stock_Page.IndexModel
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Stock";
+    var canManageStock = User.IsInRole("Owner") || User.IsInRole("Manager");
 }
 
-<h1>Index</h1>
+<h1>Stock</h1>
 
-<p>
-    <a asp-page="Create">Create New</a>
-</p>
+@if (canManageStock)
+{
+    <p>
+        <a asp-page="Create">Add New Inventory Item</a>
+    </p>
+}
 <table class="table">
     <thead>
         <tr>
@@ -62,9 +66,17 @@
                 @Html.DisplayFor(modelItem => item.Last_Updated_by)
             </td>
             <td>
-                <a asp-page="./Edit" asp-route-id="@item.Stock_ID">Edit</a> |
-                <a asp-page="./Details" asp-route-id="@item.Stock_ID">Details</a> |
-                <a asp-page="./Delete" asp-route-id="@item.Stock_ID">Delete</a>
+                @if (canManageStock)
+                {
+                    <a asp-page="./Edit" asp-route-id="@item.Stock_ID">Edit</a>
+                    <span> | </span>
+                }
+                <a asp-page="./Details" asp-route-id="@item.Stock_ID">Details</a>
+                @if (canManageStock)
+                {
+                    <span> | </span>
+                    <a asp-page="./Delete" asp-route-id="@item.Stock_ID">Delete</a>
+                }
             </td>
         </tr>
 }
