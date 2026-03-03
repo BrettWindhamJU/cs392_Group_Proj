@@ -1,61 +1,111 @@
-﻿@page
+@page
 @model IndexModel
 
-@foreach (var location in Model.Locations)
-        
+@{
+    ViewData["Title"] = "Dashboard";
+    var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+    var isPrivilegedUser = User.IsInRole("Owner") || User.IsInRole("Manager");
+    var inStockItems = Model.TotalStockItems - Model.LowStockItems;
+}
+
+@if (!isAuthenticated)
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Location Name</th>
-                <th>Location Address</th>
-                <th>Location Options</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>@location.Location_Name</td>
-                <td>@location.Address_Location</td>
-                <td>
-                    <a asp-page="/cs360/Inventory_Location/Edit" asp-route-id="@location.Location_Id" class="btn btn-sm btn-primary"> Edit </a>
-                    <a asp-page="/cs360/Inventory_Location/Delete" asp-route-id="@location.Location_Id" class="btn btn-sm btn-primary"> Delete </a>
-                    <a asp-page="/Stock_Page/Create" asp-route-Location_Id="@location.Location_Id" class="btn btn-sm btn-primary"> Add Stock </a>
-                </td>
-            </tr>
-            <tr>
-                <td colspan="3">
-                    <div class="row">
-                        <div class="col-10 offset-2">
-                            <table class="table table-sm">
+    <h1>Dashboard</h1>
+    <p>Please sign in to access inventory tools.</p>
+}
+else
+{
+    if (isPrivilegedUser)
+    {
+        <div class="dashboard-hero">
+            <h1>Dashboard</h1>
+            <p class="inventory-subtitle">Track inventory status, recent updates and important alerts.</p>
+        </div>
+
+        <div class="dashboard-metrics-grid">
+            <a class="dashboard-stat-card" asp-page="/Stock_Page/Index">
+                <p class="dashboard-stat-label">Total Stock Items</p>
+                <p class="dashboard-stat-value">@Model.TotalStockItems</p>
+            </a>
+            <a class="dashboard-stat-card" asp-page="/Stock_Page/Index">
+                <p class="dashboard-stat-label">Low Stock Items</p>
+                <p class="dashboard-stat-value">@Model.LowStockItems</p>
+            </a>
+            <a class="dashboard-stat-card" asp-page="/Inventory_Log/Index">
+                <p class="dashboard-stat-label">Inventory Logs</p>
+                <p class="dashboard-stat-value">@Model.TotalLogs</p>
+            </a>
+            <a class="dashboard-stat-card" asp-page="/cs360/Inventory_Location/Index">
+                <p class="dashboard-stat-label">Locations</p>
+                <p class="dashboard-stat-value">@Model.TotalLocations</p>
+            </a>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-12">
+                <div class="dashboard-panel">
+                    <div class="dashboard-panel-header">
+                        <h2 class="dashboard-panel-title mb-0">Recent Activity</h2>
+                        <a asp-page="/Inventory_Log/Index">View all</a>
+                    </div>
+                    @if (Model.RecentLogs.Count > 0)
+                    {
+                        <div class="table-responsive">
+                            <table class="table inventory-table dashboard-log-table">
                                 <thead>
                                     <tr>
-                                        <th>Stock ID</th>
-                                        <th>Amount</th>
-                                        <th>Danger Threshold</th>
-                                        <td>Options</td>
+                                        <th>Log ID</th>
+                                        <th>Stock</th>
+                                        <th>Before</th>
+                                        <th>After</th>
+                                        <th>Changed At</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var stock in location.Stocks)
-                                    {
-                                        <tr class="@(stock.Amount <= stock.Danger_Range ? "table-danger" : "")">
-                                            <td>@stock.Item_Name</td>
-                                            <td>@stock.Amount</td>
-                                            <td>@stock.Danger_Range</td>
-                                            <td>
-                                                <a asp-page="/Stock/Edit" asp-route-id="@stock.Stock_ID" class="btn btn-sm btn-primary"> Edit </a>
-                                                <a asp-page="/Stock/Delete" asp-route-id="@stock.Stock_ID" class="btn btn-sm btn-primary"> Delete </a>
-                                            </td>
-                                        </tr>
-                                    }
+                                @foreach (var log in Model.RecentLogs)
+                                {
+                                    <tr>
+                                        <td>@log.Log_ID</td>
+                                        <td>@log.Stock_ID_Log</td>
+                                        <td>@log.Quantity_Before</td>
+                                        <td>@log.Quantity_After</td>
+                                        <td>@log.Changed_At</td>
+                                    </tr>
+                                }
                                 </tbody>
                             </table>
                         </div>
-                    </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-}
-       
+                    }
+                    else
+                    {
+                        <p class="mb-0">No recent inventory activity yet.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="dashboard-hero">
+            <h1>Dashboard</h1>
+            <p class="inventory-subtitle">View inventory status and low stock alerts.</p>
+        </div>
 
+        <div class="dashboard-metrics-grid dashboard-metrics-grid-user">
+            <a class="dashboard-stat-card" asp-page="/Stock_Page/Index">
+                <p class="dashboard-stat-label">Total Stock Items</p>
+                <p class="dashboard-stat-value">@Model.TotalStockItems</p>
+            </a>
+            <a class="dashboard-stat-card" asp-page="/Stock_Page/Index">
+                <p class="dashboard-stat-label">In Stock</p>
+                <p class="dashboard-stat-value">@inStockItems</p>
+            </a>
+            <a class="dashboard-stat-card" asp-page="/Stock_Page/Index">
+                <p class="dashboard-stat-label">Low Stock</p>
+                <p class="dashboard-stat-value">@Model.LowStockItems</p>
+            </a>
+        </div>
+
+        <a class="btn btn-primary" asp-page="/Stock_Page/Index">Go to Inventory</a>
+    }
+}

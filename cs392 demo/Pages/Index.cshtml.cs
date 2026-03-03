@@ -1,5 +1,5 @@
 ﻿using cs392_demo.Data;
-using cs392_demo.viewModels;
+using cs392_demo.models;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,33 +7,27 @@ public class IndexModel : PageModel
 {
     private readonly cs392_demoContext _context;
 
+    public int TotalStockItems { get; private set; }
+    public int LowStockItems { get; private set; }
+    public int TotalLogs { get; private set; }
+    public int TotalLocations { get; private set; }
+    public IList<Inventory_Activity_Log> RecentLogs { get; private set; } = new List<Inventory_Activity_Log>();
+
     public IndexModel(cs392_demoContext context)
     {
         _context = context;
     }
 
-    public List<LocationStockViewModel> Locations { get; set; }
     public async Task OnGetAsync()
     {
-        Locations = await _context.Inventory_Location
-            .Select(location => new LocationStockViewModel
-            {
-                Location_Id = location.location_id,
-                Location_Name = location.Location_name,
-                Address_Location = location.Address_Location,
-                Owner_User_ID = location.Owner_User_ID,
+        TotalStockItems = await _context.Stock.CountAsync();
+        LowStockItems = await _context.Stock.CountAsync(s => s.Amount <= s.Danger_Range);
+        TotalLogs = await _context.Inventory_Activity_Log.CountAsync();
+        TotalLocations = await _context.Inventory_Location.CountAsync();
 
-                Stocks = _context.Stock
-                    .Where(stock => stock.Location_Stock_ID.ToString() == location.location_id)
-                    .Select(stock => new StockItemViewModel
-                    {
-                        Stock_ID = stock.Stock_ID,
-                        Item_Name = stock.Item_Name,
-                        SKU = stock.SKU,
-                        Amount = stock.Amount,
-                        Danger_Range = stock.Danger_Range,
-                        Last_Updated = stock.Last_Updated
-                    }).ToList()
-            }).ToListAsync();
+        RecentLogs = await _context.Inventory_Activity_Log
+            .OrderByDescending(log => log.Changed_At)
+            .Take(5)
+            .ToListAsync();
     }
 }

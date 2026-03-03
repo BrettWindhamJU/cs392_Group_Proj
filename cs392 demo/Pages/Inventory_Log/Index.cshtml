@@ -2,40 +2,48 @@
 @model cs392_demo.Pages.Inventory_Log.IndexModel
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Inventory Log";
+    var totalLogs = Model.Inventory_Activity_Log.Count;
+    var decreasedChanges = Model.Inventory_Activity_Log.Count(log => log.Quantity_After < log.Quantity_Before);
+    var increasedChanges = Model.Inventory_Activity_Log.Count(log => log.Quantity_After > log.Quantity_Before);
 }
 
-<h1>Index</h1>
+<div class="inventory-page-header">
+    <div>
+        <h1>Inventory Log</h1>
+        <p class="inventory-subtitle">Total @totalLogs log entr@(totalLogs == 1 ? "y" : "ies")</p>
+    </div>
+    <div class="inventory-status-chips">
+        <span class="inventory-chip">All Logs (@totalLogs)</span>
+        <span class="inventory-chip">Decreased (@decreasedChanges)</span>
+        <span class="inventory-chip">Increased (@increasedChanges)</span>
+    </div>
+</div>
 
 <p>
     <a asp-page="Create">Create New</a>
 </p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Inventory_Activity_Log[0].Log_ID)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Inventory_Activity_Log[0].Quantity_Before)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Inventory_Activity_Log[0].Quantity_After)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Inventory_Activity_Log[0].Changed_By)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Inventory_Activity_Log[0].Changed_At)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
+<div class="inventory-table-card">
+    <table class="table inventory-table">
+        <thead>
+            <tr>
+                <th>Log ID</th>
+                <th>Stock ID</th>
+                <th>Quantity Before</th>
+                <th>Quantity After</th>
+                <th>Changed By</th>
+                <th>Changed At</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
 @foreach (var item in Model.Inventory_Activity_Log) {
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.Log_ID)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Stock_ID_Log)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Quantity_Before)
@@ -50,11 +58,12 @@
                 @Html.DisplayFor(modelItem => item.Changed_At)
             </td>
             <td>
-                <a asp-page="./Edit" asp-route-id="@item.Stock_ID_Log">Edit</a> |
-                <a asp-page="./Details" asp-route-id="@item.Stock_ID_Log">Details</a> |
-                <a asp-page="./Delete" asp-route-id="@item.Stock_ID_Log">Delete</a>
+                <a asp-page="./Edit" asp-route-id="@item.Log_ID">Edit</a> |
+                <a asp-page="./Details" asp-route-id="@item.Log_ID">Details</a> |
+                <a asp-page="./Delete" asp-route-id="@item.Log_ID">Delete</a>
             </td>
         </tr>
 }
-    </tbody>
-</table>
+        </tbody>
+    </table>
+</div>

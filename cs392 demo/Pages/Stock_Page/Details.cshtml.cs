@@ -21,7 +21,7 @@ namespace cs392_demo.Pages.Stock_Page
 
         public Stock Stock { get; set; } = default!;
 
-        public async Task<IActionResult> OnGetAsync(char? id)
+        public async Task<IActionResult> OnGetAsync(string? id)
         {
             if (id == null)
             {

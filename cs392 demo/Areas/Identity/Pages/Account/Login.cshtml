@@ -5,7 +5,9 @@
     ViewData["Title"] = "Log in";
 }
 
-<link rel="stylesheet" href="~/css/login.css" />
+@section Styles {
+    <link rel="stylesheet" href="~/css/login.css" asp-append-version="true" />
+}
 
 <div class="login-container">
     <div class="login-card">
@@ -47,9 +49,6 @@
                     </p>
                     <p>
                         <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Create a new account</a>
-                    </p>
-                    <p>
-                        <a id="resend-confirmation" asp-page="./ResendEmailConfirmation">Resend email confirmation</a>
                     </p>
                 </div>
 

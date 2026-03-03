@@ -21,5 +21,17 @@ namespace cs392_demo.Data
         public DbSet<Inventory_Location> Inventory_Location { get; set; } = default!;
         public DbSet<Inventory_Activity_Log> Inventory_Activity_Log { get; set; } = default!;
         public DbSet<Stock> Stock { get; set; } = default!;
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Inventory_Activity_Log>()
+                .HasOne(log => log.Stock)
+                .WithMany(stock => stock.Inventory_Activity_Logs)
+                .HasForeignKey(log => log.Stock_ID_Log)
+                .HasPrincipalKey(stock => stock.Stock_ID)
+                .OnDelete(DeleteBehavior.Restrict);
+        }
     }
 }

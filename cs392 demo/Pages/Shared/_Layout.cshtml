@@ -7,25 +7,27 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/cs392_demo.styles.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container">
-                <a class="navbar-brand" href="/Index">StockWise</a>
+    <div class="min-vh-100 d-flex flex-column">
+        <header>
+            <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+                <div class="container">
+                    <a class="navbar-brand" href="/Index">StockWise</a>
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                        data-bs-target=".navbar-collapse"
-                        aria-controls="navbarSupportedContent"
-                        aria-expanded="false"
-                        aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                            data-bs-target=".navbar-collapse"
+                            aria-controls="navbarSupportedContent"
+                            aria-expanded="false"
+                            aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
 
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
 
                     <ul class="navbar-nav flex-grow-1">
-                        @if (User.Identity.IsAuthenticated)
+                        @if (User.Identity?.IsAuthenticated ?? false)
                         {
                             if (User.IsInRole("Owner"))
                             {
@@ -40,24 +42,14 @@
                                     </a>
                                     <ul class="dropdown-menu">
                                         <li>
-                                            <a class="dropdown-item" asp-page="cs360/Inventory_Location/Create">Create Inventory Location</a>
+                                            <a class="dropdown-item" asp-page="/cs360/Inventory_Location/Index">Inventory Locations</a>
                                         </li>
                                         <li>
-                                            <a class="dropdown-item" asp-page="/Inventory_Log/Create"> Create Inventory Logs</a>
+                                            <a class="dropdown-item" asp-page="/Inventory_Log/Index">Inventory Logs</a>
                                         </li>
-
                                         <li>
                                             <a class="dropdown-item" asp-page="/Stock_Page/Index">Stock</a>
                                         </li>
-
-                                        <li>
-                                            <a class="dropdown-item" asp-page="/Stock_Page/Create">Stock</a>
-                                        </li>
-
-
-
-
-
                                     </ul>
                                 </li>
                             }
@@ -73,21 +65,15 @@
                                         Manager Tools
                                     </a>
                                     <ul class="dropdown-menu">
-                                       
                                         <li>
-                                            <a class="dropdown-item" asp-page="/Inventory_Log/Create">Inventory Log</a>
+                                            <a class="dropdown-item" asp-page="/cs360/Inventory_Location/Index">Inventory Locations</a>
                                         </li>
-
+                                        <li>
+                                            <a class="dropdown-item" asp-page="/Inventory_Log/Index">Inventory Logs</a>
+                                        </li>
                                         <li>
                                             <a class="dropdown-item" asp-page="/Stock_Page/Index">Stock</a>
                                         </li>
-
-                                        <li>
-                                            <a class="dropdown-item" asp-page="/Stock_Page/Create">Stock</a>
-                                        </li>
-
-
-                                        
                                     </ul>
                                 </li>
                             }
@@ -97,10 +83,7 @@
                                     <a class="nav-link text-dark" href="/Index">Dashboard</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-page="/cs360/Inventory_Location/Details">Details</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-page="/cs360/Inventory_Location/Create">Add Location</a>
+                                    <a class="nav-link text-dark" asp-page="/Stock_Page/Index">Inventory</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-page="/Suppliers">Suppliers</a>
@@ -121,34 +104,26 @@
                         }
                     </ul>
 
-                    <ul class="navbar-nav ms-auto">
-                        @if (User.Identity.IsAuthenticated)
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-page="/Account/Account">Account</a>
-                            </li>
-                        }
-                    </ul>
+                        <partial name="_LoginPartial" />
 
-                    <partial name="_LoginPartial" />
-
+                    </div>
                 </div>
-            </div>
-        </nav>
-    </header>
+            </nav>
+        </header>
 
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
-
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - StockWise -
-            <a asp-page="/Privacy">Privacy</a>
+        <div class="container flex-grow-1">
+            <main role="main" class="pb-3">
+                @RenderBody()
+            </main>
         </div>
-    </footer>
+
+        <footer class="border-top footer text-muted mt-auto">
+            <div class="container">
+                &copy; 2026 - StockWise -
+                <a asp-page="/Privacy">Privacy</a>
+            </div>
+        </footer>
+    </div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
