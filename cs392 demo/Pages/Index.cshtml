@@ -1,61 +1,18 @@
-﻿@page
+@page
 @model IndexModel
 
-@foreach (var location in Model.Locations)
-        
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Location Name</th>
-                <th>Location Address</th>
-                <th>Location Options</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>@location.Location_Name</td>
-                <td>@location.Address_Location</td>
-                <td>
-                    <a asp-page="/cs360/Inventory_Location/Edit" asp-route-id="@location.Location_Id" class="btn btn-sm btn-primary"> Edit </a>
-                    <a asp-page="/cs360/Inventory_Location/Delete" asp-route-id="@location.Location_Id" class="btn btn-sm btn-primary"> Delete </a>
-                    <a asp-page="/Stock_Page/Create" asp-route-Location_Id="@location.Location_Id" class="btn btn-sm btn-primary"> Add Stock </a>
-                </td>
-            </tr>
-            <tr>
-                <td colspan="3">
-                    <div class="row">
-                        <div class="col-10 offset-2">
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Stock ID</th>
-                                        <th>Amount</th>
-                                        <th>Danger Threshold</th>
-                                        <td>Options</td>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var stock in location.Stocks)
-                                    {
-                                        <tr class="@(stock.Amount <= stock.Danger_Range ? "table-danger" : "")">
-                                            <td>@stock.Item_Name</td>
-                                            <td>@stock.Amount</td>
-                                            <td>@stock.Danger_Range</td>
-                                            <td>
-                                                <a asp-page="/Stock/Edit" asp-route-id="@stock.Stock_ID" class="btn btn-sm btn-primary"> Edit </a>
-                                                <a asp-page="/Stock/Delete" asp-route-id="@stock.Stock_ID" class="btn btn-sm btn-primary"> Delete </a>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+@{
+    ViewData["Title"] = "Dashboard";
 }
-       
 
+<h1>Dashboard</h1>
+
+@if (User.Identity?.IsAuthenticated ?? false)
+{
+    <p>Track inventory status, recent updates and important alerts.</p>
+    <p>Use the navigation bar to access inventory tools.</p>
+}
+else
+{
+    <p>Please sign in to access inventory tools.</p>
+}

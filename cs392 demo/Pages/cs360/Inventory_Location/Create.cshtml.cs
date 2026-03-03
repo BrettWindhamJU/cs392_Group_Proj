@@ -41,7 +41,7 @@ namespace cs392_demo.Pages.cs360.Inventory_Location
             _context.Inventory_Location.Add(Inventory_Location);
             await _context.SaveChangesAsync();
 
-            return RedirectToPage("/Index");
+            return RedirectToPage("/cs360/Inventory_Location/Index");
         }
     }
 }

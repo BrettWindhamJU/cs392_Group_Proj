@@ -66,7 +66,7 @@ namespace cs392_demo.Pages.cs360.Inventory_Location
                 }
             }
 
-            return RedirectToPage("/Index");
+            return RedirectToPage("/cs360/Inventory_Location/Index");
         }
 
         private bool Inventory_LocationExists(string id)
