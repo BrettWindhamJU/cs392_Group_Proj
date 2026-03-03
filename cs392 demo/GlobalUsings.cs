@@ -1,0 +1,1 @@
+global using Users = cs392_demo.models.AppUser;

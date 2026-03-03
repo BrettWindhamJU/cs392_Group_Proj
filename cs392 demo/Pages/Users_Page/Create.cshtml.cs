@@ -25,7 +25,7 @@ namespace cs392_demo.Pages.Users_Page
         }
 
         [BindProperty]
-        public Users Users { get; set; } = default!;
+        public AppUser Users { get; set; } = default!;
 
         // For more information, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync()

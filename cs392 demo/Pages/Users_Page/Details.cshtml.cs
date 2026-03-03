@@ -19,16 +19,16 @@ namespace cs392_demo.Pages.Users_Page
             _context = context;
         }
 
-        public Users Users { get; set; } = default!;
+        public AppUser Users { get; set; } = default!;
 
-        public async Task<IActionResult> OnGetAsync(char? id)
+        public async Task<IActionResult> OnGetAsync(string? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var users = await _context.Users.FirstOrDefaultAsync(m => m.User_ID == id);
+            var users = await _context.Users.FirstOrDefaultAsync(m => m.Id == id);
             if (users == null)
             {
                 return NotFound();
