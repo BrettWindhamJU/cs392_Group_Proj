@@ -51,15 +51,34 @@ namespace cs392_demo.Pages.Stock_Page
                 return NotFound();
             }
 
-            var stock = await _context.Stock.FindAsync(id);
-            if (stock != null)
+            var stock = await _context.Stock.FirstOrDefaultAsync(s => s.Stock_ID == id);
+            if (stock == null)
             {
-                Stock = stock;
-                _context.Stock.Remove(Stock);
-                await _context.SaveChangesAsync();
+                return RedirectToPage("./Index");
             }
 
-            return RedirectToPage("./Index");
+            try
+            {
+                var relatedLogs = await _context.Inventory_Activity_Log
+                    .Where(log => log.Stock_ID_Log == id)
+                    .ToListAsync();
+
+                if (relatedLogs.Count > 0)
+                {
+                    _context.Inventory_Activity_Log.RemoveRange(relatedLogs);
+                }
+
+                _context.Stock.Remove(stock);
+                await _context.SaveChangesAsync();
+
+                return RedirectToPage("./Index");
+            }
+            catch (DbUpdateException)
+            {
+                Stock = stock;
+                ModelState.AddModelError(string.Empty, "Unable to delete this stock item right now. Please try again.");
+                return Page();
+            }
         }
     }
 }

@@ -55,6 +55,22 @@ namespace cs392_demo.Pages.Stock_Page
             {
                 _context.Stock.Add(Stock);
                 await _context.SaveChangesAsync();
+
+                var changedBy = User?.Identity?.Name ?? "System";
+                var now = DateTime.Now;
+                var nextLogId = await GenerateNextLogIdAsync();
+
+                _context.Inventory_Activity_Log.Add(new Inventory_Activity_Log
+                {
+                    Log_ID = nextLogId,
+                    Stock_ID_Log = Stock.Stock_ID,
+                    Quantity_Before = 0,
+                    Quantity_After = Stock.Amount,
+                    Changed_By = changedBy,
+                    Changed_At = now
+                });
+
+                await _context.SaveChangesAsync();
             }
             catch (DbUpdateException)
             {
@@ -63,6 +79,39 @@ namespace cs392_demo.Pages.Stock_Page
             }
 
             return RedirectToPage("/Stock_Page/Index");
+        }
+
+        private async Task<string> GenerateNextLogIdAsync()
+        {
+            var existingIds = await _context.Inventory_Activity_Log
+                .Select(log => log.Log_ID)
+                .ToListAsync();
+
+            var maxNumber = 0;
+
+            foreach (var logId in existingIds)
+            {
+                if (!logId.StartsWith("LOG-", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                if (int.TryParse(logId.Substring(4), out var parsedNumber) && parsedNumber > maxNumber)
+                {
+                    maxNumber = parsedNumber;
+                }
+            }
+
+            var nextNumber = maxNumber + 1;
+            var nextLogId = $"LOG-{nextNumber:D3}";
+
+            while (await _context.Inventory_Activity_Log.AnyAsync(log => log.Log_ID == nextLogId))
+            {
+                nextNumber++;
+                nextLogId = $"LOG-{nextNumber:D3}";
+            }
+
+            return nextLogId;
         }
     }
 }

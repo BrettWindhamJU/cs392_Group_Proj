@@ -45,19 +45,49 @@ namespace cs392_demo.Pages.Stock_Page
         // For more information, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync()
         {
-            Stock.Last_Updated = DateTime.Now;
-            Stock.Last_Updated_by = User?.Identity?.Name ?? "System";
-
             if (!ModelState.IsValid)
             {
                 return Page();
             }
 
-            _context.Attach(Stock).State = EntityState.Modified;
+            var existingStock = await _context.Stock.FirstOrDefaultAsync(s => s.Stock_ID == Stock.Stock_ID);
+            if (existingStock == null)
+            {
+                return NotFound();
+            }
+
+            var previousAmount = existingStock.Amount;
+            var changedBy = User?.Identity?.Name ?? "System";
+            var now = DateTime.Now;
+
+            existingStock.Location_Stock_ID = Stock.Location_Stock_ID;
+            existingStock.Item_Name = Stock.Item_Name;
+            existingStock.SKU = Stock.SKU;
+            existingStock.Amount = Stock.Amount;
+            existingStock.Danger_Range = Stock.Danger_Range;
+            existingStock.Last_Updated = now;
+            existingStock.Last_Updated_by = changedBy;
 
             try
             {
                 await _context.SaveChangesAsync();
+
+                if (previousAmount != existingStock.Amount)
+                {
+                    var nextLogId = await GenerateNextLogIdAsync();
+
+                    _context.Inventory_Activity_Log.Add(new Inventory_Activity_Log
+                    {
+                        Log_ID = nextLogId,
+                        Stock_ID_Log = existingStock.Stock_ID,
+                        Quantity_Before = previousAmount,
+                        Quantity_After = existingStock.Amount,
+                        Changed_By = changedBy,
+                        Changed_At = now
+                    });
+
+                    await _context.SaveChangesAsync();
+                }
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -77,6 +107,39 @@ namespace cs392_demo.Pages.Stock_Page
         private bool StockExists(string id)
         {
             return _context.Stock.Any(e => e.Stock_ID == id);
+        }
+
+        private async Task<string> GenerateNextLogIdAsync()
+        {
+            var existingIds = await _context.Inventory_Activity_Log
+                .Select(log => log.Log_ID)
+                .ToListAsync();
+
+            var maxNumber = 0;
+
+            foreach (var logId in existingIds)
+            {
+                if (!logId.StartsWith("LOG-", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                if (int.TryParse(logId.Substring(4), out var parsedNumber) && parsedNumber > maxNumber)
+                {
+                    maxNumber = parsedNumber;
+                }
+            }
+
+            var nextNumber = maxNumber + 1;
+            var nextLogId = $"LOG-{nextNumber:D3}";
+
+            while (await _context.Inventory_Activity_Log.AnyAsync(log => log.Log_ID == nextLogId))
+            {
+                nextNumber++;
+                nextLogId = $"LOG-{nextNumber:D3}";
+            }
+
+            return nextLogId;
         }
     }
 }
