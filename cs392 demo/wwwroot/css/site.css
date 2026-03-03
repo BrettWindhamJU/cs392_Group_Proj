@@ -214,3 +214,72 @@ a:hover {
 .stock-bar-good {
   background-color: #16a34a;
 }
+
+.dashboard-hero {
+  margin-bottom: 1rem;
+}
+
+.dashboard-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.dashboard-metrics-grid-user {
+  margin-bottom: 1.25rem;
+}
+
+.dashboard-stat-card {
+  display: block;
+  background: white;
+  border: 1px solid var(--neutral-medium);
+  border-radius: 0.4rem;
+  padding: 0.9rem 1rem;
+  color: var(--text-dark);
+}
+
+.dashboard-stat-card:hover {
+  border-color: var(--teal-light);
+  text-decoration: none;
+}
+
+.dashboard-stat-label {
+  margin: 0;
+  color: #5f6f71;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.dashboard-stat-value {
+  margin: 0.2rem 0 0;
+  font-size: 1.6rem;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.dashboard-panel {
+  background: white;
+  border: 1px solid var(--neutral-medium);
+  border-radius: 0.4rem;
+  padding: 1rem;
+  height: 100%;
+}
+
+.dashboard-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.dashboard-panel-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+}
+
+.dashboard-log-table {
+  margin-bottom: 0;
+}
