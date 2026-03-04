@@ -16,9 +16,12 @@
     </div>
 </div>
 
-<p>
-    <a asp-page="Create">Add New Location</a>
-</p>
+@if (User.IsInRole("Owner"))
+{
+    <p>
+        <a asp-page="Create">Add New Location</a>
+    </p>
+}
 
 <div class="inventory-table-card">
     <table class="table inventory-table">
@@ -40,9 +43,17 @@
             <td>@item.Address_Location</td>
             <td>@item.Owner_User_ID</td>
             <td>
-                <a asp-page="Edit" asp-route-id="@item.location_id">Edit</a> |
+                @if (User.IsInRole("Owner"))
+                {
+                    <a asp-page="Edit" asp-route-id="@item.location_id">Edit</a>
+                    <span> | </span>
+                }
                 <a asp-page="Details" asp-route-id="@item.location_id">Details</a> |
-                <a asp-page="Delete" asp-route-id="@item.location_id">Delete</a> |
+                @if (User.IsInRole("Owner"))
+                {
+                    <a asp-page="Delete" asp-route-id="@item.location_id">Delete</a>
+                    <span> | </span>
+                }
                 <a asp-page="/Stock_Page/Create" asp-route-Location_Id="@item.location_id">Add Stock</a>
             </td>
         </tr>

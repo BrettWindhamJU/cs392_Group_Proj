@@ -11,7 +11,7 @@ using cs392_demo.models;
 
 namespace cs392_demo.Pages.cs360.Inventory_Location
 {
-    [Authorize(Roles = "Owner,Manager")]
+    [Authorize(Roles = "Owner")]
     public class CreateModel : PageModel
     {
         private readonly cs392_demo.Data.cs392_demoContext _context;
