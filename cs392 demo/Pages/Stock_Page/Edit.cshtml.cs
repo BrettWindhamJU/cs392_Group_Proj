@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -32,7 +33,16 @@ namespace cs392_demo.Pages.Stock_Page
                 return NotFound();
             }
 
-            var stock =  await _context.Stock.FirstOrDefaultAsync(m => m.Stock_ID == id);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            var businessId = currentUser?.BusinessId;
+
+            if (businessId == null)
+            {
+                return NotFound();
+            }
+
+            var stock = await _context.Stock.FirstOrDefaultAsync(m => m.Stock_ID == id && m.BusinessId == businessId);
             if (stock == null)
             {
                 return NotFound();
@@ -45,12 +55,30 @@ namespace cs392_demo.Pages.Stock_Page
         // For more information, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync()
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            var businessId = currentUser?.BusinessId;
+
+            if (businessId == null)
+            {
+                return NotFound();
+            }
+
             if (!ModelState.IsValid)
             {
                 return Page();
             }
 
-            var existingStock = await _context.Stock.FirstOrDefaultAsync(s => s.Stock_ID == Stock.Stock_ID);
+            var locationExistsInBusiness = await _context.Inventory_Location
+                .AnyAsync(l => l.BusinessId == businessId && l.location_id == Stock.Location_Stock_ID);
+            if (!locationExistsInBusiness)
+            {
+                ModelState.AddModelError("Stock.Location_Stock_ID", "That location does not exist in your business.");
+                return Page();
+            }
+
+            var existingStock = await _context.Stock
+                .FirstOrDefaultAsync(s => s.Stock_ID == Stock.Stock_ID && s.BusinessId == businessId);
             if (existingStock == null)
             {
                 return NotFound();
@@ -67,6 +95,7 @@ namespace cs392_demo.Pages.Stock_Page
             existingStock.Danger_Range = Stock.Danger_Range;
             existingStock.Last_Updated = now;
             existingStock.Last_Updated_by = changedBy;
+            existingStock.BusinessId = businessId;
 
             try
             {
@@ -80,6 +109,7 @@ namespace cs392_demo.Pages.Stock_Page
                     {
                         Log_ID = nextLogId,
                         Stock_ID_Log = existingStock.Stock_ID,
+                        BusinessId = businessId,
                         Quantity_Before = previousAmount,
                         Quantity_After = existingStock.Amount,
                         Changed_By = changedBy,
@@ -91,7 +121,7 @@ namespace cs392_demo.Pages.Stock_Page
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!StockExists(Stock.Stock_ID))
+                if (!StockExists(Stock.Stock_ID, businessId))
                 {
                     return NotFound();
                 }
@@ -104,9 +134,9 @@ namespace cs392_demo.Pages.Stock_Page
             return RedirectToPage("./Index");
         }
 
-        private bool StockExists(string id)
+        private bool StockExists(string id, string businessId)
         {
-            return _context.Stock.Any(e => e.Stock_ID == id);
+            return _context.Stock.Any(e => e.Stock_ID == id && e.BusinessId == businessId);
         }
 
         private async Task<string> GenerateNextLogIdAsync()

@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace cs392_demo.Pages.Inventory_Log
@@ -22,11 +23,24 @@ namespace cs392_demo.Pages.Inventory_Log
             _context = context;
         }
 
-        public IList<Inventory_Activity_Log> Inventory_Activity_Log { get;set; } = default!;
+        public IList<Inventory_Activity_Log> Inventory_Activity_Log { get; set; } = default!;
 
         public async Task OnGetAsync()
         {
-            Inventory_Activity_Log = await _context.Inventory_Activity_Log.ToListAsync();
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            var businessId = currentUser?.BusinessId;
+
+            if (businessId == null)
+            {
+                Inventory_Activity_Log = new List<Inventory_Activity_Log>();
+                return;
+            }
+
+            Inventory_Activity_Log = await _context.Inventory_Activity_Log
+                .Where(l => l.BusinessId == businessId)
+                .OrderByDescending(l => l.Changed_At)
+                .ToListAsync();
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -31,7 +32,16 @@ namespace cs392_demo.Pages.Stock_Page
                 return NotFound();
             }
 
-            var stock = await _context.Stock.FirstOrDefaultAsync(m => m.Stock_ID == id);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            var businessId = currentUser?.BusinessId;
+
+            if (businessId == null)
+            {
+                return NotFound();
+            }
+
+            var stock = await _context.Stock.FirstOrDefaultAsync(m => m.Stock_ID == id && m.BusinessId == businessId);
 
             if (stock == null)
             {
@@ -51,7 +61,16 @@ namespace cs392_demo.Pages.Stock_Page
                 return NotFound();
             }
 
-            var stock = await _context.Stock.FirstOrDefaultAsync(s => s.Stock_ID == id);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            var businessId = currentUser?.BusinessId;
+
+            if (businessId == null)
+            {
+                return NotFound();
+            }
+
+            var stock = await _context.Stock.FirstOrDefaultAsync(s => s.Stock_ID == id && s.BusinessId == businessId);
             if (stock == null)
             {
                 return RedirectToPage("./Index");
@@ -60,7 +79,7 @@ namespace cs392_demo.Pages.Stock_Page
             try
             {
                 var relatedLogs = await _context.Inventory_Activity_Log
-                    .Where(log => log.Stock_ID_Log == id)
+                    .Where(log => log.Stock_ID_Log == id && log.BusinessId == businessId)
                     .ToListAsync();
 
                 if (relatedLogs.Count > 0)

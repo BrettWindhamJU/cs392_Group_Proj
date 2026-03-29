@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using cs392_demo.Data;
 using cs392_demo.models;
+using System.Security.Claims;
 
 namespace cs392_demo.Pages.Inventory_Log
 {
@@ -31,7 +32,16 @@ namespace cs392_demo.Pages.Inventory_Log
                 return NotFound();
             }
 
-            var inventory_activity_log = await _context.Inventory_Activity_Log.FirstOrDefaultAsync(m => m.Log_ID == id);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            var businessId = currentUser?.BusinessId;
+            if (businessId == null)
+            {
+                return NotFound();
+            }
+
+            var inventory_activity_log = await _context.Inventory_Activity_Log
+                .FirstOrDefaultAsync(m => m.Log_ID == id && m.BusinessId == businessId);
 
             if (inventory_activity_log == null)
             {
@@ -51,7 +61,16 @@ namespace cs392_demo.Pages.Inventory_Log
                 return NotFound();
             }
 
-            var inventory_activity_log = await _context.Inventory_Activity_Log.FindAsync(id);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            var businessId = currentUser?.BusinessId;
+            if (businessId == null)
+            {
+                return NotFound();
+            }
+
+            var inventory_activity_log = await _context.Inventory_Activity_Log
+                .FirstOrDefaultAsync(m => m.Log_ID == id && m.BusinessId == businessId);
             if (inventory_activity_log != null)
             {
                 Inventory_Activity_Log = inventory_activity_log;

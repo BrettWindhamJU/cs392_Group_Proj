@@ -30,7 +30,7 @@
                 <th>Location ID</th>
                 <th>Location Name</th>
                 <th>Address</th>
-                <th>Owner User ID</th>
+                <th>Owner</th>
                 <th></th>
             </tr>
         </thead>
@@ -41,7 +41,7 @@
             <td>@item.location_id</td>
             <td>@item.Location_name</td>
             <td>@item.Address_Location</td>
-            <td>@item.Owner_User_ID</td>
+            <td>@Model.GetOwnerDisplay(item.Owner_User_ID)</td>
             <td>
                 @if (User.IsInRole("Owner"))
                 {

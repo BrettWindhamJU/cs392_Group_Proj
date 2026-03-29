@@ -258,6 +258,37 @@ a:hover {
   font-weight: 700;
 }
 
+.navbar-brand-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.navbar-business-context {
+  display: inline-flex;
+  align-items: center;
+  padding-left: 0.65rem;
+  border-left: 2px solid var(--teal-accent);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.navbar-business-name {
+  font-size: 0.9rem;
+  color: var(--teal-primary);
+  font-weight: 700;
+  max-width: 190px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.01em;
+}
+
+@media (max-width: 767.98px) {
+  .navbar-business-context {
+    display: none;
+  }
+}
+
 .dashboard-panel {
   background: white;
   border: 1px solid var(--neutral-medium);

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using cs392_demo.Data;
 
@@ -11,9 +12,11 @@ using cs392_demo.Data;
 namespace cs392_demo.Migrations
 {
     [DbContext(typeof(cs392_demoContext))]
-    partial class cs392_demoContextModelSnapshot : ModelSnapshot
+    [Migration("20260323033728_ScopeStockToBusiness")]
+    partial class ScopeStockToBusiness
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -258,9 +261,6 @@ namespace cs392_demo.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("BusinessId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<DateTime>("Changed_At")
                         .HasColumnType("datetime2");
 
@@ -282,7 +282,7 @@ namespace cs392_demo.Migrations
 
                     b.HasKey("Log_ID");
 
-                    b.HasIndex("BusinessId", "Stock_ID_Log");
+                    b.HasIndex("Stock_ID_Log");
 
                     b.ToTable("Inventory_Activity_Log");
                 });
@@ -362,11 +362,9 @@ namespace cs392_demo.Migrations
 
             modelBuilder.Entity("cs392_demo.models.Stock", b =>
                 {
-                    b.Property<int>("Stock_Key")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Stock_Key"));
+                    b.Property<string>("Stock_ID")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<int>("Amount")
                         .HasColumnType("int");
@@ -397,18 +395,9 @@ namespace cs392_demo.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("Stock_ID")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("Stock_Key");
+                    b.HasKey("Stock_ID");
 
                     b.HasIndex("BusinessId", "Location_Stock_ID");
-
-                    b.HasIndex("BusinessId", "Stock_ID")
-                        .IsUnique()
-                        .HasFilter("[BusinessId] IS NOT NULL");
 
                     b.ToTable("Stock");
                 });
@@ -493,12 +482,13 @@ namespace cs392_demo.Migrations
 
             modelBuilder.Entity("cs392_demo.models.Inventory_Activity_Log", b =>
                 {
-                    b.HasOne("cs392_demo.models.Business", "Business")
-                        .WithMany()
-                        .HasForeignKey("BusinessId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                    b.HasOne("cs392_demo.models.Stock", "Stock")
+                        .WithMany("Inventory_Activity_Logs")
+                        .HasForeignKey("Stock_ID_Log")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Navigation("Business");
+                    b.Navigation("Stock");
                 });
 
             modelBuilder.Entity("cs392_demo.models.Inventory_Location", b =>
@@ -537,6 +527,11 @@ namespace cs392_demo.Migrations
                     b.Navigation("Locations");
 
                     b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("cs392_demo.models.Stock", b =>
+                {
+                    b.Navigation("Inventory_Activity_Logs");
                 });
 #pragma warning restore 612, 618
         }

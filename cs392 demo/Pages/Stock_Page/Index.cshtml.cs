@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace cs392_demo.Pages.Stock_Page
@@ -15,8 +16,6 @@ namespace cs392_demo.Pages.Stock_Page
     [Authorize]
     public class IndexModel : PageModel
     {
-
-
         private readonly cs392_demo.Data.cs392_demoContext _context;
 
         public IndexModel(cs392_demo.Data.cs392_demoContext context)
@@ -24,11 +23,23 @@ namespace cs392_demo.Pages.Stock_Page
             _context = context;
         }
 
-        public IList<Stock> Stock { get;set; } = default!;
+        public IList<Stock> Stock { get; set; } = default!;
 
         public async Task OnGetAsync()
         {
-            Stock = await _context.Stock.ToListAsync();
+            var userId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
+            var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            var businessId = currentUser?.BusinessId;
+
+            if (businessId == null)
+            {
+                Stock = new List<Stock>();
+                return;
+            }
+
+            Stock = await _context.Stock
+                .Where(s => s.BusinessId == businessId)
+                .ToListAsync();
         }
     }
 }

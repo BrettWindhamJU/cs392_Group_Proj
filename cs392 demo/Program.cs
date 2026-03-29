@@ -21,7 +21,7 @@ builder.Services.AddDbContext<cs392_demoContext>(options =>
 
 // Add Identity services
 builder.Services.AddDbContext<ApplicationContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("cs392_demoContext") ?? throw new InvalidOperationException("Connection string'cs392_demoContext' not found.")));
-builder.Services.AddIdentity<AppUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddIdentity<AppUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = false)
 .AddEntityFrameworkStores<ApplicationContext>()
 .AddDefaultUI()
 .AddDefaultTokenProviders();

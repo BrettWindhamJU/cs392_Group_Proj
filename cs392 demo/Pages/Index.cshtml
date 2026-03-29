@@ -6,6 +6,9 @@
     var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
     var isPrivilegedUser = User.IsInRole("Owner") || User.IsInRole("Manager");
     var inStockItems = Model.TotalStockItems - Model.LowStockItems;
+    var dashboardTitle = !string.IsNullOrWhiteSpace(Model.BusinessName)
+        ? $"{Model.BusinessName} Dashboard"
+        : "Dashboard";
 }
 
 @if (!isAuthenticated)
@@ -18,7 +21,7 @@ else
     if (isPrivilegedUser)
     {
         <div class="dashboard-hero">
-            <h1>Dashboard</h1>
+            <h1>@dashboardTitle</h1>
             <p class="inventory-subtitle">Track inventory status, recent updates and important alerts.</p>
         </div>
 
@@ -87,9 +90,20 @@ else
     else
     {
         <div class="dashboard-hero">
-            <h1>Dashboard</h1>
+            <h1>@dashboardTitle</h1>
             <p class="inventory-subtitle">View inventory status and low stock alerts.</p>
         </div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.PendingManagerInviteLink))
+        {
+            <div class="alert alert-info d-flex justify-content-between align-items-center mb-3" role="alert">
+                <div>
+                    <strong>Manager invitation available.</strong>
+                    You've been invited to become a manager. Accept the invitation to access manager features.
+                </div>
+                <a class="btn btn-sm btn-primary" href="@Model.PendingManagerInviteLink">Accept Invitation</a>
+            </div>
+        }
 
         <div class="dashboard-metrics-grid dashboard-metrics-grid-user">
             <a class="dashboard-stat-card" asp-page="/Stock_Page/Index">

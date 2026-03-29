@@ -16,40 +16,90 @@
         </div>
         <div class="login-card-body">
             <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="login-form">
-                <h2>Create a new account</h2>
+                <h2>@(Model.IsManagerInvite ? "Accept manager invitation" : "Create a new account")</h2>
                 <hr />
 
-                <div class="form-floating">
-                    <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                    <label asp-for="Input.Email" class="form-label">Email Address</label>
-                    <span asp-validation-for="Input.Email" class="field-validation-error"></span>
-                </div>
+                @if (Model.IsManagerInvite)
+                {
+                    <div class="alert alert-info mb-3" role="alert">
+                        <strong>You've been invited as a Manager</strong> at <strong>@Model.InvitedBusinessName</strong>.
+                        Enter your password to confirm and accept this role promotion.
+                    </div>
 
-                <div class="form-floating">
-                    <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                    <label asp-for="Input.Password" class="form-label">Password</label>
-                    <span asp-validation-for="Input.Password" class="field-validation-error"></span>
-                </div>
+                    <input type="hidden" asp-for="Input.Role" value="Manager" />
+                    <input type="hidden" asp-for="Input.InviteToken" />
 
-                <div class="form-floating">
-                    <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                    <label asp-for="Input.ConfirmPassword" class="form-label">Confirm Password</label>
-                    <span asp-validation-for="Input.ConfirmPassword" class="field-validation-error"></span>
-                </div>
+                    <div class="form-floating mb-3">
+                        <input asp-for="Input.Email" class="form-control" autocomplete="username" readonly />
+                        <label asp-for="Input.Email" class="form-label">Email Address</label>
+                        <span asp-validation-for="Input.Email" class="field-validation-error"></span>
+                        <div class="form-text text-muted">This must match your existing staff account email.</div>
+                    </div>
+                }
+                else
+                {
+                    <div class="form-floating">
+                        <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                        <label asp-for="Input.Email" class="form-label">Email Address</label>
+                        <span asp-validation-for="Input.Email" class="field-validation-error"></span>
+                    </div>
+                }
 
-                <div class="form-floating mb-4">
-                    <select asp-for="Input.Role" class="form-select" aria-required="true">
-                        <option value="">-- Select Role --</option>
-                        <option value="User">User</option>
-                        <option value="Owner">Owner</option>
-                    </select>
-                    <label asp-for="Input.Role" class="form-label">Role</label>
-                    <span asp-validation-for="Input.Role" class="field-validation-error"></span>
-                </div>
+                @if (Model.IsManagerInvite)
+                {
+                    <div class="form-floating">
+                        <input asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
+                        <label asp-for="Input.Password" class="form-label">Current Password</label>
+                        <span asp-validation-for="Input.Password" class="field-validation-error"></span>
+                    </div>
+                }
+                else
+                {
+                    <div class="form-floating">
+                        <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
+                        <label asp-for="Input.Password" class="form-label">Password</label>
+                        <span asp-validation-for="Input.Password" class="field-validation-error"></span>
+                    </div>
+
+                    <div class="form-floating">
+                        <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
+                        <label asp-for="Input.ConfirmPassword" class="form-label">Confirm Password</label>
+                        <span asp-validation-for="Input.ConfirmPassword" class="field-validation-error"></span>
+                    </div>
+                }
+
+                @if (!Model.IsManagerInvite)
+                {
+                    <div class="form-floating mb-4">
+                        <select asp-for="Input.Role" id="roleSelect" class="form-select" aria-required="true">
+                            <option value="">-- Select Role --</option>
+                            <option value="User">Staff (join an existing business)</option>
+                            <option value="Owner">Owner (create a new business)</option>
+                        </select>
+                        <label asp-for="Input.Role" class="form-label">Role</label>
+                        <span asp-validation-for="Input.Role" class="field-validation-error"></span>
+                    </div>
+
+                    @* Owner: provide a business name *@
+                    <div class="form-floating mb-3" id="businessNameField" style="display:none;">
+                        <input asp-for="Input.BusinessName" class="form-control" placeholder="e.g. My Coffee Shop" />
+                        <label asp-for="Input.BusinessName" class="form-label">Business Name</label>
+                        <span asp-validation-for="Input.BusinessName" class="field-validation-error"></span>
+                        <div class="form-text text-muted">Give your business a name. A staff invite code will be generated that you can share with your team.</div>
+                    </div>
+
+                    @* Staff: enter the business invite code *@
+                    <div class="form-floating mb-3" id="inviteCodeField" style="display:none;">
+                        <input asp-for="Input.InviteCode" class="form-control" placeholder="e.g. AB3X7P2Q" style="text-transform:uppercase;" />
+                        <label asp-for="Input.InviteCode" class="form-label">Business Invite Code</label>
+                        <span asp-validation-for="Input.InviteCode" class="field-validation-error"></span>
+                        <div class="form-text text-muted">Ask your business owner for their staff invite code.</div>
+                    </div>
+                }
 
                 <div asp-validation-summary="ModelOnly" class="validation-summary-errors" role="alert"></div>
 
-                <button id="registerSubmit" type="submit" class="login-button">Register</button>
+                <button id="registerSubmit" type="submit" class="login-button">@(Model.IsManagerInvite ? "Accept Invitation" : "Register")</button>
 
                 <div class="login-links">
                     <p>
@@ -79,4 +129,31 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    @if (!Model.IsManagerInvite)
+    {
+        <script>
+            (function () {
+                var roleSelect = document.getElementById('roleSelect');
+                var businessNameField = document.getElementById('businessNameField');
+                var inviteCodeField = document.getElementById('inviteCodeField');
+
+                function updateFields() {
+                    var role = roleSelect.value;
+                    if (role === 'Owner') {
+                        businessNameField.style.display = '';
+                        inviteCodeField.style.display = 'none';
+                    } else if (role === 'User') {
+                        businessNameField.style.display = 'none';
+                        inviteCodeField.style.display = '';
+                    } else {
+                        businessNameField.style.display = 'none';
+                        inviteCodeField.style.display = 'none';
+                    }
+                }
+
+                roleSelect.addEventListener('change', updateFields);
+                updateFields(); // run on page load in case of validation re-render
+            })();
+        </script>
+    }
 }

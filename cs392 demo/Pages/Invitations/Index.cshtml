@@ -1,0 +1,125 @@
+@page
+@model cs392_demo.Pages.Invitations.IndexModel
+@{
+    ViewData["Title"] = "Team Access";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Team Access</h2>
+    <a asp-page="Create" class="btn btn-primary">+ Invite a Manager</a>
+</div>
+
+<div class="dashboard-panel mb-3">
+    <div class="dashboard-panel-header">
+        <h3 class="dashboard-panel-title mb-0">Staff Join Code</h3>
+    </div>
+    <p class="mb-2">
+        Business: <strong>@Model.BusinessName</strong>
+    </p>
+    <p class="mb-1">Staff invite code:</p>
+    <div class="d-flex align-items-center gap-2">
+        <code id="ownerInviteCode">@Model.StaffInviteCode</code>
+        <button type="button"
+                class="btn btn-sm btn-outline-secondary"
+                onclick="navigator.clipboard.writeText(document.getElementById('ownerInviteCode').innerText)">
+            Copy
+        </button>
+    </div>
+    <small class="text-muted d-block mt-2">Share this code with staff users so they can join your business.</small>
+</div>
+
+<h3 class="h5">Manager Invitations</h3>
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorNotice))
+{
+    <div class="alert alert-warning" role="alert">
+        @Model.ErrorNotice
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(Model.NewInviteLink))
+{
+    <div class="alert alert-success" role="alert">
+        <strong>@(string.IsNullOrWhiteSpace(Model.InviteNotice) ? "Invitation link ready" : Model.InviteNotice)</strong>
+        <div class="mt-2 d-flex align-items-center gap-2">
+            <input id="latestInviteLink" type="hidden" value="@Model.NewInviteLink" />
+            <button type="button"
+                    class="btn btn-sm btn-outline-secondary"
+                    onclick="navigator.clipboard.writeText(document.getElementById('latestInviteLink').value)">
+                Copy Latest Link
+            </button>
+            <small class="text-muted">This link expires in 7 days.</small>
+        </div>
+    </div>
+}
+
+@if (!Model.Invitations.Any())
+{
+    <p class="text-muted">No invitations sent yet. Click <strong>Invite a Manager</strong> to get started.</p>
+}
+else
+{
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Expires</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var invite in Model.Invitations)
+            {
+                string status;
+                string badgeClass;
+                if (invite.IsUsed)
+                {
+                    status = "Accepted";
+                    badgeClass = "bg-success";
+                }
+                else if (invite.ExpiresAt < DateTime.UtcNow)
+                {
+                    status = "Expired";
+                    badgeClass = "bg-secondary";
+                }
+                else
+                {
+                    status = "Pending";
+                    badgeClass = "bg-warning text-dark";
+                }
+
+                <tr>
+                    <td>@invite.Email</td>
+                    <td><span class="badge @badgeClass">@status</span></td>
+                    <td>@invite.CreatedAt.ToLocalTime().ToString("M/d/yyyy h:mm tt")</td>
+                    <td>@invite.ExpiresAt.ToLocalTime().ToString("M/d/yyyy h:mm tt")</td>
+                    <td>
+                        @if (!invite.IsUsed)
+                        {
+                            var link = $"{Request.Scheme}://{Request.Host}/Identity/Account/Register?inviteToken={invite.Token}";
+                            <div class="d-flex gap-2">
+                                @if (invite.ExpiresAt >= DateTime.UtcNow)
+                                {
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-secondary"
+                                            onclick="navigator.clipboard.writeText('@link')">
+                                        Copy Link
+                                    </button>
+                                }
+                                <form method="post" asp-page-handler="Regenerate" asp-route-id="@invite.Id">
+                                    <button type="submit" class="btn btn-sm btn-outline-primary">Regenerate Link</button>
+                                </form>
+                            </div>
+                        }
+                        else
+                        {
+                            <span class="text-muted">-</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

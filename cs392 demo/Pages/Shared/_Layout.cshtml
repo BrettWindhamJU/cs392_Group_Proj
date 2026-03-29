@@ -1,4 +1,23 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@inject UserManager<Users> UserManager
+@inject cs392_demo.Data.cs392_demoContext DbContext
+@{
+    string? businessName = null;
+    if (User.Identity?.IsAuthenticated ?? false)
+    {
+        var currentUser = await UserManager.GetUserAsync(User);
+        if (!string.IsNullOrWhiteSpace(currentUser?.BusinessId))
+        {
+            businessName = await DbContext.Business
+                .Where(b => b.Business_ID == currentUser.BusinessId)
+                .Select(b => b.Business_Name)
+                .FirstOrDefaultAsync();
+        }
+    }
+}
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -14,7 +33,15 @@
         <header>
             <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
                 <div class="container">
-                    <a class="navbar-brand" href="/Index">StockWise</a>
+                    <div class="navbar-brand-wrap">
+                        <a class="navbar-brand" href="/Index">StockWise</a>
+                        @if (!string.IsNullOrWhiteSpace(businessName))
+                        {
+                            <span class="navbar-business-context" title="Current business">
+                                <span class="navbar-business-name">@businessName</span>
+                            </span>
+                        }
+                    </div>
 
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                             data-bs-target=".navbar-collapse"
@@ -49,6 +76,10 @@
                                         </li>
                                         <li>
                                             <a class="dropdown-item" asp-page="/Stock_Page/Index">Stock</a>
+                                        </li>
+                                        <li><hr class="dropdown-divider" /></li>
+                                        <li>
+                                            <a class="dropdown-item" asp-page="/Invitations/Index">Team Access</a>
                                         </li>
                                     </ul>
                                 </li>
