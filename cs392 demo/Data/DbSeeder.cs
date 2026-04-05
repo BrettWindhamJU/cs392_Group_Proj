@@ -33,7 +33,7 @@ namespace cs392_demo.Data
                 seedBusiness = new Business
                 {
                     Business_ID = seedBusinessId,
-                    Business_Name = "Demo Coffee Co.",
+                    Business_Name = "Demo Business Co.",
                     Description = "Seed business for demonstration purposes.",
                     Invite_Code = seedInviteCode
                 };

@@ -1,4 +1,4 @@
-﻿using cs392_demo.Data;
+using cs392_demo.Data;
 using cs392_demo.models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,13 +12,12 @@ using System.Threading.Tasks;
 
 namespace cs392_demo.Pages.Stock_Page
 {
-
     [Authorize]
     public class IndexModel : PageModel
     {
-        private readonly cs392_demo.Data.cs392_demoContext _context;
+        private readonly cs392_demoContext _context;
 
-        public IndexModel(cs392_demo.Data.cs392_demoContext context)
+        public IndexModel(cs392_demoContext context)
         {
             _context = context;
         }
@@ -27,7 +26,7 @@ namespace cs392_demo.Pages.Stock_Page
 
         public async Task OnGetAsync()
         {
-            var userId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
             var businessId = currentUser?.BusinessId;
 
