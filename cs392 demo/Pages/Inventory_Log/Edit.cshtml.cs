@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using cs392_demo.Data;
 using cs392_demo.models;
@@ -22,8 +21,6 @@ namespace cs392_demo.Pages.Inventory_Log
         {
             _context = context;
         }
-
-        public SelectList StockOptions { get; set; } = default!;
 
         [BindProperty]
         public Inventory_Activity_Log Inventory_Activity_Log { get; set; } = default!;
@@ -50,7 +47,6 @@ namespace cs392_demo.Pages.Inventory_Log
                 return NotFound();
             }
             Inventory_Activity_Log = inventory_activity_log;
-            await PopulateStockOptionsAsync();
             return Page();
         }
 
@@ -66,21 +62,6 @@ namespace cs392_demo.Pages.Inventory_Log
                 return NotFound();
             }
 
-            Inventory_Activity_Log.BusinessId = businessId;
-            Inventory_Activity_Log.Changed_By = User?.Identity?.Name ?? "System";
-            Inventory_Activity_Log.Changed_At = DateTime.Now;
-
-            if (!await _context.Stock.AnyAsync(s => s.Stock_ID == Inventory_Activity_Log.Stock_ID_Log && s.BusinessId == businessId))
-            {
-                ModelState.AddModelError("Inventory_Activity_Log.Stock_ID_Log", "Please select a valid Stock ID.");
-            }
-
-            if (!ModelState.IsValid)
-            {
-                await PopulateStockOptionsAsync();
-                return Page();
-            }
-
             var existingLog = await _context.Inventory_Activity_Log
                 .FirstOrDefaultAsync(l => l.Log_ID == Inventory_Activity_Log.Log_ID && l.BusinessId == businessId);
             if (existingLog == null)
@@ -88,7 +69,19 @@ namespace cs392_demo.Pages.Inventory_Log
                 return NotFound();
             }
 
-            existingLog.Stock_ID_Log = Inventory_Activity_Log.Stock_ID_Log;
+            // Stock ID is immutable for historical logs; ignore any posted change.
+            Inventory_Activity_Log.Stock_ID_Log = existingLog.Stock_ID_Log;
+            ModelState.Remove("Inventory_Activity_Log.Stock_ID_Log");
+
+            Inventory_Activity_Log.BusinessId = businessId;
+            Inventory_Activity_Log.Changed_By = User?.Identity?.Name ?? "System";
+            Inventory_Activity_Log.Changed_At = DateTime.Now;
+
+            if (!ModelState.IsValid)
+            {
+                return Page();
+            }
+
             existingLog.Quantity_Before = Inventory_Activity_Log.Quantity_Before;
             existingLog.Quantity_After = Inventory_Activity_Log.Quantity_After;
             existingLog.Changed_By = Inventory_Activity_Log.Changed_By;
@@ -117,27 +110,6 @@ namespace cs392_demo.Pages.Inventory_Log
         private bool Inventory_Activity_LogExists(string id, string businessId)
         {
             return _context.Inventory_Activity_Log.Any(e => e.Log_ID == id && e.BusinessId == businessId);
-        }
-
-        private async Task PopulateStockOptionsAsync()
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
-            var businessId = currentUser?.BusinessId;
-
-            if (businessId == null)
-            {
-                StockOptions = new SelectList(Enumerable.Empty<string>());
-                return;
-            }
-
-            var stockIds = await _context.Stock
-                .Where(s => s.BusinessId == businessId)
-                .OrderBy(s => s.Stock_ID)
-                .Select(s => s.Stock_ID)
-                .ToListAsync();
-
-            StockOptions = new SelectList(stockIds);
         }
     }
 }

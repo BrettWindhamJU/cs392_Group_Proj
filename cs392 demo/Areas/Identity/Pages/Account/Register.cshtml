@@ -101,11 +101,14 @@
 
                 <button id="registerSubmit" type="submit" class="login-button">@(Model.IsManagerInvite ? "Accept Invitation" : "Register")</button>
 
-                <div class="login-links">
-                    <p>
-                        <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl">Already have an account? Sign in</a>
-                    </p>
-                </div>
+                @if (!Model.IsManagerInvite)
+                {
+                    <div class="login-links">
+                        <p>
+                            <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl">Already have an account? Sign in</a>
+                        </p>
+                    </div>
+                }
             </form>
 
             @if ((Model.ExternalLogins?.Count ?? 0) > 0)

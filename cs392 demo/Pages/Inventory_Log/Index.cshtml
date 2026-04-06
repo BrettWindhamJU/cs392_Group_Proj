@@ -3,27 +3,44 @@
 
 @{
     ViewData["Title"] = "Inventory Log";
-    var totalLogs = Model.Inventory_Activity_Log.Count;
-    var decreasedChanges = Model.Inventory_Activity_Log.Count(log => log.Quantity_After < log.Quantity_Before);
-    var increasedChanges = Model.Inventory_Activity_Log.Count(log => log.Quantity_After > log.Quantity_Before);
+    var totalLogs = Model.AllLogsCount;
+    var decreasedChanges = Model.DecreasedLogsCount;
+    var increasedChanges = Model.IncreasedLogsCount;
+    var activeStatus = string.IsNullOrWhiteSpace(Model.Status) ? "all" : Model.Status;
+    var isAllActive = string.Equals(activeStatus, "all", StringComparison.OrdinalIgnoreCase);
+    var isDecreasedActive = string.Equals(activeStatus, "decreased", StringComparison.OrdinalIgnoreCase);
+    var isIncreasedActive = string.Equals(activeStatus, "increased", StringComparison.OrdinalIgnoreCase);
 }
 
-<div class="inventory-page-header">
-    <div>
-        <h1>Inventory Log</h1>
-        <p class="inventory-subtitle">Total @totalLogs log entr@(totalLogs == 1 ? "y" : "ies")</p>
-    </div>
-    <div class="inventory-status-chips">
-        <span class="inventory-chip">All Logs (@totalLogs)</span>
-        <span class="inventory-chip">Decreased (@decreasedChanges)</span>
-        <span class="inventory-chip">Increased (@increasedChanges)</span>
-    </div>
-</div>
+<section class="inventory-list-shell">
+    <div class="inventory-list-header">
+        <div class="inventory-table-heading">
+            <div>
+                <h1>Inventory Log</h1>
+                <p class="inventory-subtitle">Total @totalLogs log entr@(totalLogs == 1 ? "y" : "ies")</p>
+                <a class="inventory-header-link" asp-page="Create">Create New</a>
+            </div>
+        </div>
 
-<p>
-    <a asp-page="Create">Create New</a>
-</p>
-<div class="inventory-table-card">
+        <div class="stock-controls-bar stock-controls-under-header">
+            <div class="inventory-status-chips stock-controls-chips">
+                <a class="inventory-chip stock-chip-icon log-chip-all @(isAllActive ? "stock-chip-active" : string.Empty)" asp-page="./Index" asp-route-status="all">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="8" y1="7" x2="16" y2="7"></line><line x1="8" y1="12" x2="16" y2="12"></line><line x1="8" y1="17" x2="16" y2="17"></line></svg>
+                    <span>All Logs (@totalLogs)</span>
+                </a>
+                <a class="inventory-chip stock-chip-icon log-chip-increase @(isIncreasedActive ? "stock-chip-active" : string.Empty)" asp-page="./Index" asp-route-status="increased">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="19" x2="12" y2="6"></line><polyline points="7 11 12 6 17 11"></polyline></svg>
+                    <span>Increased (@increasedChanges)</span>
+                </a>
+                <a class="inventory-chip stock-chip-icon log-chip-decrease @(isDecreasedActive ? "stock-chip-active" : string.Empty)" asp-page="./Index" asp-route-status="decreased">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="18"></line><polyline points="7 13 12 18 17 13"></polyline></svg>
+                    <span>Decreased (@decreasedChanges)</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="inventory-table-only-card">
     <table class="table inventory-table">
         <thead>
             <tr>
@@ -66,4 +83,5 @@
 }
         </tbody>
     </table>
-</div>
+    </div>
+</section>

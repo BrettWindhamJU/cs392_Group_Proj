@@ -42,7 +42,7 @@ else
                         <p class="dashboard-stat-meta">All active stock items across this business.</p>
                     </div>
                 </a>
-                <a class="dashboard-stat-card dashboard-stat-card-modern" asp-page="/Stock_Page/Index">
+                <a class="dashboard-stat-card dashboard-stat-card-modern" asp-page="/Stock_Page/Index" asp-route-status="low">
                     <span class="dashboard-stat-icon dashboard-stat-icon-alert">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                     </span>
@@ -132,11 +132,14 @@ else
                                     var delta = log.Quantity_After - log.Quantity_Before;
                                     var changeLabel = delta > 0 ? "Increased" : delta < 0 ? "Decreased" : "No change";
                                     var changeClass = delta > 0 ? "dashboard-change-up" : delta < 0 ? "dashboard-change-down" : "dashboard-change-flat";
+                                    var productName = Model.RecentLogProductNames.TryGetValue(log.Stock_ID_Log, out var mappedName)
+                                        ? mappedName
+                                        : log.Stock_ID_Log;
                                     <tr>
                                         <td>
                                             <div class="dashboard-log-stock">
-                                                <strong>@log.Stock_ID_Log</strong>
-                                                <span>Log #@log.Log_ID</span>
+                                                <strong>@productName</strong>
+                                                <span>Stock ID: @log.Stock_ID_Log | Log ID: @log.Log_ID</span>
                                             </div>
                                         </td>
                                         <td>@log.Quantity_Before</td>
@@ -191,7 +194,7 @@ else
                         <p class="dashboard-stat-meta">All visible stock items.</p>
                     </div>
                 </a>
-                <a class="dashboard-stat-card dashboard-stat-card-modern" asp-page="/Stock_Page/Index">
+                <a class="dashboard-stat-card dashboard-stat-card-modern" asp-page="/Stock_Page/Index" asp-route-status="in">
                     <span class="dashboard-stat-icon dashboard-stat-icon-soft">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
                     </span>
@@ -201,7 +204,7 @@ else
                         <p class="dashboard-stat-meta">Items currently above danger range.</p>
                     </div>
                 </a>
-                <a class="dashboard-stat-card dashboard-stat-card-modern" asp-page="/Stock_Page/Index">
+                <a class="dashboard-stat-card dashboard-stat-card-modern" asp-page="/Stock_Page/Index" asp-route-status="low">
                     <span class="dashboard-stat-icon dashboard-stat-icon-alert">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                     </span>

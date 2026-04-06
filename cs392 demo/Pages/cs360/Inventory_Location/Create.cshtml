@@ -5,17 +5,18 @@
     ViewData["Title"] = "Create";
 }
 
-<h1>Create</h1>
+<section class="edit-shell">
+    <header class="edit-header">
+        <h1>Create Inventory Location</h1>
+        <p class="inventory-subtitle">Add a new location where stock can be tracked.</p>
+    </header>
 
-<h4>Inventory Location</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form method="post">
+    <div class="edit-card">
+        <form method="post" class="edit-form">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Inventory_Location.location_id" class="control-label"></label>
-                <input asp-for="Inventory_Location.location_id" class="form-control" placeholder="Enter a unique ID (e.g., LOC-007)" />
+                <input asp-for="Inventory_Location.location_id" class="form-control" />
                 <span asp-validation-for="Inventory_Location.location_id" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -28,16 +29,13 @@
                 <input asp-for="Inventory_Location.Address_Location" class="form-control" />
                 <span asp-validation-for="Inventory_Location.Address_Location" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+            <div class="edit-actions">
+                <button type="submit" class="btn btn-primary">Create</button>
+                <a class="btn btn-outline-secondary" asp-page="/cs360/Inventory_Location/Index">Back to List</a>
             </div>
         </form>
     </div>
-</div>
-
-<div>
-    <a asp-page="/cs360/Inventory_Location/Index">Back to List</a>
-</div>
+</section>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}

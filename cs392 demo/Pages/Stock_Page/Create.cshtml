@@ -5,14 +5,15 @@
     ViewData["Title"] = "Create";
 }
 
-<h1>Create</h1>
+<section class="edit-shell">
+    <header class="edit-header">
+        <h1>Create Stock</h1>
+        <p class="inventory-subtitle">Add a new stock record to your inventory.</p>
+    </header>
 
-<h4>Stock</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form method="post">
-            <div asp-validation-summary="All" class="text-danger"></div>
+    <div class="edit-card">
+        <form method="post" class="edit-form">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Stock.Location_Stock_ID" class="control-label"></label>
                 <input asp-for="Stock.Location_Stock_ID" class="form-control" />
@@ -20,7 +21,7 @@
             </div>
             <div class="form-group">
                 <label asp-for="Stock.Stock_ID" class="control-label"></label>
-                <input asp-for="Stock.Stock_ID" class="form-control" placeholder="Leave blank to auto-generate (e.g., S-001)" />
+                <input id="Stock_Stock_ID" name="Stock.Stock_ID" value="@Model.Stock?.Stock_ID" class="form-control" placeholder="Optional. Leave blank to auto-generate (S-001)." />
                 <span asp-validation-for="Stock.Stock_ID" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -51,16 +52,13 @@
                 <label asp-for="Stock.Last_Updated_by" class="control-label"></label>
                 <input class="form-control" value="@(User?.Identity?.Name ?? "System")" readonly />
             </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+            <div class="edit-actions">
+                <button type="submit" class="btn btn-primary">Create</button>
+                <a class="btn btn-outline-secondary" asp-page="Index">Back to List</a>
             </div>
         </form>
     </div>
-</div>
-
-<div>
-    <a asp-page="Index">Back to List</a>
-</div>
+</section>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}

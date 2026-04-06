@@ -6,24 +6,17 @@
     var totalLocations = Model.Inventory_Location.Count;
 }
 
-<div class="inventory-page-header">
-    <div>
+<section class="inventory-list-shell">
+    <div class="inventory-list-header">
         <h1>Inventory Locations</h1>
         <p class="inventory-subtitle">Total @totalLocations location@(totalLocations == 1 ? "" : "s")</p>
+        @if (User.IsInRole("Owner"))
+        {
+            <a class="inventory-header-link" asp-page="Create">Add New Location</a>
+        }
     </div>
-    <div class="inventory-status-chips">
-        <span class="inventory-chip">All Locations (@totalLocations)</span>
-    </div>
-</div>
 
-@if (User.IsInRole("Owner"))
-{
-    <p>
-        <a asp-page="Create">Add New Location</a>
-    </p>
-}
-
-<div class="inventory-table-card">
+    <div class="inventory-table-only-card">
     <table class="table inventory-table">
         <thead>
             <tr>
@@ -42,7 +35,7 @@
             <td>@item.Location_name</td>
             <td>@item.Address_Location</td>
             <td>@Model.GetOwnerDisplay(item.Owner_User_ID)</td>
-            <td>
+            <td class="inventory-actions-cell">
                 @if (User.IsInRole("Owner"))
                 {
                     <a asp-page="Edit" asp-route-id="@item.location_id">Edit</a>
@@ -60,4 +53,5 @@
 }
         </tbody>
     </table>
-</div>
+    </div>
+</section>

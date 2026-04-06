@@ -24,6 +24,16 @@ namespace cs392_demo.Pages.Stock_Page
 
         public IList<Stock> Stock { get; set; } = default!;
 
+        [BindProperty(SupportsGet = true)]
+        public string? Search { get; set; }
+
+        [BindProperty(SupportsGet = true)]
+        public string? Status { get; set; }
+
+        public int AllItemsCount { get; set; }
+        public int LowItemsCount { get; set; }
+        public int InStockItemsCount { get; set; }
+
         public async Task OnGetAsync()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -36,9 +46,46 @@ namespace cs392_demo.Pages.Stock_Page
                 return;
             }
 
-            Stock = await _context.Stock
+            var query = _context.Stock
                 .Where(s => s.BusinessId == businessId)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(Search))
+            {
+                var term = Search.Trim().ToLower();
+                query = query.Where(s =>
+                    s.Item_Name.ToLower().Contains(term) ||
+                    s.SKU.ToLower().Contains(term) ||
+                    s.Stock_ID.ToLower().Contains(term) ||
+                    s.Location_Stock_ID.ToLower().Contains(term) ||
+                    (s.Last_Updated_by != null && s.Last_Updated_by.ToLower().Contains(term))
+                );
+            }
+
+            var scopedStock = await query
+                .OrderBy(s => s.Item_Name)
                 .ToListAsync();
+
+            AllItemsCount = scopedStock.Count;
+            LowItemsCount = scopedStock.Count(s => s.Amount <= s.Danger_Range);
+            InStockItemsCount = AllItemsCount - LowItemsCount;
+
+            var normalizedStatus = (Status ?? "all").Trim().ToLowerInvariant();
+            if (normalizedStatus != "all" && normalizedStatus != "low" && normalizedStatus != "in")
+            {
+                normalizedStatus = "all";
+            }
+
+            Status = normalizedStatus;
+
+            var filteredStock = normalizedStatus switch
+            {
+                "low" => scopedStock.Where(s => s.Amount <= s.Danger_Range).ToList(),
+                "in" => scopedStock.Where(s => s.Amount > s.Danger_Range).ToList(),
+                _ => scopedStock
+            };
+
+            Stock = filteredStock;
         }
     }
 }

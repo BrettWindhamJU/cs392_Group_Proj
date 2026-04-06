@@ -25,6 +25,13 @@ namespace cs392_demo.Pages.Inventory_Log
 
         public IList<Inventory_Activity_Log> Inventory_Activity_Log { get; set; } = default!;
 
+        [BindProperty(SupportsGet = true)]
+        public string? Status { get; set; }
+
+        public int AllLogsCount { get; set; }
+        public int DecreasedLogsCount { get; set; }
+        public int IncreasedLogsCount { get; set; }
+
         public async Task OnGetAsync()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -37,10 +44,29 @@ namespace cs392_demo.Pages.Inventory_Log
                 return;
             }
 
-            Inventory_Activity_Log = await _context.Inventory_Activity_Log
+            var scopedLogs = await _context.Inventory_Activity_Log
                 .Where(l => l.BusinessId == businessId)
                 .OrderByDescending(l => l.Changed_At)
                 .ToListAsync();
+
+            AllLogsCount = scopedLogs.Count;
+            DecreasedLogsCount = scopedLogs.Count(log => log.Quantity_After < log.Quantity_Before);
+            IncreasedLogsCount = scopedLogs.Count(log => log.Quantity_After > log.Quantity_Before);
+
+            var normalizedStatus = (Status ?? "all").Trim().ToLowerInvariant();
+            if (normalizedStatus != "all" && normalizedStatus != "decreased" && normalizedStatus != "increased")
+            {
+                normalizedStatus = "all";
+            }
+
+            Status = normalizedStatus;
+
+            Inventory_Activity_Log = normalizedStatus switch
+            {
+                "decreased" => scopedLogs.Where(log => log.Quantity_After < log.Quantity_Before).ToList(),
+                "increased" => scopedLogs.Where(log => log.Quantity_After > log.Quantity_Before).ToList(),
+                _ => scopedLogs
+            };
         }
     }
 }

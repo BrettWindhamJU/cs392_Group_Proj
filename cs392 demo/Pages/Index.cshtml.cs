@@ -3,6 +3,7 @@ using cs392_demo.models;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using System.Linq;
 
 public class IndexModel : PageModel
 {
@@ -16,6 +17,7 @@ public class IndexModel : PageModel
     public string? StaffInviteCode { get; private set; }
     public string? PendingManagerInviteLink { get; private set; }
     public IList<Inventory_Activity_Log> RecentLogs { get; private set; } = new List<Inventory_Activity_Log>();
+    public IDictionary<string, string> RecentLogProductNames { get; private set; } = new Dictionary<string, string>();
 
     public IndexModel(cs392_demoContext context)
     {
@@ -75,6 +77,19 @@ public class IndexModel : PageModel
                 .OrderByDescending(log => log.Changed_At)
                 .Take(5)
                 .ToListAsync();
+
+            var recentStockIds = RecentLogs
+                .Select(l => l.Stock_ID_Log)
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Distinct()
+                .ToList();
+
+            if (recentStockIds.Count > 0)
+            {
+                RecentLogProductNames = await _context.Stock
+                    .Where(s => s.BusinessId == businessId && recentStockIds.Contains(s.Stock_ID))
+                    .ToDictionaryAsync(s => s.Stock_ID, s => s.Item_Name);
+            }
         }
         catch (Exception)
         {
@@ -85,6 +100,7 @@ public class IndexModel : PageModel
             TotalLocations = 0;
             PendingManagerInviteLink = null;
             RecentLogs = new List<Inventory_Activity_Log>();
+            RecentLogProductNames = new Dictionary<string, string>();
         }
     }
 }
