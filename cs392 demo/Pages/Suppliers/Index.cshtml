@@ -7,17 +7,20 @@
 }
 
 <section class="inventory-list-shell">
-    <div class="inventory-list-header">
-        <div class="inventory-table-heading">
-            <div>
-                <h1>Suppliers</h1>
-                <p class="inventory-subtitle">Total @Model.Suppliers.Count supplier@(Model.Suppliers.Count == 1 ? string.Empty : "s")</p>
-                @if (canManage)
-                {
-                    <a class="inventory-header-link" asp-page="/Suppliers/Create">Add Supplier</a>
-                }
-            </div>
+    <div class="inventory-list-header suppliers-header">
+        <div class="suppliers-header-top">
+            <h1>Suppliers</h1>
+            <a class="suppliers-ai-link" asp-page="/Chat_Page/Chatbot">
+                <span aria-hidden="true">✦</span>
+                <span>Ask StockWise</span>
+            </a>
         </div>
+
+        <p class="inventory-subtitle">Total @Model.Suppliers.Count supplier@(Model.Suppliers.Count == 1 ? string.Empty : "s")</p>
+        @if (canManage)
+        {
+            <a class="inventory-header-link" asp-page="/Suppliers/Create">Add Supplier</a>
+        }
     </div>
 
     @if (Model.Suppliers.Count == 0)
@@ -90,3 +93,10 @@
         </div>
     }
 </section>
+
+@if (!string.IsNullOrWhiteSpace(Model.SuppliersError))
+{
+    <div class="alert alert-warning mt-3" role="alert">
+        @Model.SuppliersError
+    </div>
+}

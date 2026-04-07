@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 
 namespace cs392_demo.Pages.Suppliers
 {
@@ -59,7 +60,17 @@ namespace cs392_demo.Pages.Suppliers
                 ModelState.AddModelError("Supplier.Name", "Supplier name is required.");
             }
 
-            var existing = await _mongoService.GetBySupplierIdAsync(businessId, Supplier.SupplierId.Trim());
+            Supplier? existing = null;
+            try
+            {
+                existing = await _mongoService.GetBySupplierIdAsync(businessId, Supplier.SupplierId.Trim());
+            }
+            catch (Exception ex) when (IsMongoConnectionIssue(ex))
+            {
+                ModelState.AddModelError(string.Empty, "Supplier database is temporarily unavailable. Please try again shortly.");
+                return Page();
+            }
+
             if (existing != null)
             {
                 ModelState.AddModelError("Supplier.SupplierId", "That supplier ID already exists for this business.");
@@ -95,8 +106,28 @@ namespace cs392_demo.Pages.Suppliers
             Supplier.CreatedAtUtc = DateTime.UtcNow;
             Supplier.UpdatedAtUtc = DateTime.UtcNow;
 
-            await _mongoService.CreateAsync(Supplier);
+            try
+            {
+                await _mongoService.CreateAsync(Supplier);
+            }
+            catch (Exception ex) when (IsMongoConnectionIssue(ex))
+            {
+                ModelState.AddModelError(string.Empty, "Supplier database is temporarily unavailable. Please try again shortly.");
+                return Page();
+            }
+
             return RedirectToPage("/Suppliers/Index");
+        }
+
+        private static bool IsMongoConnectionIssue(Exception ex)
+        {
+            var message = ex.ToString();
+            return ex is MongoConnectionException
+                || ex is TimeoutException
+                || message.Contains("timed out", StringComparison.OrdinalIgnoreCase)
+                || message.Contains("DnsClient", StringComparison.OrdinalIgnoreCase)
+                || message.Contains("server selection", StringComparison.OrdinalIgnoreCase)
+                || message.Contains("mongod", StringComparison.OrdinalIgnoreCase);
         }
 
         private static List<string> ParseCsv(string input)

@@ -13,17 +13,34 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 
 builder.Services.AddHttpClient<AIService>();
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromHours(6);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 
 //Replaced AddDbContextFactory for Identity purposes
 builder.Services.AddDbContext<cs392_demoContext>(options =>
     options.UseSqlServer(
-        builder.Configuration.GetConnectionString("cs392_demoContext") 
-        ?? throw new InvalidOperationException("Connection string 'cs392_demoContext' not found.")
-    )
+        builder.Configuration.GetConnectionString("cs392_demoContext")
+        ?? throw new InvalidOperationException("Connection string 'cs392_demoContext' not found."),
+        sqlOptions => sqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(10),
+            errorNumbersToAdd: null))
 );
 
 // Add Identity services
-builder.Services.AddDbContext<ApplicationContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("cs392_demoContext") ?? throw new InvalidOperationException("Connection string'cs392_demoContext' not found.")));
+builder.Services.AddDbContext<ApplicationContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("cs392_demoContext")
+        ?? throw new InvalidOperationException("Connection string'cs392_demoContext' not found."),
+        sqlOptions => sqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(10),
+            errorNumbersToAdd: null)));
 builder.Services.AddIdentity<AppUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = false)
 .AddEntityFrameworkStores<ApplicationContext>()
 .AddDefaultUI()
@@ -58,6 +75,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+app.UseSession();
 
 // Required for Identity authentication
 app.UseAuthentication();
@@ -67,7 +85,14 @@ app.MapRazorPages();
 
 using (var scope = app.Services.CreateScope())
 {
-    await DbSeeder.SeedRolesAndAdminAsync(scope.ServiceProvider);
+    try
+    {
+        await DbSeeder.SeedRolesAndAdminAsync(scope.ServiceProvider);
+    }
+    catch (Exception ex)
+    {
+        app.Logger.LogError(ex, "Database seeding failed at startup. App will continue running.");
+    }
 }
 
 

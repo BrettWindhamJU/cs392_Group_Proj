@@ -4,108 +4,74 @@
     ViewData["Title"] = "AI Chatbot";
 }
 
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        background-color: #f5f7fb;
-    }
+<div class="sw-chat-shell">
+    <a asp-page="/Suppliers/Index" class="sw-chat-back-link sw-chat-back-link-outside">
+        <span aria-hidden="true">←</span>
+        <span>Back to Suppliers</span>
+    </a>
 
-    .chat-container {
-        width: 700px;
-        margin: 40px auto;
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        display: flex;
-        flex-direction: column;
-        height: 600px;
-    }
-
-    .chat-header {
-        padding: 15px;
-        font-size: 20px;
-        font-weight: bold;
-        border-bottom: 1px solid #eee;
-    }
-
-    .chat-box {
-        flex: 1;
-        padding: 15px;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .message {
-        max-width: 75%;
-        padding: 10px 14px;
-        border-radius: 12px;
-        line-height: 1.4;
-    }
-
-    .user {
-        align-self: flex-end;
-        background-color: #007bff;
-        color: white;
-    }
-
-    .ai {
-        align-self: flex-start;
-        background-color: #e9ecef;
-        color: black;
-    }
-
-    .chat-input {
-        border-top: 1px solid #eee;
-        padding: 10px;
-        display: flex;
-        gap: 10px;
-    }
-
-        .chat-input textarea {
-            flex: 1;
-            resize: none;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            padding: 10px;
-        }
-
-        .chat-input button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-            .chat-input button:disabled {
-                background-color: #999;
-                cursor: not-allowed;
-            }
-</style>
-
-<div class="chat-container">
-    <div class="chat-header">
-        🤖 AI Chatbot
-    </div>
-
-    <div class="chat-box">
-        @foreach (var msg in Model.ChatHistory)
-        {
-            <div class="message @(msg.Role == "User" ? "user" : "ai")">
-                @msg.Content
+    <div class="sw-chat-container">
+        <div class="sw-chat-header">
+            <div>
+                <div class="sw-chat-title-block">
+                    <div class="sw-chat-kicker">StockWise</div>
+                    <h1 class="sw-chat-title">
+                        <span class="sw-chat-title-icon" aria-hidden="true">✦</span>
+                        <span>Supplier Assistant</span>
+                    </h1>
+                </div>
             </div>
-        }
-    </div>
+            <div class="sw-chat-header-actions">
+                <form method="post" asp-page-handler="Clear">
+                    <button type="submit" class="btn btn-sm sw-chat-clear-btn">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M4.5 6.2a2.7 2.7 0 0 1 2.7-2.7h9.6a2.7 2.7 0 0 1 2.7 2.7v6.2a2.7 2.7 0 0 1-2.7 2.7h-6l-3.7 3v-3H7.2a2.7 2.7 0 0 1-2.7-2.7V6.2Z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                        <span>New Chat</span>
+                    </button>
+                </form>
+            </div>
+        </div>
 
-    <form method="post" class="chat-input">
-        <textarea asp-for="UserMessage" rows="2" placeholder="Type your message..."></textarea>
-        <button type="submit" disabled="@(Model.IsProcessing ? "disabled" : null)">
-            Send
-        </button>
-    </form>
+        <div class="sw-chat-box" id="chatBox">
+
+
+            @foreach (var msg in Model.ChatHistory)
+            {
+                <div class="sw-chat-row @(msg.Role == "User" ? "sw-chat-row-user" : "sw-chat-row-ai")">
+                    <div class="sw-chat-bubble @(msg.Role == "User" ? "sw-chat-bubble-user" : "sw-chat-bubble-ai")">@msg.Content</div>
+                </div>
+            }
+        </div>
+
+        <div class="sw-chat-validation" asp-validation-summary="All"></div>
+
+        <form method="post" class="sw-chat-input" id="chatForm">
+            <textarea asp-for="UserMessage" rows="2" id="chatMessageInput" placeholder="Ask about supplier status, delivery time, payment terms, or MOQ..." class="form-control"></textarea>
+            <button type="submit" class="btn btn-primary sw-chat-send-btn" @(Model.IsProcessing ? "disabled" : null)>
+                Send
+            </button>
+        </form>
+    </div>
 </div>
 
-<div asp-validation-summary="All"></div>
+<script>
+    (function () {
+        var chatBox = document.getElementById("chatBox");
+        var input = document.getElementById("chatMessageInput");
+        var form = document.getElementById("chatForm");
+
+        if (chatBox) {
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        if (input && form) {
+            input.addEventListener("keydown", function (event) {
+                if (event.key === "Enter" && !event.shiftKey) {
+                    event.preventDefault();
+                    form.submit();
+                }
+            });
+        }
+    })();
+</script>

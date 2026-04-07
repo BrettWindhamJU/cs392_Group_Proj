@@ -162,6 +162,10 @@ a:hover {
   margin-bottom: 0.75rem;
 }
 
+.stock-page-header h1 {
+  font-size: clamp(1.95rem, 2.9vw, 2.45rem);
+}
+
 .inventory-subtitle {
   margin: 0;
   color: #5f6f71;
@@ -545,6 +549,64 @@ a:hover {
   margin-bottom: 0;
 }
 
+.suppliers-header-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.suppliers-header-actions-row {
+  margin-top: 0.35rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.suppliers-ai-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #1f6670;
+  font-family: "Sora", "Avenir Next", "Gill Sans", sans-serif;
+  font-size: 1.04rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+}
+
+.suppliers-ai-link:hover {
+  color: #134e57;
+  text-decoration: none;
+}
+
+.suppliers-ai-link span[aria-hidden="true"] {
+  font-size: 0.9rem;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 767.98px) {
+  .suppliers-header-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .suppliers-header-actions-row {
+    align-items: flex-start;
+  }
+
+  .suppliers-ai-link {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 .inventory-table-only-card {
   border: 1px solid #d9e5e5;
   border-radius: 0.5rem;
@@ -697,6 +759,268 @@ a:hover {
   .inventory-list-header {
     padding-left: 0;
     padding-right: 0;
+  }
+}
+
+.sw-chat-shell {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+  width: min(100vw - 2.5rem, 1280px);
+  min-height: calc(100vh - 105px);
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 0.75rem 0;
+}
+
+.sw-chat-container {
+  width: 100%;
+  height: calc(100vh - 190px);
+  min-height: 620px;
+  background: #ffffff;
+  border: 1px solid #d7e5e6;
+  border-radius: 0.45rem;
+  box-shadow: 0 12px 24px rgba(15, 61, 68, 0.06);
+  display: grid;
+  grid-template-rows: auto 1fr auto auto;
+  overflow: hidden;
+}
+
+.sw-chat-title {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  font-size: clamp(1.22rem, 1.7vw, 1.45rem);
+  letter-spacing: -0.005em;
+  color: #1b464d;
+}
+
+.sw-chat-title-block {
+  border-left: 3px solid #2a7a86;
+  padding-left: 0.65rem;
+}
+
+.sw-chat-kicker {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #3d747d;
+  margin: 0 0 0.18rem;
+}
+
+.sw-chat-title-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.2rem;
+  height: 1.2rem;
+  color: #1f7e8c;
+  font-size: 1rem;
+  transform: translateY(-1px);
+}
+
+.sw-chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 0.95rem 1.2rem 0.85rem;
+  border-bottom: 1px solid #e3ecee;
+  background: transparent;
+}
+
+.sw-chat-header h1 {
+  margin: 0;
+}
+
+.sw-chat-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  color: #2e656f;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+.sw-chat-back-link:hover {
+  color: #1f5159;
+  text-decoration: none;
+}
+
+.sw-chat-back-link-outside {
+  margin: 0 0 0.45rem 0.15rem;
+}
+
+.sw-chat-header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sw-chat-clear-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid #ccdcdc;
+  background: #f8fcfc;
+  color: #2f4e54;
+  font-weight: 700;
+  border-radius: 0.6rem;
+  padding: 0.36rem 0.72rem;
+}
+
+.sw-chat-clear-btn svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  flex: 0 0 1.1rem;
+}
+
+.sw-chat-clear-btn:hover {
+  background: #f3f8f8;
+  border-color: #bad1d1;
+  color: #24464c;
+}
+
+.sw-chat-box {
+  overflow-y: auto;
+  padding: 1.1rem 1.2rem;
+  display: grid;
+  gap: 0.62rem;
+  align-content: start;
+  background: #ffffff;
+}
+
+
+.sw-chat-empty-state {
+  justify-self: start;
+  margin-top: 0.2rem;
+  margin-bottom: 0.55rem;
+  padding: 0.2rem 0;
+  border: 0;
+  color: #667a7e;
+  background: transparent;
+  font-weight: 500;
+  border-radius: 0;
+}
+
+.sw-chat-row {
+  display: flex;
+}
+
+.sw-chat-row-user {
+  justify-content: flex-end;
+}
+
+.sw-chat-row-ai {
+  justify-content: flex-start;
+}
+
+.sw-chat-bubble {
+  max-width: min(82%, 640px);
+  border-radius: 0.45rem;
+  padding: 0.72rem 0.88rem;
+  line-height: 1.45;
+  font-size: 0.985rem;
+  white-space: pre-line;
+  word-wrap: break-word;
+}
+
+.sw-chat-bubble-user {
+  background: #1f6670;
+  color: #ffffff;
+  box-shadow: 0 6px 14px rgba(26, 95, 107, 0.14);
+}
+
+.sw-chat-bubble-ai {
+  background: #ffffff;
+  color: #1e3134;
+  border: 1px solid #d6e5e6;
+}
+
+.sw-chat-validation {
+  padding: 0 1.2rem;
+}
+
+.sw-chat-validation .validation-summary-errors,
+.sw-chat-validation .validation-summary-valid {
+  margin: 0;
+}
+
+.sw-chat-input {
+  border-top: 1px solid #e4eded;
+  padding: 0.9rem 1.2rem 1rem;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.72rem;
+  align-items: end;
+  background: #ffffff;
+}
+
+.sw-chat-input textarea {
+  min-height: 50px;
+  max-height: 150px;
+  resize: vertical;
+  border-radius: 0.4rem;
+  border: 1px solid #cddcdf;
+  padding: 0.68rem 0.8rem;
+}
+
+.sw-chat-send-btn {
+  min-width: 95px;
+  height: 50px;
+  border-radius: 0.45rem;
+  font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  .sw-chat-shell {
+    width: 100%;
+    min-height: calc(100vh - 85px);
+    position: static;
+    left: auto;
+    transform: none;
+    padding: 0.35rem 0;
+  }
+
+  .sw-chat-container {
+    height: calc(100vh - 105px);
+    min-height: 0;
+    border-radius: 0.4rem;
+  }
+
+  .sw-chat-header {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0.95rem;
+  }
+
+  .sw-chat-header-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .sw-chat-box {
+    padding: 0.9rem;
+  }
+
+  .sw-chat-bubble {
+    max-width: 92%;
+  }
+
+  .sw-chat-input {
+    grid-template-columns: 1fr;
+    padding: 0.8rem 0.95rem 0.95rem;
+  }
+
+  .sw-chat-send-btn {
+    width: 100%;
   }
 }
 

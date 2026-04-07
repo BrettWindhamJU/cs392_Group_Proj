@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 
 namespace cs392_demo.Pages.Suppliers
 {
@@ -49,7 +50,17 @@ namespace cs392_demo.Pages.Suppliers
                 return NotFound();
             }
 
-            var supplier = await _mongoService.GetBySupplierIdAsync(businessId, id);
+            Supplier? supplier;
+            try
+            {
+                supplier = await _mongoService.GetBySupplierIdAsync(businessId, id);
+            }
+            catch (Exception ex) when (IsMongoConnectionIssue(ex))
+            {
+                TempData["SuppliersError"] = "Supplier database is temporarily unavailable. Please try again shortly.";
+                return RedirectToPage("/Suppliers/Index");
+            }
+
             if (supplier == null)
             {
                 return NotFound();
@@ -79,7 +90,17 @@ namespace cs392_demo.Pages.Suppliers
                 return NotFound();
             }
 
-            var existing = await _mongoService.GetBySupplierIdAsync(businessId, id);
+            Supplier? existing;
+            try
+            {
+                existing = await _mongoService.GetBySupplierIdAsync(businessId, id);
+            }
+            catch (Exception ex) when (IsMongoConnectionIssue(ex))
+            {
+                TempData["SuppliersError"] = "Supplier database is temporarily unavailable. Please try again shortly.";
+                return RedirectToPage("/Suppliers/Index");
+            }
+
             if (existing == null)
             {
                 return NotFound();
@@ -119,8 +140,28 @@ namespace cs392_demo.Pages.Suppliers
                 })
                 .ToList();
 
-            await _mongoService.UpdateAsync(businessId, existing.SupplierId, Supplier);
+            try
+            {
+                await _mongoService.UpdateAsync(businessId, existing.SupplierId, Supplier);
+            }
+            catch (Exception ex) when (IsMongoConnectionIssue(ex))
+            {
+                ModelState.AddModelError(string.Empty, "Supplier database is temporarily unavailable. Please try again shortly.");
+                return Page();
+            }
+
             return RedirectToPage("/Suppliers/Index");
+        }
+
+        private static bool IsMongoConnectionIssue(Exception ex)
+        {
+            var message = ex.ToString();
+            return ex is MongoConnectionException
+                || ex is TimeoutException
+                || message.Contains("timed out", StringComparison.OrdinalIgnoreCase)
+                || message.Contains("DnsClient", StringComparison.OrdinalIgnoreCase)
+                || message.Contains("server selection", StringComparison.OrdinalIgnoreCase)
+                || message.Contains("mongod", StringComparison.OrdinalIgnoreCase);
         }
 
         private static List<string> ParseCsv(string input)

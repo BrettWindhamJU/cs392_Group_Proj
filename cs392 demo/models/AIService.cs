@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Net;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -22,10 +23,15 @@ namespace cs392_demo.models
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
             var aiSettings = config.GetSection("AISettings");
-            _apiKey = aiSettings["ApiKey"] ?? throw new InvalidOperationException("AISettings:ApiKey is not configured.");
+            _apiKey = aiSettings["ApiKey"]
+                ?? config["GOOGLE_API_KEY"]
+                ?? config["GEMINI_API_KEY"]
+                ?? throw new InvalidOperationException("Gemini API key is not configured. Set AISettings:ApiKey, GOOGLE_API_KEY, or GEMINI_API_KEY.");
             _model = aiSettings["Model"] ?? "gemini-2.5-flash";
 
-            var baseAddress = aiSettings["BaseAddress"] ?? "https://generativelanguage.googleapis.com/v1beta/";
+            var baseAddress = aiSettings["BaseAddress"]
+                ?? aiSettings["BaseUrl"]
+                ?? "https://generativelanguage.googleapis.com/v1beta/";
             _httpClient.BaseAddress = new Uri(baseAddress);
         }
 
@@ -79,14 +85,47 @@ namespace cs392_demo.models
             var cleaned = raw.Replace("###", "")
                              .Replace("**", "")
                              .Replace("*", "")
+                             .Replace("\r\n", "\n")
+                             .Replace("\r", "\n")
                              .Trim();
+
+            var lines = cleaned
+                .Split('\n')
+                .Select(l => l.Trim())
+                .ToList();
+
+            // Keep paragraph breaks but avoid large vertical gaps.
+            var normalizedLines = new List<string>(lines.Count);
+            var previousBlank = false;
+            foreach (var line in lines)
+            {
+                var isBlank = string.IsNullOrWhiteSpace(line);
+                if (isBlank && previousBlank)
+                {
+                    continue;
+                }
+
+                normalizedLines.Add(line);
+                previousBlank = isBlank;
+            }
+
+            cleaned = string.Join("\n", normalizedLines).Trim();
 
             return cleaned;
         }
 
-        // 🧠 Improved prompt
-        private static string BuildPrompt(string userMessage)
+
+        private static string BuildPrompt(string userMessage, string? dataContext = null)
         {
+            var contextSection = string.IsNullOrWhiteSpace(dataContext)
+                ? ""
+                : $@"
+Data context from your system:
+{dataContext}
+
+Use this data when answering supplier-related questions. If the requested information is not present in the context, say that clearly.
+";
+
             return $@"
 You are a helpful AI assistant.
 
@@ -97,6 +136,7 @@ Rules:
 - Avoid unnecessary repetition
 - Avoid Markdown symbols (*, **, #)
 - Dont make the Response too long, but be informative
+{contextSection}
 User question:
 {userMessage}
 ";
@@ -126,6 +166,38 @@ User question:
                 generationConfig = new
                 {
                     temperature = 0.3,
+                    topP = 0.8,
+                    topK = 40,
+                    maxOutputTokens = 1024
+                }
+            };
+
+            return await SendRequestAsync(payload);
+        }
+
+        public async Task<string> SendPromptWithContextAsync(string message, string dataContext)
+        {
+            if (string.IsNullOrWhiteSpace(message))
+                throw new ArgumentNullException(nameof(message));
+
+            var prompt = BuildPrompt(message, dataContext);
+
+            var payload = new
+            {
+                contents = new[]
+                {
+                    new
+                    {
+                        role = "user",
+                        parts = new[]
+                        {
+                            new { text = prompt }
+                        }
+                    }
+                },
+                generationConfig = new
+                {
+                    temperature = 0.2,
                     topP = 0.8,
                     topK = 40,
                     maxOutputTokens = 1024
@@ -182,6 +254,12 @@ User question:
             if (!response.IsSuccessStatusCode)
             {
                 _logger.LogError("Gemini API error: {Status} - {Response}", response.StatusCode, responseText);
+
+                if (response.StatusCode == HttpStatusCode.Forbidden)
+                {
+                    throw new InvalidOperationException("Gemini API returned 403 Forbidden. Verify that the key is valid and Generative Language API is enabled.");
+                }
+
                 throw new InvalidOperationException($"Gemini API error: {response.StatusCode}");
             }
 
