@@ -30,38 +30,28 @@ namespace cs392_demo.Services
 
         // ---------------- SUPPLIER METHODS ----------------
 
-        public async Task<List<Supplier>> GetAllSuppliersAsync()
+        public async Task<List<Supplier>> GetAllAsync()
         {
             return await _supplierCollection.Find(_ => true).ToListAsync();
         }
 
-        public async Task<List<Supplier>> GetSuppliersByBusinessAsync(string businessId)
+        public async Task<List<Supplier>> GetByBusinessAsync(string businessId)
         {
-            return await _supplierCollection
-                .Find(s => s.BusinessId == businessId)
-                .ToListAsync();
+            return await _supplierCollection.Find(s => s.BusinessId == businessId).ToListAsync();
         }
 
-        public async Task<Supplier?> GetSupplierAsync(string businessId, string supplierId)
+        public async Task<Supplier?> GetBySupplierIdAsync(string businessId, string supplierId)
         {
             return await _supplierCollection
                 .Find(s => s.BusinessId == businessId && s.SupplierId == supplierId)
                 .FirstOrDefaultAsync();
         }
 
-        public async Task CreateSupplierAsync(Supplier supplier)
+        public async Task CreateAsync(Supplier supplier)
         {
             await _supplierCollection.InsertOneAsync(supplier);
         }
 
-        public async Task<bool> UpdateSupplierAsync(string businessId, string supplierId, Supplier updatedSupplier)
-        {
-            var result = await _supplierCollection.ReplaceOneAsync(
-                s => s.BusinessId == businessId && s.SupplierId == supplierId,
-                updatedSupplier);
-
-            return result.ModifiedCount > 0;
-        }
 
         public async Task<bool> DeleteSupplierAsync(string businessId, string supplierId)
         {
