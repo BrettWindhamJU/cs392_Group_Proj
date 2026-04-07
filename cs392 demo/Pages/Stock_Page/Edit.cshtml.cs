@@ -118,7 +118,28 @@ namespace cs392_demo.Pages.Stock_Page
 
                     await _mongo.InventoryLog.InsertOneAsync(log);
                 }
+
+                await _context.SaveChangesAsync();
+
+                if (previousAmount != existingStock.Amount)
+                {
+                    var nextLogId = await GenerateNextLogIdAsync();
+
+                    _context.Inventory_Activity_Log.Add(new Inventory_Activity_Log
+                    {
+                        Log_ID = nextLogId,
+                        Stock_ID_Log = existingStock.Stock_ID,
+                        BusinessId = businessId,
+                        Quantity_Before = previousAmount,
+                        Quantity_After = existingStock.Amount,
+                        Changed_By = changedBy,
+                        Changed_At = now
+                    });
+
+                    await _context.SaveChangesAsync();
+                }
             }
+
             catch (DbUpdateConcurrencyException)
             {
                 if (!StockExists(Stock.Stock_ID, businessId))
