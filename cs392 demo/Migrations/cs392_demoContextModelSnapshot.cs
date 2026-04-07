@@ -163,6 +163,9 @@ namespace cs392_demo.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<string>("BusinessId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -212,6 +215,8 @@ namespace cs392_demo.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("BusinessId");
+
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 
@@ -223,11 +228,38 @@ namespace cs392_demo.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("cs392_demo.models.Business", b =>
+                {
+                    b.Property<string>("Business_ID")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Business_Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Invite_Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Business_ID");
+
+                    b.HasIndex("Invite_Code")
+                        .IsUnique();
+
+                    b.ToTable("Business");
+                });
+
             modelBuilder.Entity("cs392_demo.models.Inventory_Activity_Log", b =>
                 {
                     b.Property<string>("Log_ID")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("BusinessId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("Changed_At")
                         .HasColumnType("datetime2");
@@ -250,19 +282,25 @@ namespace cs392_demo.Migrations
 
                     b.HasKey("Log_ID");
 
-                    b.HasIndex("Stock_ID_Log");
+                    b.HasIndex("BusinessId", "Stock_ID_Log");
 
                     b.ToTable("Inventory_Activity_Log");
                 });
 
             modelBuilder.Entity("cs392_demo.models.Inventory_Location", b =>
                 {
-                    b.Property<string>("location_id")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("Location_Key")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Location_Key"));
 
                     b.Property<string>("Address_Location")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("BusinessId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Location_name")
                         .IsRequired()
@@ -272,19 +310,69 @@ namespace cs392_demo.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("location_id");
+                    b.Property<string>("location_id")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Location_Key");
+
+                    b.HasIndex("BusinessId", "location_id");
 
                     b.ToTable("Inventory_Location");
                 });
 
+            modelBuilder.Entity("cs392_demo.models.ManagerInvitation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("BusinessId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BusinessId");
+
+                    b.HasIndex("Token")
+                        .IsUnique();
+
+                    b.ToTable("ManagerInvitation");
+                });
+
             modelBuilder.Entity("cs392_demo.models.Stock", b =>
                 {
-                    b.Property<string>("Stock_ID")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                    b.Property<int>("Stock_Key")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Stock_Key"));
 
                     b.Property<int>("Amount")
                         .HasColumnType("int");
+
+                    b.Property<string>("BusinessId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("Danger_Range")
                         .HasColumnType("int");
@@ -302,14 +390,25 @@ namespace cs392_demo.Migrations
 
                     b.Property<string>("Location_Stock_ID")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("SKU")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.HasKey("Stock_ID");
+                    b.Property<string>("Stock_ID")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Stock_Key");
+
+                    b.HasIndex("BusinessId", "Location_Stock_ID");
+
+                    b.HasIndex("BusinessId", "Stock_ID")
+                        .IsUnique()
+                        .HasFilter("[BusinessId] IS NOT NULL");
 
                     b.ToTable("Stock");
                 });
@@ -382,20 +481,62 @@ namespace cs392_demo.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("cs392_demo.models.AppUser", b =>
+                {
+                    b.HasOne("cs392_demo.models.Business", "Business")
+                        .WithMany("Users")
+                        .HasForeignKey("BusinessId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Business");
+                });
+
             modelBuilder.Entity("cs392_demo.models.Inventory_Activity_Log", b =>
                 {
-                    b.HasOne("cs392_demo.models.Stock", "Stock")
-                        .WithMany("Inventory_Activity_Logs")
-                        .HasForeignKey("Stock_ID_Log")
-                        .OnDelete(DeleteBehavior.Restrict)
+                    b.HasOne("cs392_demo.models.Business", "Business")
+                        .WithMany()
+                        .HasForeignKey("BusinessId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Business");
+                });
+
+            modelBuilder.Entity("cs392_demo.models.Inventory_Location", b =>
+                {
+                    b.HasOne("cs392_demo.models.Business", "Business")
+                        .WithMany("Locations")
+                        .HasForeignKey("BusinessId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Business");
+                });
+
+            modelBuilder.Entity("cs392_demo.models.ManagerInvitation", b =>
+                {
+                    b.HasOne("cs392_demo.models.Business", "Business")
+                        .WithMany()
+                        .HasForeignKey("BusinessId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Stock");
+                    b.Navigation("Business");
                 });
 
             modelBuilder.Entity("cs392_demo.models.Stock", b =>
                 {
-                    b.Navigation("Inventory_Activity_Logs");
+                    b.HasOne("cs392_demo.models.Business", "Business")
+                        .WithMany()
+                        .HasForeignKey("BusinessId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Business");
+                });
+
+            modelBuilder.Entity("cs392_demo.models.Business", b =>
+                {
+                    b.Navigation("Locations");
+
+                    b.Navigation("Users");
                 });
 #pragma warning restore 612, 618
         }

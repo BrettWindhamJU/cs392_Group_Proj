@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace cs392_demo.Pages.Users_Page
@@ -21,11 +22,23 @@ namespace cs392_demo.Pages.Users_Page
             _context = context;
         }
 
-        public IList<AppUser> Users { get;set; } = default!;
+        public IList<AppUser> Users { get; set; } = default!;
 
         public async Task OnGetAsync()
         {
-            Users = await _context.Users.ToListAsync();
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            var businessId = currentUser?.BusinessId;
+
+            if (businessId == null)
+            {
+                Users = new List<AppUser>();
+                return;
+            }
+
+            Users = await _context.Users
+                .Where(u => u.BusinessId == businessId)
+                .ToListAsync();
         }
     }
 }

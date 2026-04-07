@@ -5,13 +5,14 @@
     ViewData["Title"] = "Edit";
 }
 
-<h1>Edit</h1>
+<section class="edit-shell">
+    <header class="edit-header">
+        <h1>Edit Inventory Log</h1>
+        <p class="inventory-subtitle">Update this log entry and save your changes.</p>
+    </header>
 
-<h4>Inventory Activity Log</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form method="post">
+    <div class="edit-card">
+        <form method="post" class="edit-form">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Inventory_Activity_Log.Log_ID" class="control-label"></label>
@@ -20,9 +21,8 @@
             </div>
             <div class="form-group">
                 <label asp-for="Inventory_Activity_Log.Stock_ID_Log" class="control-label"></label>
-                <select asp-for="Inventory_Activity_Log.Stock_ID_Log" asp-items="Model.StockOptions" class="form-control">
-                    <option value="">Select Stock ID</option>
-                </select>
+                <input class="form-control" value="@Model.Inventory_Activity_Log.Stock_ID_Log" readonly />
+                <input type="hidden" asp-for="Inventory_Activity_Log.Stock_ID_Log" />
                 <span asp-validation-for="Inventory_Activity_Log.Stock_ID_Log" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -45,16 +45,13 @@
                 <input class="form-control" value="@(Model.Inventory_Activity_Log.Changed_At.ToString("g"))" readonly />
                 <input type="hidden" asp-for="Inventory_Activity_Log.Changed_At" />
             </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+            <div class="edit-actions">
+                <button type="submit" class="btn btn-primary">Save</button>
+                <a class="btn btn-outline-secondary" asp-page="./Index">Back to List</a>
             </div>
         </form>
     </div>
-</div>
-
-<div>
-    <a asp-page="./Index">Back to List</a>
-</div>
+</section>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}

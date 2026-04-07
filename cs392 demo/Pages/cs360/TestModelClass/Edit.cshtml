@@ -5,13 +5,14 @@
     ViewData["Title"] = "Edit";
 }
 
-<h1>Edit</h1>
+<section class="edit-shell">
+    <header class="edit-header">
+        <h1>Edit Test Model Entry</h1>
+        <p class="inventory-subtitle">Update the value and save your changes.</p>
+    </header>
 
-<h4>TestModelClass</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form method="post">
+    <div class="edit-card">
+        <form method="post" class="edit-form">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="TestModelClass.testVal" class="control-label"></label>
@@ -19,16 +20,13 @@
                 <span asp-validation-for="TestModelClass.testVal" class="text-danger"></span>
             </div>
             <input type="hidden" asp-for="TestModelClass.testKey" />
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+            <div class="edit-actions">
+                <button type="submit" class="btn btn-primary">Save</button>
+                <a class="btn btn-outline-secondary" asp-page="./Index">Back to List</a>
             </div>
         </form>
     </div>
-</div>
-
-<div>
-    <a asp-page="./Index">Back to List</a>
-</div>
+</section>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
