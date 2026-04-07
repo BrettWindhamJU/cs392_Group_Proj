@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Components;
 using cs392_demo;
 using Microsoft.AspNetCore.Identity;
 using cs392_demo.models;
+using cs392_demo.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +29,7 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(options => options.SignIn.Re
 .AddDefaultUI()
 .AddDefaultTokenProviders();
 builder.Services.AddControllersWithViews();
+builder.Services.AddSingleton<MongoDBService>();
 
 
 

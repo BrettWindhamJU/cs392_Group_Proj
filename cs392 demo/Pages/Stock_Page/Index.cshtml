@@ -13,6 +13,7 @@
     var isInActive = string.Equals(activeStatus, "in", StringComparison.OrdinalIgnoreCase);
     var hasSearch = !string.IsNullOrWhiteSpace(Model.Search);
     var filteredCount = Model.Stock.Count;
+    var statusLabel = isLowActive ? "Low Stock" : isInActive ? "In Stock" : "All Items";
 }
 
 <section class="inventory-list-shell">
@@ -61,58 +62,75 @@
         </div>
     </div>
 
-    <div class="inventory-table-only-card">
-    <table class="table inventory-table">
-        <thead>
-            <tr>
-                <th>Product</th>
-                <th>SKU</th>
-                <th>Stock</th>
-                <th>Reorder At</th>
-                <th>Last Updated</th>
-                <th>Updated By</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-@foreach (var item in Model.Stock) {
-            var stockPercent = item.Danger_Range > 0
-                ? Math.Min(100, (int)Math.Round((double)item.Amount / (item.Danger_Range * 2) * 100))
-                : 100;
-            var stockBarClass = item.Amount <= item.Danger_Range ? "stock-bar-low" : "stock-bar-good";
-            <tr>
-                <td>
-                    <div class="inventory-product-name">@item.Item_Name</div>
-                    <div class="inventory-product-meta">Location @item.Location_Stock_ID</div>
-                </td>
-                <td>@item.SKU</td>
-                <td>
-                    <div class="inventory-stock-cell">
-                        <div class="inventory-stock-track">
-                            <div class="inventory-stock-fill @stockBarClass" style="width:@stockPercent%"></div>
+    @if (Model.Stock.Count == 0)
+    {
+        <div class="inventory-empty-state">
+            <h2>No inventory items found</h2>
+            @if (hasSearch)
+            {
+                <p>No inventory items match your current search within the @statusLabel filter.</p>
+            }
+            else
+            {
+                <p>There are currently no items available in the @statusLabel filter.</p>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="inventory-table-only-card">
+        <table class="table inventory-table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>SKU</th>
+                    <th>Stock</th>
+                    <th>Reorder At</th>
+                    <th>Last Updated</th>
+                    <th>Updated By</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+    @foreach (var item in Model.Stock) {
+                var stockPercent = item.Danger_Range > 0
+                    ? Math.Min(100, (int)Math.Round((double)item.Amount / (item.Danger_Range * 2) * 100))
+                    : 100;
+                var stockBarClass = item.Amount <= item.Danger_Range ? "stock-bar-low" : "stock-bar-good";
+                <tr>
+                    <td>
+                        <div class="inventory-product-name">@item.Item_Name</div>
+                        <div class="inventory-product-meta">@item.Location_Stock_ID</div>
+                    </td>
+                    <td>@item.SKU</td>
+                    <td>
+                        <div class="inventory-stock-cell">
+                            <div class="inventory-stock-track">
+                                <div class="inventory-stock-fill @stockBarClass" style="width:@stockPercent%"></div>
+                            </div>
+                            <span>@item.Amount</span>
                         </div>
-                        <span>@item.Amount</span>
-                    </div>
-                </td>
-                <td>@item.Danger_Range</td>
-                <td>@item.Last_Updated</td>
-                <td>@item.Last_Updated_by</td>
-                <td class="inventory-actions-cell">
-                    @if (canManageStock)
-                    {
-                        <a asp-page="./Edit" asp-route-id="@item.Stock_ID">Edit</a>
-                        <span> | </span>
-                    }
-                    <a asp-page="./Details" asp-route-id="@item.Stock_ID">Details</a>
-                    @if (canManageStock)
-                    {
-                        <span> | </span>
-                        <a asp-page="./Delete" asp-route-id="@item.Stock_ID">Delete</a>
-                    }
-                </td>
-            </tr>
-}
-        </tbody>
-    </table>
-    </div>
+                    </td>
+                    <td>@item.Danger_Range</td>
+                    <td>@item.Last_Updated</td>
+                    <td>@item.Last_Updated_by</td>
+                    <td class="inventory-actions-cell">
+                        @if (canManageStock)
+                        {
+                            <a asp-page="./Edit" asp-route-id="@item.Stock_ID">Edit</a>
+                            <span> | </span>
+                        }
+                        <a asp-page="./Details" asp-route-id="@item.Stock_ID">Details</a>
+                        @if (canManageStock)
+                        {
+                            <span> | </span>
+                            <a asp-page="./Delete" asp-route-id="@item.Stock_ID">Delete</a>
+                        }
+                    </td>
+                </tr>
+    }
+            </tbody>
+        </table>
+        </div>
+    }
 </section>

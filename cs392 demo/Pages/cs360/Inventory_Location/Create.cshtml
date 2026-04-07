@@ -2,13 +2,13 @@
 @model cs392_demo.Pages.cs360.Inventory_Location.CreateModel
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Add Inventory Location";
 }
 
 <section class="edit-shell">
     <header class="edit-header">
-        <h1>Create Inventory Location</h1>
-        <p class="inventory-subtitle">Add a new location where stock can be tracked.</p>
+        <h1>Add Inventory Location</h1>
+        <p class="inventory-subtitle">Set up a new location to keep stock organized.</p>
     </header>
 
     <div class="edit-card">
@@ -30,7 +30,7 @@
                 <span asp-validation-for="Inventory_Location.Address_Location" class="text-danger"></span>
             </div>
             <div class="edit-actions">
-                <button type="submit" class="btn btn-primary">Create</button>
+                <button type="submit" class="btn btn-primary">Save Location</button>
                 <a class="btn btn-outline-secondary" asp-page="/cs360/Inventory_Location/Index">Back to List</a>
             </div>
         </form>

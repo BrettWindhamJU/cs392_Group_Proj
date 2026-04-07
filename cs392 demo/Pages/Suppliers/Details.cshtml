@@ -1,0 +1,69 @@
+@page "{id}"
+@model cs392_demo.Pages.Suppliers.DetailsModel
+
+@{
+    ViewData["Title"] = "Supplier Details";
+}
+
+<section class="details-shell">
+    <header class="details-header">
+        <h1>Supplier Details</h1>
+    </header>
+
+    <div class="details-card">
+        <dl class="details-grid">
+            <dt>Supplier ID</dt>
+            <dd>@Model.Supplier.SupplierId</dd>
+
+            <dt>Name</dt>
+            <dd>@Model.Supplier.Name</dd>
+
+            <dt>Status</dt>
+            <dd>@Model.Supplier.Status</dd>
+
+            <dt>Primary Contact</dt>
+            <dd>@Model.Supplier.Contact.PrimaryName</dd>
+
+            <dt>Email</dt>
+            <dd>@Model.Supplier.Contact.Email</dd>
+
+            <dt>Phone</dt>
+            <dd>@Model.Supplier.Contact.Phone</dd>
+
+            <dt>Address</dt>
+            <dd>@Model.Supplier.Address.Line1, @Model.Supplier.Address.City, @Model.Supplier.Address.State @Model.Supplier.Address.PostalCode, @Model.Supplier.Address.Country</dd>
+
+            <dt>Categories</dt>
+            <dd>@string.Join(", ", Model.Supplier.Categories)</dd>
+
+            <dt>Delivery Time</dt>
+            <dd>@(Model.Supplier.Terms.LeadTimeDays.HasValue ? $"{Model.Supplier.Terms.LeadTimeDays.Value} day{(Model.Supplier.Terms.LeadTimeDays.Value == 1 ? string.Empty : "s")}" : "-")</dd>
+
+            <dt>Minimum Order</dt>
+            <dd>@(Model.Supplier.Terms.MinimumOrderAmount.HasValue ? $"{Model.Supplier.Terms.MinimumOrderAmount.Value}" : "-")</dd>
+
+            <dt>Payment Terms</dt>
+            <dd>@Model.Supplier.Terms.PaymentTerms</dd>
+
+            <dt>Delivery Days</dt>
+            <dd>@string.Join(", ", Model.Supplier.Terms.DeliveryDays)</dd>
+
+            <dt>Reliability Score</dt>
+            <dd>@Model.Supplier.Performance.ReliabilityScore</dd>
+
+            <dt>Last Delivery</dt>
+            <dd>@(Model.Supplier.Performance.LastDeliveryAtUtc.HasValue ? Model.Supplier.Performance.LastDeliveryAtUtc.Value.ToString("g") : "-")</dd>
+
+            <dt>Notes</dt>
+            <dd>@Model.Supplier.Notes</dd>
+        </dl>
+
+        <div class="details-actions">
+            @if (User.IsInRole("Owner") || User.IsInRole("Manager"))
+            {
+                <a asp-page="/Suppliers/Edit" asp-route-id="@Model.Supplier.SupplierId">Edit</a>
+            }
+            <a asp-page="/Suppliers/Index">Back to List</a>
+        </div>
+    </div>
+</section>

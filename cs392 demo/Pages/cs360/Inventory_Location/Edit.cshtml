@@ -2,13 +2,13 @@
 @model cs392_demo.Pages.cs360.Inventory_Location.EditModel
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Update Inventory Location";
 }
 
 <section class="edit-shell">
     <header class="edit-header">
-        <h1>Edit Inventory Location</h1>
-        <p class="inventory-subtitle">Update location details and save your changes.</p>
+        <h1>Update Inventory Location</h1>
+        <p class="inventory-subtitle">Modify inventory location details and apply your updates.</p>
     </header>
 
     <div class="edit-card">
@@ -30,7 +30,7 @@
                 <span asp-validation-for="Inventory_Location.Address_Location" class="text-danger"></span>
             </div>
             <div class="edit-actions">
-                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
                 <a class="btn btn-outline-secondary" asp-page="/cs360/Inventory_Location/Index">Back to List</a>
             </div>
         </form>
