@@ -1,0 +1,102 @@
+@page
+@model cs392_demo.Pages.Suppliers.IndexModel
+
+@{
+    ViewData["Title"] = "Suppliers";
+    var canManage = User.IsInRole("Owner") || User.IsInRole("Manager");
+}
+
+<section class="inventory-list-shell">
+    <div class="inventory-list-header suppliers-header">
+        <div class="suppliers-header-top">
+            <h1>Suppliers</h1>
+            <a class="suppliers-ai-link" asp-page="/Chat_Page/Chatbot">
+                <span aria-hidden="true">✦</span>
+                <span>Ask StockWise</span>
+            </a>
+        </div>
+
+        <p class="inventory-subtitle">Total @Model.Suppliers.Count supplier@(Model.Suppliers.Count == 1 ? string.Empty : "s")</p>
+        @if (canManage)
+        {
+            <a class="inventory-header-link" asp-page="/Suppliers/Create">Add Supplier</a>
+        }
+    </div>
+
+    @if (Model.Suppliers.Count == 0)
+    {
+        <div class="suppliers-empty-state">
+            <h2>No suppliers found</h2>
+            <p>Once you add suppliers, they will appear here with contact details, delivery times, and payment terms.</p>
+        </div>
+    }
+    else
+    {
+        <div class="inventory-table-only-card">
+            <table class="table inventory-table">
+                <thead>
+                    <tr>
+                        <th>Supplier</th>
+                        <th>Contact Information</th>
+                        <th>Delivery Time</th>
+                        <th>Payment Terms</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Suppliers)
+                    {
+                        <tr>
+                            <td>
+                                <div class="inventory-product-name">@item.Name</div>
+                                <div class="supplier-location-meta">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                        <path d="M12 21c3.5-4.1 6-7.1 6-10a6 6 0 1 0-12 0c0 2.9 2.5 5.9 6 10Zm0-8a2.2 2.2 0 1 0 0-4.4 2.2 2.2 0 0 0 0 4.4Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+                                    </svg>
+                                    <span>@(string.IsNullOrWhiteSpace(item.Address.City) && string.IsNullOrWhiteSpace(item.Address.State) ? "-" : $"{item.Address.City}, {item.Address.State}")</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="supplier-contact-list">
+                                    <div class="supplier-contact-item">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                            <path d="M4 6.5A1.5 1.5 0 0 1 5.5 5h13A1.5 1.5 0 0 1 20 6.5v11a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5v-11Zm1.8.3 5.8 4.9a.6.6 0 0 0 .8 0l5.8-4.9" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"></path>
+                                        </svg>
+                                        <span>@(string.IsNullOrWhiteSpace(item.Contact.Email) ? "-" : item.Contact.Email)</span>
+                                    </div>
+                                    <div class="supplier-contact-item">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                            <path d="M6 4.5h3l1.5 3.5-2 1.8a14.8 14.8 0 0 0 5.7 5.7l1.8-2 3.5 1.5v3A1.5 1.5 0 0 1 18 20C10.3 20 4 13.7 4 6a1.5 1.5 0 0 1 2-1.5Z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"></path>
+                                        </svg>
+                                        <span>@(string.IsNullOrWhiteSpace(item.Contact.Phone) ? "-" : item.Contact.Phone)</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>@(item.Terms.LeadTimeDays.HasValue ? $"{item.Terms.LeadTimeDays.Value} day{(item.Terms.LeadTimeDays.Value == 1 ? string.Empty : "s")}" : "-")</td>
+                            <td>@item.Terms.PaymentTerms</td>
+                            <td>@item.Status</td>
+                            <td class="inventory-actions-cell">
+                                <a asp-page="/Suppliers/Details" asp-route-id="@item.SupplierId">Details</a>
+                                @if (canManage)
+                                {
+                                    <span> | </span>
+                                    <a asp-page="/Suppliers/Edit" asp-route-id="@item.SupplierId">Edit</a>
+                                    <span> | </span>
+                                    <a asp-page="/Suppliers/Delete" asp-route-id="@item.SupplierId">Delete</a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+@if (!string.IsNullOrWhiteSpace(Model.SuppliersError))
+{
+    <div class="alert alert-warning mt-3" role="alert">
+        @Model.SuppliersError
+    </div>
+}

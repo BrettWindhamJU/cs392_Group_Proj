@@ -1,0 +1,39 @@
+@page "{id}"
+@model cs392_demo.Pages.Suppliers.DeleteModel
+
+@{
+    ViewData["Title"] = "Delete Supplier";
+}
+
+<section class="delete-shell">
+    <header class="delete-header">
+        <h1>Delete Supplier</h1>
+        <p class="inventory-subtitle">This action permanently removes this supplier record.</p>
+    </header>
+
+    <div class="delete-card">
+        <p class="delete-warning">Are you sure you want to delete this supplier?</p>
+
+        <dl class="delete-grid">
+            <dt>Supplier ID</dt>
+            <dd>@Model.Supplier.SupplierId</dd>
+
+            <dt>Name</dt>
+            <dd>@Model.Supplier.Name</dd>
+
+            <dt>Primary Contact</dt>
+            <dd>@Model.Supplier.Contact.PrimaryName</dd>
+
+            <dt>Email</dt>
+            <dd>@Model.Supplier.Contact.Email</dd>
+
+            <dt>Status</dt>
+            <dd>@Model.Supplier.Status</dd>
+        </dl>
+
+        <form method="post" class="delete-actions">
+            <button type="submit" class="btn btn-danger">Delete</button>
+            <a class="btn btn-outline-secondary" asp-page="/Suppliers/Index">Back to List</a>
+        </form>
+    </div>
+</section>

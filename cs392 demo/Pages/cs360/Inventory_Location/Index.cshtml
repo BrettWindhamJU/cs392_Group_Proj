@@ -16,42 +16,52 @@
         }
     </div>
 
-    <div class="inventory-table-only-card">
-    <table class="table inventory-table">
-        <thead>
-            <tr>
-                <th>Location ID</th>
-                <th>Location Name</th>
-                <th>Address</th>
-                <th>Owner</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-@foreach (var item in Model.Inventory_Location)
-{
-        <tr>
-            <td>@item.location_id</td>
-            <td>@item.Location_name</td>
-            <td>@item.Address_Location</td>
-            <td>@Model.GetOwnerDisplay(item.Owner_User_ID)</td>
-            <td class="inventory-actions-cell">
-                @if (User.IsInRole("Owner"))
-                {
-                    <a asp-page="Edit" asp-route-id="@item.location_id">Edit</a>
-                    <span> | </span>
-                }
-                <a asp-page="Details" asp-route-id="@item.location_id">Details</a> |
-                @if (User.IsInRole("Owner"))
-                {
-                    <a asp-page="Delete" asp-route-id="@item.location_id">Delete</a>
-                    <span> | </span>
-                }
-                <a asp-page="/Stock_Page/Create" asp-route-Location_Id="@item.location_id">Add Stock</a>
-            </td>
-        </tr>
-}
-        </tbody>
-    </table>
-    </div>
+    @if (!Model.Inventory_Location.Any())
+    {
+        <div class="inventory-empty-state locations-empty-state">
+            <h2>No locations found</h2>
+            <p>Once locations are added, they will appear here with IDs, addresses, and ownership details.</p>
+        </div>
+    }
+    else
+    {
+        <div class="inventory-table-only-card">
+            <table class="table inventory-table">
+                <thead>
+                    <tr>
+                        <th>Location ID</th>
+                        <th>Location Name</th>
+                        <th>Address</th>
+                        <th>Owner</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Inventory_Location)
+                    {
+                        <tr>
+                            <td>@item.location_id</td>
+                            <td>@item.Location_name</td>
+                            <td>@item.Address_Location</td>
+                            <td>@Model.GetOwnerDisplay(item.Owner_User_ID)</td>
+                            <td class="inventory-actions-cell">
+                                @if (User.IsInRole("Owner"))
+                                {
+                                    <a asp-page="Edit" asp-route-id="@item.location_id">Edit</a>
+                                    <span> | </span>
+                                }
+                                <a asp-page="Details" asp-route-id="@item.location_id">Details</a> |
+                                @if (User.IsInRole("Owner"))
+                                {
+                                    <a asp-page="Delete" asp-route-id="@item.location_id">Delete</a>
+                                    <span> | </span>
+                                }
+                                <a asp-page="/Stock_Page/Create" asp-route-Location_Id="@item.location_id">Add Stock</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
 </section>
