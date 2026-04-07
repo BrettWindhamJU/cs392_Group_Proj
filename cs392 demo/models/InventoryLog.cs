@@ -10,10 +10,12 @@ namespace cs392_demo.models
         [BsonRepresentation(BsonType.String)]
 
         public string Log_ID { get; set; }
-        public string Stock_ID { get; set; }
-        public string location_ID { get; set; }
-        public string Change_Amount { get; set; }
-        public DateTime Change_Time { get; set; }
+        public string Stock_ID_Log { get; set; }
+        public string BusinessId { get; set; }
+        public int Quantity_Before { get; set; }
+        public int Quantity_After { get; set; }
+        public string Changed_By { get; set; }
+        public DateTime Changed_At { get; set; }
 
     }
 }

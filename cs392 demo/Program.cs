@@ -1,11 +1,12 @@
+using cs392_demo;
+using cs392_demo.Data;
+using cs392_demo.models;
+using cs392_demo.Services;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using cs392_demo.Data;
-using Microsoft.AspNetCore.Components;
-using cs392_demo;
-using Microsoft.AspNetCore.Identity;
 using MongoDB.Driver;
-using cs392_demo.models;
 
 var builder = WebApplication.CreateBuilder(args);
 

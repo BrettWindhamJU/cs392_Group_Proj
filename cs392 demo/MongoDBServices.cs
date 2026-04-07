@@ -1,34 +1,33 @@
-﻿using cs392_demo.models;
-using MongoDB.Driver;
+﻿using MongoDB.Driver;
+using cs392_demo.models;
+using Microsoft.Extensions.Configuration;
 
-namespace cs392_demo
+namespace cs392_demo.Services
 {
     public class MongoDBServices
     {
-        private readonly IMongoCollection<InventoryLog> _inventoryLogs;
+        private readonly IMongoDatabase _database;
 
         public MongoDBServices(IConfiguration config)
         {
-            var client = new MongoClient(
-                config["mongoDBSettings:ConnectionString"]
-                );
-            var database = client.GetDatabase(
-                config["mongoDBSettings:DatabaseName"]
-                );
+            // Read config safely
+            var connectionString = config["mongoDBSettings:ConnectionString"];
+            var databaseName = config["mongoDBSettings:DatabaseName"];
 
-            _inventoryLogs = database.GetCollection<InventoryLog>(
-                config["mongoDBSettings:CollectionName"]
-                );
+            if (string.IsNullOrWhiteSpace(connectionString))
+                throw new Exception("MongoDB connection string is missing in appsettings.json under mongoDBSettings:ConnectionString");
+
+            if (string.IsNullOrWhiteSpace(databaseName))
+                throw new Exception("MongoDB database name is missing in appsettings.json under mongoDBSettings:DatabaseName");
+
+            // Create client and get database
+            var client = new MongoClient(connectionString);
+            _database = client.GetDatabase(databaseName);
         }
-        public async Task<List<InventoryLog>> GetAllAsync()
-        { 
-            return await _inventoryLogs.Find(_ => true).ToListAsync();
-        }
+
+        // Expose collections safely
+        public IMongoCollection<InventoryLog> InventoryLog =>
+            _database.GetCollection<InventoryLog>("InventoryLog");
+
     }
 }
-
-/*
- TODO 
-add back end for the inventory modifier page to record this data
-add a new page to display the inventory logs, with graphs and shiiiiw
- */

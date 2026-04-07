@@ -1,0 +1,51 @@
+﻿@page
+@model AnalyticsModel
+
+<h2>Inventory Analytics</h2>
+
+<canvas id="stockChart"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const dataFromServer = @Html.Raw(Json.Serialize(Model.StockData));
+
+    const datasets = [];
+
+    for (const stockId in dataFromServer) {
+        const points = dataFromServer[stockId];
+
+        datasets.push({
+            label: stockId,
+            data: points.map(p => ({
+                x: new Date(p.date),
+                y: p.amount
+            })),
+            borderWidth: 2,
+            fill: false
+        });
+    }
+
+    const ctx = document.getElementById('stockChart');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            datasets: datasets
+        },
+        options: {
+            parsing: false,
+            scales: {
+                x: {
+                    type: 'time',
+                    time: {
+                        unit: 'day'
+                    }
+                },
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
