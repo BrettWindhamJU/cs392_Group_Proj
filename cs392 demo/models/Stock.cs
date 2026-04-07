@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace cs392_demo.models
 {
@@ -7,6 +7,8 @@ namespace cs392_demo.models
     {
 
         [Key]
+        public int Stock_Key { get; set; }
+
         [Required]
         [StringLength(50)]
         [Display(Name = "Stock ID")]
@@ -15,6 +17,12 @@ namespace cs392_demo.models
         [Required]
         [Display(Name = "Location ID")]
         public string Location_Stock_ID { get; set; } = string.Empty;
+
+        /// <summary>The business this stock row belongs to.</summary>
+        public string? BusinessId { get; set; }
+
+        [ForeignKey(nameof(BusinessId))]
+        public Business? Business { get; set; }
 
         [Required]
         [Display(Name = "Item Name")]
@@ -38,9 +46,5 @@ namespace cs392_demo.models
         [StringLength(256)]
         [Display(Name = "Updated By")]
         public string? Last_Updated_by { get; set; }
-
-        public ICollection<Inventory_Activity_Log> Inventory_Activity_Logs { get; set; } = new List<Inventory_Activity_Log>();
-
-
     }
 }

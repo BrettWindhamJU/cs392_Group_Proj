@@ -1,34 +1,67 @@
-﻿@page
+@page
 @model cs392_demo.Pages.Stock_Page.IndexModel
 
 @{
     ViewData["Title"] = "Stock";
     var canManageStock = User.IsInRole("Owner") || User.IsInRole("Manager");
-    var totalCount = Model.Stock.Count;
-    var lowStockCount = Model.Stock.Count(s => s.Amount <= s.Danger_Range);
-    var inStockCount = totalCount - lowStockCount;
+    var allCount = Model.AllItemsCount;
+    var lowStockCount = Model.LowItemsCount;
+    var inStockCount = Model.InStockItemsCount;
+    var activeStatus = string.IsNullOrWhiteSpace(Model.Status) ? "all" : Model.Status;
+    var isAllActive = string.Equals(activeStatus, "all", StringComparison.OrdinalIgnoreCase);
+    var isLowActive = string.Equals(activeStatus, "low", StringComparison.OrdinalIgnoreCase);
+    var isInActive = string.Equals(activeStatus, "in", StringComparison.OrdinalIgnoreCase);
+    var hasSearch = !string.IsNullOrWhiteSpace(Model.Search);
+    var filteredCount = Model.Stock.Count;
 }
 
-<div class="inventory-page-header stock-page-header">
-    <div>
-        <h1>Stock</h1>
-        <p class="inventory-subtitle">Total @totalCount item(s) in your inventory</p>
-    </div>
-    <div class="inventory-status-chips">
-        <span class="inventory-chip">All Items (@totalCount)</span>
-        <span class="inventory-chip">Low Stock (@lowStockCount)</span>
-        <span class="inventory-chip">In Stock (@inStockCount)</span>
-    </div>
-</div>
+<section class="inventory-list-shell">
+    <div class="inventory-list-header">
+        <div class="inventory-table-heading">
+            <div>
+                <h1>Stock</h1>
+                <p class="inventory-subtitle">Total @filteredCount item(s) in your inventory</p>
+                @if (canManageStock)
+                {
+                    <a class="inventory-header-link" asp-page="Create">Add New Inventory Item</a>
+                }
+            </div>
+        </div>
 
-@if (canManageStock)
-{
-    <p>
-        <a asp-page="Create">Add New Inventory Item</a>
-    </p>
-}
+        <div class="stock-controls-bar stock-controls-under-header">
+            <div class="inventory-status-chips stock-controls-chips">
+                <a class="inventory-chip stock-chip-icon @(isAllActive ? "stock-chip-active" : string.Empty)" asp-page="./Index" asp-route-search="@Model.Search" asp-route-status="all">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16.5V8a2 2 0 0 0-1.03-1.75l-7-3.89a2 2 0 0 0-1.94 0l-7 3.89A2 2 0 0 0 3 8v8.5a2 2 0 0 0 1.03 1.75l7 3.89a2 2 0 0 0 1.94 0l7-3.89A2 2 0 0 0 21 16.5Z"></path><path d="m3.5 7 8.5 4.75L20.5 7"></path><path d="M12 11.75V22"></path><path d="m7.5 4.75 8.9 4.95"></path></svg>
+                    <span>All Items (@allCount)</span>
+                </a>
+                <a class="inventory-chip stock-chip-icon stock-chip-low @(isLowActive ? "stock-chip-active" : string.Empty)" asp-page="./Index" asp-route-search="@Model.Search" asp-route-status="low">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                    <span>Low Stock (@lowStockCount)</span>
+                </a>
+                <a class="inventory-chip stock-chip-icon stock-chip-good @(isInActive ? "stock-chip-active" : string.Empty)" asp-page="./Index" asp-route-search="@Model.Search" asp-route-status="in">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><path d="m9 11 3 3L22 4"></path></svg>
+                    <span>In Stock (@inStockCount)</span>
+                </a>
+            </div>
 
-<div class="inventory-table-card">
+            <form method="get" class="stock-search-wrap">
+                <input type="hidden" name="status" value="@activeStatus" />
+                <label class="stock-search" aria-label="Search inventory">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="11" cy="11" r="7"></circle>
+                        <path d="m20 20-3.5-3.5"></path>
+                    </svg>
+                    <input type="text" name="search" value="@Model.Search" placeholder="Search inventory..." />
+                </label>
+                @if (hasSearch)
+                {
+                    <a class="btn stock-clear-btn" asp-page="./Index" asp-route-status="@activeStatus">Clear</a>
+                }
+            </form>
+        </div>
+    </div>
+
+    <div class="inventory-table-only-card">
     <table class="table inventory-table">
         <thead>
             <tr>
@@ -64,7 +97,7 @@
                 <td>@item.Danger_Range</td>
                 <td>@item.Last_Updated</td>
                 <td>@item.Last_Updated_by</td>
-                <td>
+                <td class="inventory-actions-cell">
                     @if (canManageStock)
                     {
                         <a asp-page="./Edit" asp-route-id="@item.Stock_ID">Edit</a>
@@ -81,4 +114,5 @@
 }
         </tbody>
     </table>
-</div>
+    </div>
+</section>

@@ -6,6 +6,12 @@
     var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
     var isPrivilegedUser = User.IsInRole("Owner") || User.IsInRole("Manager");
     var inStockItems = Model.TotalStockItems - Model.LowStockItems;
+    var stockHealth = Model.TotalStockItems > 0
+        ? Math.Clamp((int)Math.Round((double)inStockItems / Model.TotalStockItems * 100), 0, 100)
+        : 0;
+    var dashboardTitle = !string.IsNullOrWhiteSpace(Model.BusinessName)
+        ? $"{Model.BusinessName} Dashboard"
+        : "Dashboard";
 }
 
 @if (!isAuthenticated)
@@ -17,59 +23,131 @@ else
 {
     if (isPrivilegedUser)
     {
-        <div class="dashboard-hero">
-            <h1>Dashboard</h1>
-            <p class="inventory-subtitle">Track inventory status, recent updates and important alerts.</p>
-        </div>
+        <section class="dashboard-shell">
+            <div class="dashboard-topbar">
+                <div class="dashboard-hero dashboard-hero-modern">
+                    <h1>@dashboardTitle</h1>
+                    <p class="inventory-subtitle">Track stock health, recent movement, and location coverage from one place.</p>
+                </div>
+            </div>
 
-        <div class="dashboard-metrics-grid">
-            <a class="dashboard-stat-card" asp-page="/Stock_Page/Index">
-                <p class="dashboard-stat-label">Total Stock Items</p>
-                <p class="dashboard-stat-value">@Model.TotalStockItems</p>
-            </a>
-            <a class="dashboard-stat-card" asp-page="/Stock_Page/Index">
-                <p class="dashboard-stat-label">Low Stock Items</p>
-                <p class="dashboard-stat-value">@Model.LowStockItems</p>
-            </a>
-            <a class="dashboard-stat-card" asp-page="/Inventory_Log/Index">
-                <p class="dashboard-stat-label">Inventory Logs</p>
-                <p class="dashboard-stat-value">@Model.TotalLogs</p>
-            </a>
-            <a class="dashboard-stat-card" asp-page="/cs360/Inventory_Location/Index">
-                <p class="dashboard-stat-label">Locations</p>
-                <p class="dashboard-stat-value">@Model.TotalLocations</p>
-            </a>
-        </div>
+            <div class="dashboard-metrics-grid dashboard-metrics-grid-modern">
+                <a class="dashboard-stat-card dashboard-stat-card-modern" asp-page="/Stock_Page/Index">
+                    <span class="dashboard-stat-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+                    </span>
+                    <div>
+                        <p class="dashboard-stat-label">Total Inventory</p>
+                        <p class="dashboard-stat-value">@Model.TotalStockItems</p>
+                        <p class="dashboard-stat-meta">All active stock items across this business.</p>
+                    </div>
+                </a>
+                <a class="dashboard-stat-card dashboard-stat-card-modern" asp-page="/Stock_Page/Index" asp-route-status="low">
+                    <span class="dashboard-stat-icon dashboard-stat-icon-alert">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    </span>
+                    <div>
+                        <p class="dashboard-stat-label">Low Stock Items</p>
+                        <p class="dashboard-stat-value">@Model.LowStockItems</p>
+                        <p class="dashboard-stat-meta">Needs attention before service is affected.</p>
+                    </div>
+                </a>
+                <a class="dashboard-stat-card dashboard-stat-card-modern" asp-page="/Inventory_Log/Index">
+                    <span class="dashboard-stat-icon dashboard-stat-icon-soft">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                    </span>
+                    <div>
+                        <p class="dashboard-stat-label">Inventory Logs</p>
+                        <p class="dashboard-stat-value">@Model.TotalLogs</p>
+                        <p class="dashboard-stat-meta">Recorded quantity changes and updates.</p>
+                    </div>
+                </a>
+                <a class="dashboard-stat-card dashboard-stat-card-modern" asp-page="/cs360/Inventory_Location/Index">
+                    <span class="dashboard-stat-icon dashboard-stat-icon-muted">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                    </span>
+                    <div>
+                        <p class="dashboard-stat-label">Locations</p>
+                        <p class="dashboard-stat-value">@Model.TotalLocations</p>
+                        <p class="dashboard-stat-meta">Locations where inventory is tracked and managed.</p>
+                    </div>
+                </a>
+            </div>
 
-        <div class="row g-3">
-            <div class="col-12">
-                <div class="dashboard-panel">
+            <div class="dashboard-feature-grid">
+                <section class="dashboard-showcase-card">
+                    <div class="dashboard-showcase-visual">
+                        <div class="dashboard-showcase-overlay">
+                            <span class="dashboard-showcase-tag">Inventory Overview</span>
+                            <h2>Keep your shelves ready for the next rush.</h2>
+                            <p>Watch stock movement, danger range alerts, and location coverage without leaving the dashboard.</p>
+                        </div>
+                    </div>
+                    <div class="dashboard-showcase-content">
+                        <span class="dashboard-section-label">Business Insights</span>
+                        <h2 class="dashboard-panel-title">Inventory Management Overview</h2>
+                        <p class="dashboard-copy">Monitor products, supplies, packaging, and other essentials so low-stock items are visible before they disrupt daily operations.</p>
+                        <div class="dashboard-health-block">
+                            <div>
+                                <p class="dashboard-health-label">Stock health</p>
+                                <p class="dashboard-health-value">@stockHealth%</p>
+                            </div>
+                            <div class="dashboard-health-meter" aria-hidden="true">
+                                <span style="width: @stockHealth%;"></span>
+                            </div>
+                        </div>
+                        <div class="dashboard-actions mt-3">
+                            <a class="btn btn-primary" asp-page="/Stock_Page/Index">View Stock</a>
+                            <a class="btn btn-outline-secondary" asp-page="/cs360/Inventory_Location/Index">View Locations</a>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="dashboard-content-grid">
+                <section class="dashboard-panel dashboard-panel-modern dashboard-panel-full">
                     <div class="dashboard-panel-header">
-                        <h2 class="dashboard-panel-title mb-0">Recent Activity</h2>
+                        <div>
+                            <span class="dashboard-section-label">Recent Activity</span>
+                            <h2 class="dashboard-panel-title mb-0">Inventory movement</h2>
+                        </div>
                         <a asp-page="/Inventory_Log/Index">View all</a>
                     </div>
                     @if (Model.RecentLogs.Count > 0)
                     {
                         <div class="table-responsive">
-                            <table class="table inventory-table dashboard-log-table">
+                            <table class="table inventory-table dashboard-log-table dashboard-log-table-modern">
                                 <thead>
                                     <tr>
-                                        <th>Log ID</th>
                                         <th>Stock</th>
                                         <th>Before</th>
                                         <th>After</th>
-                                        <th>Changed At</th>
+                                        <th>Activity</th>
+                                        <th>Updated</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                 @foreach (var log in Model.RecentLogs)
                                 {
+                                    var delta = log.Quantity_After - log.Quantity_Before;
+                                    var changeLabel = delta > 0 ? "Increased" : delta < 0 ? "Decreased" : "No change";
+                                    var changeClass = delta > 0 ? "dashboard-change-up" : delta < 0 ? "dashboard-change-down" : "dashboard-change-flat";
+                                    var productName = Model.RecentLogProductNames.TryGetValue(log.Stock_ID_Log, out var mappedName)
+                                        ? mappedName
+                                        : log.Stock_ID_Log;
                                     <tr>
-                                        <td>@log.Log_ID</td>
-                                        <td>@log.Stock_ID_Log</td>
+                                        <td>
+                                            <div class="dashboard-log-stock">
+                                                <strong>@productName</strong>
+                                                <span>Stock ID: @log.Stock_ID_Log | Log ID: @log.Log_ID</span>
+                                            </div>
+                                        </td>
                                         <td>@log.Quantity_Before</td>
                                         <td>@log.Quantity_After</td>
-                                        <td>@log.Changed_At</td>
+                                        <td>
+                                            <span class="dashboard-change-pill @changeClass">@changeLabel</span>
+                                        </td>
+                                        <td>@log.Changed_At.ToLocalTime().ToString("M/d/yyyy h:mm tt")</td>
                                     </tr>
                                 }
                                 </tbody>
@@ -80,32 +158,89 @@ else
                     {
                         <p class="mb-0">No recent inventory activity yet.</p>
                     }
-                </div>
+                </section>
             </div>
-        </div>
+        </section>
     }
     else
     {
-        <div class="dashboard-hero">
-            <h1>Dashboard</h1>
-            <p class="inventory-subtitle">View inventory status and low stock alerts.</p>
-        </div>
+        <section class="dashboard-shell">
+            <div class="dashboard-topbar">
+                <div class="dashboard-hero dashboard-hero-modern">
+                    <h1>@dashboardTitle</h1>
+                    <p class="inventory-subtitle">View stock levels, spot low inventory, and keep up with the latest changes.</p>
+                </div>
+            </div>
 
-        <div class="dashboard-metrics-grid dashboard-metrics-grid-user">
-            <a class="dashboard-stat-card" asp-page="/Stock_Page/Index">
-                <p class="dashboard-stat-label">Total Stock Items</p>
-                <p class="dashboard-stat-value">@Model.TotalStockItems</p>
-            </a>
-            <a class="dashboard-stat-card" asp-page="/Stock_Page/Index">
-                <p class="dashboard-stat-label">In Stock</p>
-                <p class="dashboard-stat-value">@inStockItems</p>
-            </a>
-            <a class="dashboard-stat-card" asp-page="/Stock_Page/Index">
-                <p class="dashboard-stat-label">Low Stock</p>
-                <p class="dashboard-stat-value">@Model.LowStockItems</p>
-            </a>
-        </div>
+            @if (!string.IsNullOrWhiteSpace(Model.PendingManagerInviteLink))
+            {
+                <div class="alert alert-info d-flex justify-content-between align-items-center mb-4" role="alert">
+                    <div>
+                        <strong>Manager invitation available.</strong>
+                        You've been invited to become a manager. Accept the invitation to access manager features.
+                    </div>
+                    <a class="btn btn-sm btn-primary" href="@Model.PendingManagerInviteLink">Accept Invitation</a>
+                </div>
+            }
 
-        <a class="btn btn-primary" asp-page="/Stock_Page/Index">Go to Inventory</a>
+            <div class="dashboard-metrics-grid dashboard-metrics-grid-modern dashboard-metrics-grid-user">
+                <a class="dashboard-stat-card dashboard-stat-card-modern" asp-page="/Stock_Page/Index">
+                    <span class="dashboard-stat-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+                    </span>
+                    <div>
+                        <p class="dashboard-stat-label">Total Inventory</p>
+                        <p class="dashboard-stat-value">@Model.TotalStockItems</p>
+                        <p class="dashboard-stat-meta">All visible stock items.</p>
+                    </div>
+                </a>
+                <a class="dashboard-stat-card dashboard-stat-card-modern" asp-page="/Stock_Page/Index" asp-route-status="in">
+                    <span class="dashboard-stat-icon dashboard-stat-icon-soft">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+                    </span>
+                    <div>
+                        <p class="dashboard-stat-label">Available</p>
+                        <p class="dashboard-stat-value">@inStockItems</p>
+                        <p class="dashboard-stat-meta">Items currently above danger range.</p>
+                    </div>
+                </a>
+                <a class="dashboard-stat-card dashboard-stat-card-modern" asp-page="/Stock_Page/Index" asp-route-status="low">
+                    <span class="dashboard-stat-icon dashboard-stat-icon-alert">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    </span>
+                    <div>
+                        <p class="dashboard-stat-label">Low Stock</p>
+                        <p class="dashboard-stat-value">@Model.LowStockItems</p>
+                        <p class="dashboard-stat-meta">Items that need attention soon.</p>
+                    </div>
+                </a>
+            </div>
+
+            <div class="dashboard-feature-grid">
+                <section class="dashboard-showcase-card dashboard-showcase-card-compact">
+                    <div class="dashboard-showcase-visual dashboard-showcase-visual-compact">
+                        <div class="dashboard-showcase-overlay">
+                            <span class="dashboard-showcase-tag">Inventory Overview</span>
+                            <h2>Stay ahead of low stock.</h2>
+                            <p>Keep an eye on the products that matter most before service slows down.</p>
+                        </div>
+                    </div>
+                    <div class="dashboard-showcase-content">
+                        <span class="dashboard-section-label">Stock Summary</span>
+                        <h2 class="dashboard-panel-title">Daily inventory snapshot</h2>
+                        <p class="dashboard-copy">Your dashboard surfaces current stock health and the latest activity so you can react quickly without extra navigation.</p>
+                        <div class="dashboard-health-block">
+                            <div>
+                                <p class="dashboard-health-label">Stock health</p>
+                                <p class="dashboard-health-value">@stockHealth%</p>
+                            </div>
+                            <div class="dashboard-health-meter" aria-hidden="true">
+                                <span style="width: @stockHealth%;"></span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </section>
     }
 }

@@ -5,29 +5,27 @@
     ViewData["Title"] = "Create";
 }
 
-<h1>Create</h1>
+<section class="edit-shell">
+    <header class="edit-header">
+        <h1>Create Test Model Entry</h1>
+        <p class="inventory-subtitle">Add a new test entry.</p>
+    </header>
 
-<h4>TestModelClass</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form method="post">
+    <div class="edit-card">
+        <form method="post" class="edit-form">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="TestModelClass.testVal" class="control-label"></label>
                 <input asp-for="TestModelClass.testVal" class="form-control" />
                 <span asp-validation-for="TestModelClass.testVal" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+            <div class="edit-actions">
+                <button type="submit" class="btn btn-primary">Create</button>
+                <a class="btn btn-outline-secondary" asp-page="Index">Back to List</a>
             </div>
         </form>
     </div>
-</div>
-
-<div>
-    <a asp-page="Index">Back to List</a>
-</div>
+</section>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}

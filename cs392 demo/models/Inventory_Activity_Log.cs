@@ -14,10 +14,12 @@ namespace cs392_demo.models
         [Display(Name = "Stock ID")]
         [Required]
         [StringLength(50)]
-        [ForeignKey(nameof(Stock))]
         public string Stock_ID_Log { get; set; } = string.Empty;
 
-        public Stock? Stock { get; set; }
+        public string? BusinessId { get; set; }
+
+        [ForeignKey(nameof(BusinessId))]
+        public Business? Business { get; set; }
 
         [Display(Name = "Quantity Before")]
         public int Quantity_Before { get; set; }

@@ -1,4 +1,23 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@inject UserManager<Users> UserManager
+@inject cs392_demo.Data.cs392_demoContext DbContext
+@{
+    string? businessName = null;
+    if (User.Identity?.IsAuthenticated ?? false)
+    {
+        var currentUser = await UserManager.GetUserAsync(User);
+        if (!string.IsNullOrWhiteSpace(currentUser?.BusinessId))
+        {
+            businessName = await DbContext.Business
+                .Where(b => b.Business_ID == currentUser.BusinessId)
+                .Select(b => b.Business_Name)
+                .FirstOrDefaultAsync();
+        }
+    }
+}
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -14,7 +33,15 @@
         <header>
             <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
                 <div class="container">
-                    <a class="navbar-brand" href="/Index">StockWise</a>
+                    <div class="navbar-brand-wrap">
+                        <a class="navbar-brand" href="/Index">StockWise</a>
+                        @if (!string.IsNullOrWhiteSpace(businessName))
+                        {
+                            <span class="navbar-business-context" title="Current business">
+                                <span class="navbar-business-name">@businessName</span>
+                            </span>
+                        }
+                    </div>
 
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                             data-bs-target=".navbar-collapse"
@@ -37,8 +64,7 @@
 
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" style="color:#c39a4b"
-                                       href="#" role="button" data-bs-toggle="dropdown">
-                                        Owner Tools
+                                       href="#" role="button" data-bs-toggle="dropdown">Owner Tools
                                     </a>
                                     <ul class="dropdown-menu">
                                         <li>
@@ -50,6 +76,14 @@
                                         <li>
                                             <a class="dropdown-item" asp-page="/Stock_Page/Index">Stock</a>
                                         </li>
+                                        <li><hr class="dropdown-divider" /></li>
+                                        <li>
+                                            <a class="dropdown-item" asp-page="/Invitations/Index">Team Access</a>
+                                        </li>
+                                            <li>
+                                                <a class="dropdown-item" asp-page="/Chat_Page/Chatbot">AI Help</a>
+                                            </li>
+
                                     </ul>
                                 </li>
                             }
@@ -61,8 +95,7 @@
 
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" style="color:#c39a4b"
-                                       href="#" role="button" data-bs-toggle="dropdown">
-                                        Manager Tools
+                                       href="#" role="button" data-bs-toggle="dropdown">Manager Tools
                                     </a>
                                     <ul class="dropdown-menu">
                                         <li>
@@ -74,6 +107,10 @@
                                         <li>
                                             <a class="dropdown-item" asp-page="/Stock_Page/Index">Stock</a>
                                         </li>
+
+                                            <li>
+                                                <a class="dropdown-item" asp-page="/Chat_Page/Chatbot">AI Help</a>
+                                            </li>
                                     </ul>
                                 </li>
                             }
@@ -99,7 +136,17 @@
                         else
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" href="/Index">Dashboard</a>
+                                <a class="nav-link text-dark nav-link-with-icon" href="/Index">
+                                    <span class="nav-link-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="3" y="3" width="8" height="8" rx="1.5"></rect>
+                                            <rect x="13" y="3" width="8" height="5" rx="1.5"></rect>
+                                            <rect x="13" y="10" width="8" height="11" rx="1.5"></rect>
+                                            <rect x="3" y="13" width="8" height="8" rx="1.5"></rect>
+                                        </svg>
+                                    </span>
+                                    <span>Dashboard</span>
+                                </a>
                             </li>
                         }
                     </ul>

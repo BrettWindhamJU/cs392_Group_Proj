@@ -5,13 +5,14 @@
     ViewData["Title"] = "Edit";
 }
 
-<h1>Edit</h1>
+<section class="edit-shell">
+    <header class="edit-header">
+        <h1>Edit Stock</h1>
+        <p class="inventory-subtitle">Update stock values and save your changes.</p>
+    </header>
 
-<h4>Stock</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form method="post">
+    <div class="edit-card">
+        <form method="post" class="edit-form">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Stock.Stock_ID" />
             <div class="form-group">
@@ -41,7 +42,8 @@
             </div>
             <div class="form-group">
                 <label asp-for="Stock.Last_Updated" class="control-label"></label>
-                <input asp-for="Stock.Last_Updated" type="datetime-local" class="form-control" />
+                <input class="form-control" value="@(Model.Stock.Last_Updated?.ToString("g") ?? string.Empty)" readonly />
+                <input type="hidden" asp-for="Stock.Last_Updated" />
                 <span asp-validation-for="Stock.Last_Updated" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -50,16 +52,13 @@
                 <input type="hidden" asp-for="Stock.Last_Updated_by" />
                 <span asp-validation-for="Stock.Last_Updated_by" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+            <div class="edit-actions">
+                <button type="submit" class="btn btn-primary">Save</button>
+                <a class="btn btn-outline-secondary" asp-page="./Index">Back to List</a>
             </div>
         </form>
     </div>
-</div>
-
-<div>
-    <a asp-page="./Index">Back to List</a>
-</div>
+</section>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}

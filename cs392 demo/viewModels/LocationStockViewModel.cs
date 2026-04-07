@@ -2,11 +2,11 @@
 {
     public class LocationStockViewModel
     {
-        public string Location_Id { get; set; }
-        public string Location_Name { get; set; }
-        public string Address_Location { get; set; }
-        public string Owner_User_ID { get; set; }
+        public string Location_Id { get; set; } = string.Empty;
+        public string Location_Name { get; set; } = string.Empty;
+        public string Address_Location { get; set; } = string.Empty;
+        public string Owner_User_ID { get; set; } = string.Empty;
 
-        public List<StockItemViewModel> Stocks { get; set; }
+        public List<StockItemViewModel> Stocks { get; set; } = new();
     }
 }

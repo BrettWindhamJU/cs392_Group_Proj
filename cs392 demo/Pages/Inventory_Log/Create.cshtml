@@ -5,13 +5,14 @@
     ViewData["Title"] = "Create";
 }
 
-<h1>Create</h1>
+<section class="edit-shell">
+    <header class="edit-header">
+        <h1>Create Inventory Log</h1>
+        <p class="inventory-subtitle">Add a new inventory activity log entry.</p>
+    </header>
 
-<h4>Inventory Activity Log</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form method="post">
+    <div class="edit-card">
+        <form method="post" class="edit-form">
             <div asp-validation-summary="All" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Inventory_Activity_Log.Log_ID" class="control-label"></label>
@@ -43,16 +44,13 @@
                 <label asp-for="Inventory_Activity_Log.Changed_At" class="control-label"></label>
                 <input class="form-control" value="@(DateTime.Now.ToString("g"))" readonly />
             </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+            <div class="edit-actions">
+                <button type="submit" class="btn btn-primary">Create</button>
+                <a class="btn btn-outline-secondary" asp-page="Index">Back to List</a>
             </div>
         </form>
     </div>
-</div>
-
-<div>
-    <a asp-page="Index">Back to List</a>
-</div>
+</section>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}

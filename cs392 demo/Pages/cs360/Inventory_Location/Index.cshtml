@@ -6,28 +6,24 @@
     var totalLocations = Model.Inventory_Location.Count;
 }
 
-<div class="inventory-page-header">
-    <div>
+<section class="inventory-list-shell">
+    <div class="inventory-list-header">
         <h1>Inventory Locations</h1>
         <p class="inventory-subtitle">Total @totalLocations location@(totalLocations == 1 ? "" : "s")</p>
+        @if (User.IsInRole("Owner"))
+        {
+            <a class="inventory-header-link" asp-page="Create">Add New Location</a>
+        }
     </div>
-    <div class="inventory-status-chips">
-        <span class="inventory-chip">All Locations (@totalLocations)</span>
-    </div>
-</div>
 
-<p>
-    <a asp-page="Create">Add New Location</a>
-</p>
-
-<div class="inventory-table-card">
+    <div class="inventory-table-only-card">
     <table class="table inventory-table">
         <thead>
             <tr>
                 <th>Location ID</th>
                 <th>Location Name</th>
                 <th>Address</th>
-                <th>Owner User ID</th>
+                <th>Owner</th>
                 <th></th>
             </tr>
         </thead>
@@ -38,15 +34,24 @@
             <td>@item.location_id</td>
             <td>@item.Location_name</td>
             <td>@item.Address_Location</td>
-            <td>@item.Owner_User_ID</td>
-            <td>
-                <a asp-page="Edit" asp-route-id="@item.location_id">Edit</a> |
+            <td>@Model.GetOwnerDisplay(item.Owner_User_ID)</td>
+            <td class="inventory-actions-cell">
+                @if (User.IsInRole("Owner"))
+                {
+                    <a asp-page="Edit" asp-route-id="@item.location_id">Edit</a>
+                    <span> | </span>
+                }
                 <a asp-page="Details" asp-route-id="@item.location_id">Details</a> |
-                <a asp-page="Delete" asp-route-id="@item.location_id">Delete</a> |
+                @if (User.IsInRole("Owner"))
+                {
+                    <a asp-page="Delete" asp-route-id="@item.location_id">Delete</a>
+                    <span> | </span>
+                }
                 <a asp-page="/Stock_Page/Create" asp-route-Location_Id="@item.location_id">Add Stock</a>
             </td>
         </tr>
 }
         </tbody>
     </table>
-</div>
+    </div>
+</section>
