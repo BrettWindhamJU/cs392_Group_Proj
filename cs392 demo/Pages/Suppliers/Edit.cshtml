@@ -1,0 +1,307 @@
+@page "{id}"
+@model cs392_demo.Pages.Suppliers.EditModel
+
+@{
+    ViewData["Title"] = "Update Supplier";
+    var initialCatalogItems = (Model.CatalogItems != null && Model.CatalogItems.Count > 0)
+        ? Model.CatalogItems
+        : new List<cs392_demo.models.SupplierCatalogItem> { new() };
+}
+
+<section class="edit-shell">
+    <header class="edit-header">
+        <h1>Update Supplier Profile</h1>
+        <p class="inventory-subtitle">Review supplier information and save changes to keep records current.</p>
+    </header>
+
+    <div class="edit-card">
+        <form method="post" class="edit-form">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-group">
+                <label asp-for="Supplier.SupplierId" class="control-label"></label>
+                <input asp-for="Supplier.SupplierId" class="form-control" readonly />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Supplier.Name" class="control-label"></label>
+                <input asp-for="Supplier.Name" class="form-control" />
+                <span asp-validation-for="Supplier.Name" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Supplier.Status" class="control-label"></label>
+                <select asp-for="Supplier.Status" class="form-select">
+                    @if (string.IsNullOrWhiteSpace(Model.Supplier.Status))
+                    {
+                        <option value="" selected disabled>Select status</option>
+                    }
+                    else
+                    {
+                        <option value="" disabled>Select status</option>
+                    }
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Supplier.Contact.PrimaryName" class="control-label"></label>
+                <input asp-for="Supplier.Contact.PrimaryName" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Supplier.Contact.Email" class="control-label"></label>
+                <input asp-for="Supplier.Contact.Email" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Supplier.Contact.Phone" class="control-label"></label>
+                <input asp-for="Supplier.Contact.Phone" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Supplier.Address.Line1" class="control-label"></label>
+                <input asp-for="Supplier.Address.Line1" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Supplier.Address.City" class="control-label"></label>
+                <input asp-for="Supplier.Address.City" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Supplier.Address.State" class="control-label"></label>
+                <input asp-for="Supplier.Address.State" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Supplier.Address.PostalCode" class="control-label"></label>
+                <input asp-for="Supplier.Address.PostalCode" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Supplier.Address.Country" class="control-label"></label>
+                <input asp-for="Supplier.Address.Country" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label class="control-label">Categories (comma separated)</label>
+                <input asp-for="CategoriesInput" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Supplier.Terms.LeadTimeDays" class="control-label"></label>
+                <input asp-for="Supplier.Terms.LeadTimeDays" type="number" min="1" step="1" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Supplier.Terms.MinimumOrderAmount" class="control-label"></label>
+                <input asp-for="Supplier.Terms.MinimumOrderAmount" type="number" min="1" step="1" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Supplier.Terms.PaymentTerms" class="control-label"></label>
+                <input asp-for="Supplier.Terms.PaymentTerms" class="form-control" placeholder="e.g., Net 30, Due on receipt" />
+            </div>
+
+            <div class="form-group">
+                <label class="control-label">Delivery Days (comma separated)</label>
+                <input asp-for="DeliveryDaysInput" class="form-control" placeholder="e.g., Mon, Wed, Fri" />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Supplier.Terms.Currency" class="control-label"></label>
+                <select asp-for="Supplier.Terms.Currency" class="form-select">
+                    @if (string.IsNullOrWhiteSpace(Model.Supplier.Terms.Currency))
+                    {
+                        <option value="" selected disabled>Select currency</option>
+                    }
+                    else
+                    {
+                        <option value="" disabled>Select currency</option>
+                    }
+                    <option value="USD">USD</option>
+                    <option value="CAD">CAD</option>
+                    <option value="EUR">EUR</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label">Catalog Items</label>
+                <div class="catalog-editor">
+                    <div class="catalog-grid-head" aria-hidden="true">
+                        <span>Stock ID</span>
+                        <span>Supplier SKU</span>
+                        <span>Unit</span>
+                        <span>Pack Size</span>
+                        <span>Price</span>
+                        <span>Action</span>
+                    </div>
+                <div id="catalog-items-container" class="catalog-items-container">
+                    @for (var i = 0; i < initialCatalogItems.Count; i++)
+                    {
+                        var item = initialCatalogItems[i];
+                        <div class="catalog-item-row" data-index="@i">
+                            <div class="catalog-field">
+                                <label class="catalog-mobile-label">Stock ID</label>
+                                <input class="form-control" name="CatalogItems[@i].StockId" value="@item.StockId" placeholder="Stock ID" />
+                            </div>
+                            <div class="catalog-field">
+                                <label class="catalog-mobile-label">Supplier SKU</label>
+                                <input class="form-control" name="CatalogItems[@i].SupplierSku" value="@item.SupplierSku" placeholder="Supplier SKU" />
+                            </div>
+                            <div class="catalog-field">
+                                <label class="catalog-mobile-label">Unit</label>
+                                <input class="form-control" name="CatalogItems[@i].Unit" value="@item.Unit" placeholder="Unit" />
+                            </div>
+                            <div class="catalog-field">
+                                <label class="catalog-mobile-label">Pack Size</label>
+                                <input class="form-control" name="CatalogItems[@i].PackSize" value="@item.PackSize" placeholder="Pack Size" />
+                            </div>
+                            <div class="catalog-field">
+                                <label class="catalog-mobile-label">Price</label>
+                                <input class="form-control" name="CatalogItems[@i].LastUnitPrice" value="@(item.LastUnitPrice?.ToString())" type="number" min="0" step="0.01" placeholder="Price" />
+                            </div>
+                            <div class="catalog-action-cell">
+                                <button type="button" class="catalog-remove-btn" aria-label="Remove catalog item">
+                                    <span class="catalog-remove-x" aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <button type="button" id="add-catalog-item" class="btn btn-outline-secondary catalog-add-btn">Add Catalog Item</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Supplier.Performance.ReliabilityScore" class="control-label"></label>
+                <input asp-for="Supplier.Performance.ReliabilityScore" type="number" min="0" max="100" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Supplier.Performance.LastDeliveryAtUtc" class="control-label"></label>
+                <input asp-for="Supplier.Performance.LastDeliveryAtUtc" type="datetime-local" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Supplier.Notes" class="control-label"></label>
+                <textarea asp-for="Supplier.Notes" class="form-control"></textarea>
+            </div>
+
+            <div class="edit-actions">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a class="btn btn-outline-secondary" asp-page="/Suppliers/Index">Back to List</a>
+            </div>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+    <script>
+        (() => {
+            const container = document.getElementById("catalog-items-container");
+            const addBtn = document.getElementById("add-catalog-item");
+
+            if (!container || !addBtn) {
+                return;
+            }
+
+            const reindexRows = () => {
+                const rows = container.querySelectorAll(".catalog-item-row");
+                rows.forEach((row, index) => {
+                    row.setAttribute("data-index", index.toString());
+                    const inputs = row.querySelectorAll("input");
+                    const keys = ["StockId", "SupplierSku", "Unit", "PackSize", "LastUnitPrice"];
+                    inputs.forEach((input, i) => {
+                        input.name = `CatalogItems[${index}].${keys[i]}`;
+                    });
+                });
+            };
+
+            const syncRemoveButtons = () => {
+                const rows = container.querySelectorAll(".catalog-item-row");
+                rows.forEach((row, index) => {
+                    const removeBtn = row.querySelector(".catalog-remove-btn");
+                    if (!removeBtn) {
+                        return;
+                    }
+
+                    if (index === 0) {
+                        removeBtn.style.display = "none";
+                        removeBtn.setAttribute("aria-hidden", "true");
+                    } else {
+                        removeBtn.style.display = "inline-flex";
+                        removeBtn.removeAttribute("aria-hidden");
+                    }
+                });
+            };
+
+            addBtn.addEventListener("click", () => {
+                const index = container.querySelectorAll(".catalog-item-row").length;
+                const row = document.createElement("div");
+                row.className = "catalog-item-row";
+                row.setAttribute("data-index", index.toString());
+                row.innerHTML = `
+                    <div class="catalog-field">
+                        <label class="catalog-mobile-label">Stock ID</label>
+                        <input class="form-control" name="CatalogItems[${index}].StockId" placeholder="Stock ID" />
+                    </div>
+                    <div class="catalog-field">
+                        <label class="catalog-mobile-label">Supplier SKU</label>
+                        <input class="form-control" name="CatalogItems[${index}].SupplierSku" placeholder="Supplier SKU" />
+                    </div>
+                    <div class="catalog-field">
+                        <label class="catalog-mobile-label">Unit</label>
+                        <input class="form-control" name="CatalogItems[${index}].Unit" placeholder="Unit" />
+                    </div>
+                    <div class="catalog-field">
+                        <label class="catalog-mobile-label">Pack Size</label>
+                        <input class="form-control" name="CatalogItems[${index}].PackSize" placeholder="Pack Size" />
+                    </div>
+                    <div class="catalog-field">
+                        <label class="catalog-mobile-label">Price</label>
+                        <input class="form-control" name="CatalogItems[${index}].LastUnitPrice" type="number" min="0" step="0.01" placeholder="Price" />
+                    </div>
+                    <div class="catalog-action-cell">
+                        <button type="button" class="catalog-remove-btn" aria-label="Remove catalog item">
+                            <span class="catalog-remove-x" aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(row);
+                syncRemoveButtons();
+            });
+
+            container.addEventListener("click", (event) => {
+                const target = event.target;
+                if (!(target instanceof HTMLElement)) {
+                    return;
+                }
+
+                const removeBtn = target.closest(".catalog-remove-btn");
+                if (!removeBtn) {
+                    return;
+                }
+
+                const rows = container.querySelectorAll(".catalog-item-row");
+                if (rows.length === 1) {
+                    const inputs = rows[0].querySelectorAll("input");
+                    inputs.forEach(input => input.value = "");
+                    return;
+                }
+
+                const row = removeBtn.closest(".catalog-item-row");
+                if (row) {
+                    row.remove();
+                    reindexRows();
+                    syncRemoveButtons();
+                }
+            });
+
+            syncRemoveButtons();
+        })();
+    </script>
+}

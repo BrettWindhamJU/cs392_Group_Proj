@@ -2,13 +2,13 @@
 @model cs392_demo.Pages.Inventory_Log.EditModel
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Update Inventory Log Entry";
 }
 
 <section class="edit-shell">
     <header class="edit-header">
-        <h1>Edit Inventory Log</h1>
-        <p class="inventory-subtitle">Update this log entry and save your changes.</p>
+        <h1>Update Inventory Log Entry</h1>
+        <p class="inventory-subtitle">Update this record to keep stock history accurate.</p>
     </header>
 
     <div class="edit-card">
@@ -46,7 +46,7 @@
                 <input type="hidden" asp-for="Inventory_Activity_Log.Changed_At" />
             </div>
             <div class="edit-actions">
-                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
                 <a class="btn btn-outline-secondary" asp-page="./Index">Back to List</a>
             </div>
         </form>
