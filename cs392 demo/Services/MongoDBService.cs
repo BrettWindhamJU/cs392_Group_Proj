@@ -52,8 +52,15 @@ namespace cs392_demo.Services
             await _supplierCollection.InsertOneAsync(supplier);
         }
 
+        public async Task<bool> UpdateAsync(string businessId, string supplierId, Supplier updatedSupplier)
+        {
+            var result = await _supplierCollection.ReplaceOneAsync(
+                s => s.BusinessId == businessId && s.SupplierId == supplierId,
+                updatedSupplier);
 
-        public async Task<bool> DeleteSupplierAsync(string businessId, string supplierId)
+            return result.ModifiedCount > 0;
+        }
+        public async Task<bool> DeleteAsync(string businessId, string supplierId)
         {
             var result = await _supplierCollection.DeleteOneAsync(
                 s => s.BusinessId == businessId && s.SupplierId == supplierId);
