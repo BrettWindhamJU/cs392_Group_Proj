@@ -1,55 +1,52 @@
-using cs392_demo;
-using cs392_demo.models;
-using cs392_demo.Services;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using MongoDB.Driver;
+using System.Text.Json;
 
 public class AnalyticsModel : PageModel
 {
-    private readonly MongoDBService _mongo;
+    public string StockDataJson { get; set; }
 
-    public AnalyticsModel(MongoDBService mongo)
+    public void OnGet()
     {
-        _mongo = mongo;
-    }
 
-    public Dictionary<string, List<ChartPoint>> StockData { get; set; } = new();
-
-    public async Task OnGetAsync()
-    {
-        // Fetch logs sorted by date
-        var logs = await _mongo.InventoryLog
-            .Find(_ => true)
-            .SortBy(l => l.Changed_At)
-            .ToListAsync();
-
-        // Group logs by Stock_ID and convert to ChartPoints
-        StockData = logs
-            .GroupBy(l => l.Stock_ID_Log)
-            .ToDictionary(
-                g => g.Key,
-                g => g.Select(l => new ChartPoint
-                {
-                    Date = l.Changed_At,
-                    Amount = l.Quantity_After // ensure this is int or double
-                }).ToList()
-            );
-
-        // Debug output: print nicely in console
-        Console.WriteLine("StockData:");
-        foreach (var kvp in StockData)
+        // Example: replace with DB call
+        var stockData = new Dictionary<string, List<StockPoint>>
         {
-            Console.WriteLine($"StockID: {kvp.Key}");
-            foreach (var point in kvp.Value)
+            ["Item A"] = new List<StockPoint>
             {
-                Console.WriteLine($"  Date: {point.Date:yyyy-MM-dd HH:mm}, Amount: {point.Amount}");
+                new StockPoint { date = DateTime.Now.AddDays(-10), amount = 55 },
+                new StockPoint { date = DateTime.Now.AddDays(-9), amount = 43 },
+                new StockPoint { date = DateTime.Now.AddDays(-8), amount = 40 },
+                new StockPoint { date = DateTime.Now.AddDays(-7), amount = 39 },
+                new StockPoint { date = DateTime.Now.AddDays(-6), amount = 37 },
+                new StockPoint { date = DateTime.Now.AddDays(-5), amount = 32 },
+                new StockPoint { date = DateTime.Now.AddDays(-4), amount = 58 }
+            },
+            ["Item B"] = new List<StockPoint>
+            {
+                new StockPoint { date = DateTime.Now.AddDays(-10), amount = 25 },
+                new StockPoint { date = DateTime.Now.AddDays(-9), amount = 23 },
+                new StockPoint { date = DateTime.Now.AddDays(-8), amount = 20 },
+                new StockPoint { date = DateTime.Now.AddDays(-7), amount = 19 },
+                new StockPoint { date = DateTime.Now.AddDays(-6), amount = 17 },
+                new StockPoint { date = DateTime.Now.AddDays(-5), amount = 12 },
+                new StockPoint { date = DateTime.Now.AddDays(-4), amount = 38 }
             }
-        }
-    }
+        };
 
-    public class ChartPoint
-    {
-        public DateTime Date { get; set; }
-        public int Amount { get; set; }
+        StockDataJson = JsonSerializer.Serialize(
+            stockData.ToDictionary(
+                k => k.Key,
+                v => v.Value.Select(p => new {
+                    date = new DateTimeOffset(p.date).ToUnixTimeMilliseconds(),
+                    amount = p.amount
+                })
+            )
+);
     }
+}
+
+public class StockPoint
+{
+    public DateTime date { get; set; }
+    public int amount { get; set; }
 }

@@ -9,8 +9,8 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
 
 <script>
-    // Serialize C# dictionary to JS object
-    const dataFromServer = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.StockData));
+    // Use pre-serialized JSON from backend
+    const dataFromServer = @Html.Raw(Model.StockDataJson);
 
     const datasets = [];
 
@@ -20,13 +20,18 @@
         datasets.push({
             label: stockId,
             data: points.map(p => ({
-                x: new Date(p.date),
-                y: Number(p.amount)  // Force numeric type
+                x: p.date,
+                y: Number(p.amount)
             })),
             borderWidth: 2,
             fill: false
         });
+       
+        console.log(points.map(p => p.date || p.Date));
+        console.log(new Date(points[0].date || points[0].Date));
     }
+    
+    const maxY = Math.max(...datasets.flatMap(ds => ds.data.map(d => d.y)));
 
     const ctx = document.getElementById('stockChart').getContext('2d');
 
@@ -42,8 +47,7 @@
                 },
                 y: {
                     beginAtZero: true,
-                    optional: auto-scale max
-                    suggestedMax: Math.max(...datasets.flatMap(ds => ds.data.map(d => d.y))) * 1.1
+                    suggestedMax: maxY * 1.1
                 }
             }
         }
