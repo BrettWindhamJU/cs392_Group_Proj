@@ -2,13 +2,13 @@
 @model cs392_demo.Pages.Inventory_Log.CreateModel
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Add Inventory Log Entry";
 }
 
 <section class="edit-shell">
     <header class="edit-header">
-        <h1>Create Inventory Log</h1>
-        <p class="inventory-subtitle">Add a new inventory activity log entry.</p>
+        <h1>Add Inventory Log Entry</h1>
+        <p class="inventory-subtitle">Create a new record to keep stock history accurate.</p>
     </header>
 
     <div class="edit-card">
@@ -45,7 +45,7 @@
                 <input class="form-control" value="@(DateTime.Now.ToString("g"))" readonly />
             </div>
             <div class="edit-actions">
-                <button type="submit" class="btn btn-primary">Create</button>
+                <button type="submit" class="btn btn-primary">Save Log Entry</button>
                 <a class="btn btn-outline-secondary" asp-page="Index">Back to List</a>
             </div>
         </form>

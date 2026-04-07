@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>cs392_demo</RootNamespace>
+    <UserSecretsId>cs392-demo-local-secrets</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

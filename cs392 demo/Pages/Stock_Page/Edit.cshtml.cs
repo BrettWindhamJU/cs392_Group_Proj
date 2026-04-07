@@ -18,9 +18,9 @@ namespace cs392_demo.Pages.Stock_Page
     public class EditModel : PageModel
     {
         private readonly cs392_demo.Data.cs392_demoContext _context;
-        private readonly MongoDBServices _mongo;
+        private readonly MongoDBService _mongo;
 
-        public EditModel(cs392_demoContext context, MongoDBServices mongo)
+        public EditModel(cs392_demoContext context, MongoDBService mongo)
         {
             _context = context;
             _mongo = mongo;

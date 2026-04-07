@@ -6,9 +6,9 @@ using MongoDB.Driver;
 
 public class AnalyticsModel : PageModel
 {
-    private readonly MongoDBServices _mongo;
+    private readonly MongoDBService _mongo;
 
-    public AnalyticsModel(MongoDBServices mongo)
+    public AnalyticsModel(MongoDBService mongo)
     {
         _mongo = mongo;
     }
