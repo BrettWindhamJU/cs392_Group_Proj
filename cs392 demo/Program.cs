@@ -4,9 +4,13 @@ using cs392_demo.Data;
 using Microsoft.AspNetCore.Components;
 using cs392_demo;
 using Microsoft.AspNetCore.Identity;
+using MongoDB.Driver;
 using cs392_demo.models;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// add mongodb services
+builder.Services.AddSingleton<MongoDBServices>();
 
 // Add services to the container.
 builder.Services.AddRazorPages();
