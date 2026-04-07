@@ -1,0 +1,111 @@
+﻿@page
+@model CS392_Demo3.Pages.Curriculum.ChatbotModel
+@{
+    ViewData["Title"] = "AI Chatbot";
+}
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f5f7fb;
+    }
+
+    .chat-container {
+        width: 700px;
+        margin: 40px auto;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        display: flex;
+        flex-direction: column;
+        height: 600px;
+    }
+
+    .chat-header {
+        padding: 15px;
+        font-size: 20px;
+        font-weight: bold;
+        border-bottom: 1px solid #eee;
+    }
+
+    .chat-box {
+        flex: 1;
+        padding: 15px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .message {
+        max-width: 75%;
+        padding: 10px 14px;
+        border-radius: 12px;
+        line-height: 1.4;
+    }
+
+    .user {
+        align-self: flex-end;
+        background-color: #007bff;
+        color: white;
+    }
+
+    .ai {
+        align-self: flex-start;
+        background-color: #e9ecef;
+        color: black;
+    }
+
+    .chat-input {
+        border-top: 1px solid #eee;
+        padding: 10px;
+        display: flex;
+        gap: 10px;
+    }
+
+        .chat-input textarea {
+            flex: 1;
+            resize: none;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+
+        .chat-input button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+            .chat-input button:disabled {
+                background-color: #999;
+                cursor: not-allowed;
+            }
+</style>
+
+<div class="chat-container">
+    <div class="chat-header">
+        🤖 AI Chatbot
+    </div>
+
+    <div class="chat-box">
+        @foreach (var msg in Model.ChatHistory)
+        {
+            <div class="message @(msg.Role == "User" ? "user" : "ai")">
+                @msg.Content
+            </div>
+        }
+    </div>
+
+    <form method="post" class="chat-input">
+        <textarea asp-for="UserMessage" rows="2" placeholder="Type your message..."></textarea>
+        <button type="submit" disabled="@(Model.IsProcessing ? "disabled" : null)">
+            Send
+        </button>
+    </form>
+</div>
+
+<div asp-validation-summary="All"></div>

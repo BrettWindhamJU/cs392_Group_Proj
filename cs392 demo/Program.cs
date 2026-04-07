@@ -11,6 +11,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorPages();
 
+builder.Services.AddHttpClient<AIService>();
+
 //Replaced AddDbContextFactory for Identity purposes
 builder.Services.AddDbContext<cs392_demoContext>(options =>
     options.UseSqlServer(
