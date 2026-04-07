@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using cs392_demo.Data;
 using cs392_demo.models;
+using cs392_demo.Services;
 
 namespace cs392_demo.Pages.Stock_Page
 {
@@ -17,10 +18,12 @@ namespace cs392_demo.Pages.Stock_Page
     public class EditModel : PageModel
     {
         private readonly cs392_demo.Data.cs392_demoContext _context;
+        private readonly MongoDBService _mongo;
 
-        public EditModel(cs392_demo.Data.cs392_demoContext context)
+        public EditModel(cs392_demoContext context, MongoDBService mongo)
         {
             _context = context;
+            _mongo = mongo;
         }
 
         [BindProperty]
@@ -99,6 +102,23 @@ namespace cs392_demo.Pages.Stock_Page
 
             try
             {
+
+                if (previousAmount != existingStock.Amount)
+                {
+                    var log = new InventoryLog
+                    {
+                        Log_ID = Guid.NewGuid().ToString(), // Mongo-friendly ID
+                        Stock_ID_Log = existingStock.Stock_ID,
+                        BusinessId = businessId,
+                        Quantity_Before = previousAmount,
+                        Quantity_After = existingStock.Amount,
+                        Changed_By = changedBy,
+                        Changed_At = now
+                    };
+
+                    await _mongo.InventoryLog.InsertOneAsync(log);
+                }
+
                 await _context.SaveChangesAsync();
 
                 if (previousAmount != existingStock.Amount)
@@ -119,6 +139,7 @@ namespace cs392_demo.Pages.Stock_Page
                     await _context.SaveChangesAsync();
                 }
             }
+
             catch (DbUpdateConcurrencyException)
             {
                 if (!StockExists(Stock.Stock_ID, businessId))

@@ -25,6 +25,8 @@
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.23" />
     <PackageReference Include="MongoDB.Driver" Version="3.7.1" />
     <PackageReference Include="OpenAI" Version="2.10.0" />
+    <PackageReference Include="MongoDB.Bson" Version="3.7.1" />
+    <PackageReference Include="MongoDB.Driver" Version="3.7.1" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,13 +1,19 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using cs392_demo.Data;
-using Microsoft.AspNetCore.Components;
 using cs392_demo;
+using cs392_demo.Data;
+using cs392_demo.models;
+using cs392_demo.Services;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
 using cs392_demo.models;
 using cs392_demo.Services;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// add mongodb services
+builder.Services.AddSingleton<MongoDBService>();
 
 // Add services to the container.
 builder.Services.AddRazorPages();
