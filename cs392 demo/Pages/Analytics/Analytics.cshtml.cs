@@ -17,12 +17,13 @@ public class AnalyticsModel : PageModel
 
     public async Task OnGetAsync()
     {
+        // Fetch logs sorted by date
         var logs = await _mongo.InventoryLog
             .Find(_ => true)
             .SortBy(l => l.Changed_At)
             .ToListAsync();
 
-        // Group logs by Stock_ID
+        // Group logs by Stock_ID and convert to ChartPoints
         StockData = logs
             .GroupBy(l => l.Stock_ID_Log)
             .ToDictionary(
@@ -30,9 +31,20 @@ public class AnalyticsModel : PageModel
                 g => g.Select(l => new ChartPoint
                 {
                     Date = l.Changed_At,
-                    Amount = l.Quantity_After
+                    Amount = l.Quantity_After // ensure this is int or double
                 }).ToList()
             );
+
+        // Debug output: print nicely in console
+        Console.WriteLine("StockData:");
+        foreach (var kvp in StockData)
+        {
+            Console.WriteLine($"StockID: {kvp.Key}");
+            foreach (var point in kvp.Value)
+            {
+                Console.WriteLine($"  Date: {point.Date:yyyy-MM-dd HH:mm}, Amount: {point.Amount}");
+            }
+        }
     }
 
     public class ChartPoint
