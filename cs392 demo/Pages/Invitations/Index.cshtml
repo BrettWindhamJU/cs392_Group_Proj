@@ -92,7 +92,7 @@ else
 
                 <tr>
                     <td>@invite.Email</td>
-                    <td><span class="badge @badgeClass">@status</span></td>
+                    <td><span class="badge invite-status-badge @badgeClass">@status</span></td>
                     <td>@invite.CreatedAt.ToLocalTime().ToString("M/d/yyyy h:mm tt")</td>
                     <td>@invite.ExpiresAt.ToLocalTime().ToString("M/d/yyyy h:mm tt")</td>
                     <td>
@@ -123,3 +123,16 @@ else
         </tbody>
     </table>
 }
+
+<style>
+    .invite-status-badge {
+        min-width: 74px;
+        height: 20px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.72rem;
+        padding: 0 0.28rem;
+        line-height: 1;
+    }
+</style>

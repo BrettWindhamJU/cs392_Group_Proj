@@ -1439,6 +1439,11 @@ a:hover {
   color: #37576b;
 }
 
+.dashboard-stat-icon-success {
+  background: rgba(46, 125, 50, 0.1);
+  color: #2e7d32;
+}
+
 .dashboard-stat-icon-muted {
   background: rgba(75, 91, 94, 0.08);
   color: #4b5b5e;

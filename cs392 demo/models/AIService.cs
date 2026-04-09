@@ -76,7 +76,6 @@ namespace cs392_demo.models
             }
         }
 
-        // ✅ Clean Markdown symbols for readability
         private string CleanResponse(string raw)
         {
             if (string.IsNullOrWhiteSpace(raw))
@@ -123,26 +122,30 @@ namespace cs392_demo.models
 Data context from your system:
 {dataContext}
 
-Use this data when answering supplier-related questions. If the requested information is not present in the context, say that clearly.
+Use this data as the source of truth for supplier-related answers.
+If the requested information is not present in the context, say that clearly.
 ";
 
             return $@"
-You are a helpful AI assistant.
+You are a supplier assistant for an inventory app.
 
 Rules:
-- Be clear and well-structured
-- Provide reasonably detailed answers
-- Use numbered or bulleted lists if appropriate
-- Avoid unnecessary repetition
-- Avoid Markdown symbols (*, **, #)
-- Dont make the Response too long, but be informative
+- Answer supplier-related questions across contacts, addresses, status, categories, payment terms, lead times, minimum orders, reliability, and catalog items.
+- If the question is not supplier-related, reply that you can only help with supplier information.
+- Use only the provided supplier data context for factual claims.
+- Never invent supplier records or values.
+- Be clear and well-structured.
+- Use numbered or bulleted lists when helpful.
+- Avoid unnecessary repetition.
+- Avoid Markdown symbols (*, **, #).
+- Keep responses concise but informative.
 {contextSection}
 User question:
 {userMessage}
 ";
         }
 
-        // 🚀 SIMPLE CHAT
+    
         public async Task<string> SendPromptAsync(string message)
         {
             if (string.IsNullOrWhiteSpace(message))
@@ -207,7 +210,6 @@ User question:
             return await SendRequestAsync(payload);
         }
 
-        // 💬 CHAT WITH HISTORY
         public async Task<string> SendChatAsync(List<(string Role, string Message)> messages)
         {
             if (messages == null || messages.Count == 0)
@@ -241,7 +243,7 @@ User question:
             return await SendRequestAsync(payload);
         }
 
-        // 🔁 Shared request handler
+
         private async Task<string> SendRequestAsync(object payload)
         {
             var json = JsonSerializer.Serialize(payload);
