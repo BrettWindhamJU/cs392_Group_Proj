@@ -4,8 +4,6 @@ using cs392_demo.models;
 using cs392_demo.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
-using cs392_demo.models;
-using cs392_demo.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
@@ -52,7 +50,6 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(options => options.SignIn.Re
 .AddDefaultUI()
 .AddDefaultTokenProviders();
 builder.Services.AddControllersWithViews();
-builder.Services.AddSingleton<MongoDBService>();
 
 
 

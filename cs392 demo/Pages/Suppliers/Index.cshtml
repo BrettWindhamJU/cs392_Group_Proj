@@ -4,6 +4,13 @@
 @{
     ViewData["Title"] = "Suppliers";
     var canManage = User.IsInRole("Owner") || User.IsInRole("Manager");
+    var totalSuppliers = Model.TotalSuppliersCount;
+    var canPage = Model.TotalPages > 1;
+    var pageStart = Model.PageStartItem;
+    var pageEnd = Model.PageEndItem;
+    var pageWindowStart = Math.Max(1, Model.PageNumber - 1);
+    var pageWindowEnd = Math.Min(Model.TotalPages, pageWindowStart + 2);
+    pageWindowStart = Math.Max(1, pageWindowEnd - 2);
 }
 
 <section class="inventory-list-shell">
@@ -16,7 +23,7 @@
             </a>
         </div>
 
-        <p class="inventory-subtitle">Total @Model.Suppliers.Count supplier@(Model.Suppliers.Count == 1 ? string.Empty : "s")</p>
+        <p class="inventory-subtitle">Total @totalSuppliers supplier@(totalSuppliers == 1 ? string.Empty : "s")</p>
         @if (canManage)
         {
             <a class="inventory-header-link" asp-page="/Suppliers/Create">Add Supplier</a>
@@ -90,6 +97,47 @@
                     }
                 </tbody>
             </table>
+        </div>
+
+        <div class="inventory-pagination-shell" aria-label="Suppliers pagination">
+            <div class="inventory-pagination-meta">
+                Showing @pageStart-@pageEnd of @Model.TotalSuppliersCount
+            </div>
+            <div class="inventory-pagination-controls">
+                @if (canPage)
+                {
+                    <a class="inventory-page-btn" asp-page="./Index" asp-route-pageNumber="1" aria-label="First page">&laquo;</a>
+                    <a class="inventory-page-btn" asp-page="./Index" asp-route-pageNumber="@(Model.PageNumber - 1)" aria-label="Previous page">&lsaquo;</a>
+                }
+                else
+                {
+                    <span class="inventory-page-btn is-disabled" aria-hidden="true">&laquo;</span>
+                    <span class="inventory-page-btn is-disabled" aria-hidden="true">&lsaquo;</span>
+                }
+
+                @for (var pageIndex = pageWindowStart; pageIndex <= pageWindowEnd; pageIndex++)
+                {
+                    if (pageIndex == Model.PageNumber)
+                    {
+                        <span class="inventory-page-btn is-current" aria-current="page">@pageIndex</span>
+                    }
+                    else
+                    {
+                        <a class="inventory-page-btn" asp-page="./Index" asp-route-pageNumber="@pageIndex">@pageIndex</a>
+                    }
+                }
+
+                @if (canPage)
+                {
+                    <a class="inventory-page-btn" asp-page="./Index" asp-route-pageNumber="@(Model.PageNumber + 1)" aria-label="Next page">&rsaquo;</a>
+                    <a class="inventory-page-btn" asp-page="./Index" asp-route-pageNumber="@Model.TotalPages" aria-label="Last page">&raquo;</a>
+                }
+                else
+                {
+                    <span class="inventory-page-btn is-disabled" aria-hidden="true">&rsaquo;</span>
+                    <span class="inventory-page-btn is-disabled" aria-hidden="true">&raquo;</span>
+                }
+            </div>
         </div>
     }
 </section>

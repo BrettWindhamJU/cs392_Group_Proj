@@ -10,6 +10,12 @@
     var isAllActive = string.Equals(activeStatus, "all", StringComparison.OrdinalIgnoreCase);
     var isDecreasedActive = string.Equals(activeStatus, "decreased", StringComparison.OrdinalIgnoreCase);
     var isIncreasedActive = string.Equals(activeStatus, "increased", StringComparison.OrdinalIgnoreCase);
+    var canPage = Model.TotalPages > 1;
+    var pageStart = Model.PageStartItem;
+    var pageEnd = Model.PageEndItem;
+    var pageWindowStart = Math.Max(1, Model.PageNumber - 1);
+    var pageWindowEnd = Math.Min(Model.TotalPages, pageWindowStart + 2);
+    pageWindowStart = Math.Max(1, pageWindowEnd - 2);
 }
 
 <section class="inventory-list-shell">
@@ -24,15 +30,15 @@
 
         <div class="stock-controls-bar stock-controls-under-header">
             <div class="inventory-status-chips stock-controls-chips">
-                <a class="inventory-chip stock-chip-icon log-chip-all @(isAllActive ? "stock-chip-active" : string.Empty)" asp-page="./Index" asp-route-status="all">
+                <a class="inventory-chip stock-chip-icon log-chip-all @(isAllActive ? "stock-chip-active" : string.Empty)" asp-page="./Index" asp-route-status="all" asp-route-pageNumber="1">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="8" y1="7" x2="16" y2="7"></line><line x1="8" y1="12" x2="16" y2="12"></line><line x1="8" y1="17" x2="16" y2="17"></line></svg>
                     <span>All Logs (@totalLogs)</span>
                 </a>
-                <a class="inventory-chip stock-chip-icon log-chip-increase @(isIncreasedActive ? "stock-chip-active" : string.Empty)" asp-page="./Index" asp-route-status="increased">
+                <a class="inventory-chip stock-chip-icon log-chip-increase @(isIncreasedActive ? "stock-chip-active" : string.Empty)" asp-page="./Index" asp-route-status="increased" asp-route-pageNumber="1">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="19" x2="12" y2="6"></line><polyline points="7 11 12 6 17 11"></polyline></svg>
                     <span>Increased (@increasedChanges)</span>
                 </a>
-                <a class="inventory-chip stock-chip-icon log-chip-decrease @(isDecreasedActive ? "stock-chip-active" : string.Empty)" asp-page="./Index" asp-route-status="decreased">
+                <a class="inventory-chip stock-chip-icon log-chip-decrease @(isDecreasedActive ? "stock-chip-active" : string.Empty)" asp-page="./Index" asp-route-status="decreased" asp-route-pageNumber="1">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="18"></line><polyline points="7 13 12 18 17 13"></polyline></svg>
                     <span>Decreased (@decreasedChanges)</span>
                 </a>
@@ -93,6 +99,47 @@
                     }
                 </tbody>
             </table>
+        </div>
+
+        <div class="inventory-pagination-shell" aria-label="Inventory log pagination">
+            <div class="inventory-pagination-meta">
+                Showing @pageStart-@pageEnd of @Model.FilteredLogsCount
+            </div>
+            <div class="inventory-pagination-controls">
+                @if (canPage)
+                {
+                    <a class="inventory-page-btn" asp-page="./Index" asp-route-status="@activeStatus" asp-route-pageNumber="1" aria-label="First page">&laquo;</a>
+                    <a class="inventory-page-btn" asp-page="./Index" asp-route-status="@activeStatus" asp-route-pageNumber="@(Model.PageNumber - 1)" aria-label="Previous page">&lsaquo;</a>
+                }
+                else
+                {
+                    <span class="inventory-page-btn is-disabled" aria-hidden="true">&laquo;</span>
+                    <span class="inventory-page-btn is-disabled" aria-hidden="true">&lsaquo;</span>
+                }
+
+                @for (var pageIndex = pageWindowStart; pageIndex <= pageWindowEnd; pageIndex++)
+                {
+                    if (pageIndex == Model.PageNumber)
+                    {
+                        <span class="inventory-page-btn is-current" aria-current="page">@pageIndex</span>
+                    }
+                    else
+                    {
+                        <a class="inventory-page-btn" asp-page="./Index" asp-route-status="@activeStatus" asp-route-pageNumber="@pageIndex">@pageIndex</a>
+                    }
+                }
+
+                @if (canPage)
+                {
+                    <a class="inventory-page-btn" asp-page="./Index" asp-route-status="@activeStatus" asp-route-pageNumber="@(Model.PageNumber + 1)" aria-label="Next page">&rsaquo;</a>
+                    <a class="inventory-page-btn" asp-page="./Index" asp-route-status="@activeStatus" asp-route-pageNumber="@Model.TotalPages" aria-label="Last page">&raquo;</a>
+                }
+                else
+                {
+                    <span class="inventory-page-btn is-disabled" aria-hidden="true">&rsaquo;</span>
+                    <span class="inventory-page-btn is-disabled" aria-hidden="true">&raquo;</span>
+                }
+            </div>
         </div>
     }
 </section>

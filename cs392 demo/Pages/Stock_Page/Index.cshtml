@@ -12,8 +12,14 @@
     var isLowActive = string.Equals(activeStatus, "low", StringComparison.OrdinalIgnoreCase);
     var isInActive = string.Equals(activeStatus, "in", StringComparison.OrdinalIgnoreCase);
     var hasSearch = !string.IsNullOrWhiteSpace(Model.Search);
-    var filteredCount = Model.Stock.Count;
+    var filteredCount = Model.TotalItemsCount;
     var statusLabel = isLowActive ? "Low Stock" : isInActive ? "In Stock" : "All Items";
+    var canPage = Model.TotalPages > 1;
+    var pageStart = Model.PageStartItem;
+    var pageEnd = Model.PageEndItem;
+    var pageWindowStart = Math.Max(1, Model.PageNumber - 1);
+    var pageWindowEnd = Math.Min(Model.TotalPages, pageWindowStart + 2);
+    pageWindowStart = Math.Max(1, pageWindowEnd - 2);
 }
 
 <section class="inventory-list-shell">
@@ -31,15 +37,15 @@
 
         <div class="stock-controls-bar stock-controls-under-header">
             <div class="inventory-status-chips stock-controls-chips">
-                <a class="inventory-chip stock-chip-icon @(isAllActive ? "stock-chip-active" : string.Empty)" asp-page="./Index" asp-route-search="@Model.Search" asp-route-status="all">
+                <a class="inventory-chip stock-chip-icon @(isAllActive ? "stock-chip-active" : string.Empty)" asp-page="./Index" asp-route-search="@Model.Search" asp-route-status="all" asp-route-pageNumber="1">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16.5V8a2 2 0 0 0-1.03-1.75l-7-3.89a2 2 0 0 0-1.94 0l-7 3.89A2 2 0 0 0 3 8v8.5a2 2 0 0 0 1.03 1.75l7 3.89a2 2 0 0 0 1.94 0l7-3.89A2 2 0 0 0 21 16.5Z"></path><path d="m3.5 7 8.5 4.75L20.5 7"></path><path d="M12 11.75V22"></path><path d="m7.5 4.75 8.9 4.95"></path></svg>
                     <span>All Items (@allCount)</span>
                 </a>
-                <a class="inventory-chip stock-chip-icon stock-chip-low @(isLowActive ? "stock-chip-active" : string.Empty)" asp-page="./Index" asp-route-search="@Model.Search" asp-route-status="low">
+                <a class="inventory-chip stock-chip-icon stock-chip-low @(isLowActive ? "stock-chip-active" : string.Empty)" asp-page="./Index" asp-route-search="@Model.Search" asp-route-status="low" asp-route-pageNumber="1">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
                     <span>Low Stock (@lowStockCount)</span>
                 </a>
-                <a class="inventory-chip stock-chip-icon stock-chip-good @(isInActive ? "stock-chip-active" : string.Empty)" asp-page="./Index" asp-route-search="@Model.Search" asp-route-status="in">
+                <a class="inventory-chip stock-chip-icon stock-chip-good @(isInActive ? "stock-chip-active" : string.Empty)" asp-page="./Index" asp-route-search="@Model.Search" asp-route-status="in" asp-route-pageNumber="1">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><path d="m9 11 3 3L22 4"></path></svg>
                     <span>In Stock (@inStockCount)</span>
                 </a>
@@ -56,7 +62,7 @@
                 </label>
                 @if (hasSearch)
                 {
-                    <a class="btn stock-clear-btn" asp-page="./Index" asp-route-status="@activeStatus">Clear</a>
+                    <a class="btn stock-clear-btn" asp-page="./Index" asp-route-status="@activeStatus" asp-route-pageNumber="1">Clear</a>
                 }
             </form>
         </div>
@@ -131,6 +137,47 @@
     }
             </tbody>
         </table>
+        </div>
+
+        <div class="inventory-pagination-shell" aria-label="Stock pagination">
+            <div class="inventory-pagination-meta">
+                Showing @pageStart-@pageEnd of @Model.TotalItemsCount
+            </div>
+            <div class="inventory-pagination-controls">
+                @if (canPage)
+                {
+                    <a class="inventory-page-btn" asp-page="./Index" asp-route-search="@Model.Search" asp-route-status="@activeStatus" asp-route-pageNumber="1" aria-label="First page">&laquo;</a>
+                    <a class="inventory-page-btn" asp-page="./Index" asp-route-search="@Model.Search" asp-route-status="@activeStatus" asp-route-pageNumber="@(Model.PageNumber - 1)" aria-label="Previous page">&lsaquo;</a>
+                }
+                else
+                {
+                    <span class="inventory-page-btn is-disabled" aria-hidden="true">&laquo;</span>
+                    <span class="inventory-page-btn is-disabled" aria-hidden="true">&lsaquo;</span>
+                }
+
+                @for (var pageIndex = pageWindowStart; pageIndex <= pageWindowEnd; pageIndex++)
+                {
+                    if (pageIndex == Model.PageNumber)
+                    {
+                        <span class="inventory-page-btn is-current" aria-current="page">@pageIndex</span>
+                    }
+                    else
+                    {
+                        <a class="inventory-page-btn" asp-page="./Index" asp-route-search="@Model.Search" asp-route-status="@activeStatus" asp-route-pageNumber="@pageIndex">@pageIndex</a>
+                    }
+                }
+
+                @if (canPage)
+                {
+                    <a class="inventory-page-btn" asp-page="./Index" asp-route-search="@Model.Search" asp-route-status="@activeStatus" asp-route-pageNumber="@(Model.PageNumber + 1)" aria-label="Next page">&rsaquo;</a>
+                    <a class="inventory-page-btn" asp-page="./Index" asp-route-search="@Model.Search" asp-route-status="@activeStatus" asp-route-pageNumber="@Model.TotalPages" aria-label="Last page">&raquo;</a>
+                }
+                else
+                {
+                    <span class="inventory-page-btn is-disabled" aria-hidden="true">&rsaquo;</span>
+                    <span class="inventory-page-btn is-disabled" aria-hidden="true">&raquo;</span>
+                }
+            </div>
         </div>
     }
 </section>
