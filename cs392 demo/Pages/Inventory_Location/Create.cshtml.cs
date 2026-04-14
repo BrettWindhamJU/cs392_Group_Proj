@@ -72,7 +72,7 @@ namespace cs392_demo.Pages.cs360.Inventory_Location
                 return Page();
             }
 
-            return RedirectToPage("/cs360/Inventory_Location/Index");
+            return RedirectToPage("/Inventory_Location/Index");
         }
     }
 }

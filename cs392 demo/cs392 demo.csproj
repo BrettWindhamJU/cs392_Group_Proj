@@ -9,6 +9,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Pages\Inv_Location\**" />
+    <Content Remove="Pages\Inv_Location\**" />
+    <EmbeddedResource Remove="Pages\Inv_Location\**" />
+    <None Remove="Pages\Inv_Location\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid.EntityFrameworkAdapter" Version="8.0.23" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.23" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.23" />
@@ -31,7 +38,6 @@
 
   <ItemGroup>
     <Folder Include="Components\" />
-    <Folder Include="Pages\Inv_Location\" />
   </ItemGroup>
 
 </Project>
