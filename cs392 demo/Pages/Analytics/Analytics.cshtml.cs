@@ -3,7 +3,7 @@ using System.Text.Json;
 
 public class AnalyticsModel : PageModel
 {
-    public string StockDataJson { get; set; }
+    public string StockDataJson { get; set; } = string.Empty;
 
     public void OnGet()
     {

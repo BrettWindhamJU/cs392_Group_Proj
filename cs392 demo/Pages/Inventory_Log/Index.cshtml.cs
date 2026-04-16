@@ -28,6 +28,15 @@ namespace cs392_demo.Pages.Inventory_Log
         [BindProperty(SupportsGet = true)]
         public string? Status { get; set; }
 
+        [BindProperty(SupportsGet = true)]
+        public int PageNumber { get; set; } = 1;
+
+        public int PageSize { get; } = 12;
+        public int FilteredLogsCount { get; set; }
+        public int TotalPages { get; set; }
+        public int PageStartItem { get; set; }
+        public int PageEndItem { get; set; }
+
         public int AllLogsCount { get; set; }
         public int DecreasedLogsCount { get; set; }
         public int IncreasedLogsCount { get; set; }
@@ -61,12 +70,43 @@ namespace cs392_demo.Pages.Inventory_Log
 
             Status = normalizedStatus;
 
-            Inventory_Activity_Log = normalizedStatus switch
+            var filteredLogs = normalizedStatus switch
             {
                 "decreased" => scopedLogs.Where(log => log.Quantity_After < log.Quantity_Before).ToList(),
                 "increased" => scopedLogs.Where(log => log.Quantity_After > log.Quantity_Before).ToList(),
                 _ => scopedLogs
             };
+
+            FilteredLogsCount = filteredLogs.Count;
+            TotalPages = FilteredLogsCount == 0 ? 0 : (int)Math.Ceiling(FilteredLogsCount / (double)PageSize);
+
+            if (PageNumber < 1)
+            {
+                PageNumber = 1;
+            }
+
+            if (TotalPages > 0 && PageNumber > TotalPages)
+            {
+                PageNumber = TotalPages;
+            }
+
+            var skip = (PageNumber - 1) * PageSize;
+            Inventory_Activity_Log = filteredLogs
+                .Skip(skip)
+                .Take(PageSize)
+                .ToList();
+
+            if (FilteredLogsCount == 0)
+            {
+                PageStartItem = 0;
+                PageEndItem = 0;
+                PageNumber = 1;
+            }
+            else
+            {
+                PageStartItem = skip + 1;
+                PageEndItem = Math.Min(skip + PageSize, FilteredLogsCount);
+            }
         }
     }
 }

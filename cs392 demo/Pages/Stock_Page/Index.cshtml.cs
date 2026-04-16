@@ -30,6 +30,15 @@ namespace cs392_demo.Pages.Stock_Page
         [BindProperty(SupportsGet = true)]
         public string? Status { get; set; }
 
+        [BindProperty(SupportsGet = true)]
+        public int PageNumber { get; set; } = 1;
+
+        public int PageSize { get; } = 12;
+        public int TotalItemsCount { get; set; }
+        public int TotalPages { get; set; }
+        public int PageStartItem { get; set; }
+        public int PageEndItem { get; set; }
+
         public int AllItemsCount { get; set; }
         public int LowItemsCount { get; set; }
         public int InStockItemsCount { get; set; }
@@ -85,7 +94,36 @@ namespace cs392_demo.Pages.Stock_Page
                 _ => scopedStock
             };
 
-            Stock = filteredStock;
+            TotalItemsCount = filteredStock.Count;
+            TotalPages = TotalItemsCount == 0 ? 0 : (int)Math.Ceiling(TotalItemsCount / (double)PageSize);
+
+            if (PageNumber < 1)
+            {
+                PageNumber = 1;
+            }
+
+            if (TotalPages > 0 && PageNumber > TotalPages)
+            {
+                PageNumber = TotalPages;
+            }
+
+            var skip = (PageNumber - 1) * PageSize;
+            Stock = filteredStock
+                .Skip(skip)
+                .Take(PageSize)
+                .ToList();
+
+            if (TotalItemsCount == 0)
+            {
+                PageStartItem = 0;
+                PageEndItem = 0;
+                PageNumber = 1;
+            }
+            else
+            {
+                PageStartItem = skip + 1;
+                PageEndItem = Math.Min(skip + PageSize, TotalItemsCount);
+            }
         }
     }
 }

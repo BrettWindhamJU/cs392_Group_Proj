@@ -25,6 +25,15 @@ namespace cs392_demo.Pages.Suppliers
         public List<Supplier> Suppliers { get; private set; } = new();
         public string CurrentBusinessId { get; private set; } = string.Empty;
 
+        [BindProperty(SupportsGet = true)]
+        public int PageNumber { get; set; } = 1;
+
+        public int PageSize { get; } = 12;
+        public int TotalSuppliersCount { get; set; }
+        public int TotalPages { get; set; }
+        public int PageStartItem { get; set; }
+        public int PageEndItem { get; set; }
+
         [TempData]
         public string? SuppliersError { get; set; }
 
@@ -45,10 +54,45 @@ namespace cs392_demo.Pages.Suppliers
             {
                 Suppliers = await _mongoService.GetByBusinessAsync(businessId);
                 Suppliers = Suppliers.OrderBy(s => s.Name).ToList();
+
+                TotalSuppliersCount = Suppliers.Count;
+                TotalPages = TotalSuppliersCount == 0 ? 0 : (int)Math.Ceiling(TotalSuppliersCount / (double)PageSize);
+
+                if (PageNumber < 1)
+                {
+                    PageNumber = 1;
+                }
+
+                if (TotalPages > 0 && PageNumber > TotalPages)
+                {
+                    PageNumber = TotalPages;
+                }
+
+                var skip = (PageNumber - 1) * PageSize;
+                Suppliers = Suppliers
+                    .Skip(skip)
+                    .Take(PageSize)
+                    .ToList();
+
+                if (TotalSuppliersCount == 0)
+                {
+                    PageStartItem = 0;
+                    PageEndItem = 0;
+                    PageNumber = 1;
+                }
+                else
+                {
+                    PageStartItem = skip + 1;
+                    PageEndItem = Math.Min(skip + PageSize, TotalSuppliersCount);
+                }
             }
             catch (Exception ex) when (IsMongoConnectionIssue(ex))
             {
                 Suppliers = new List<Supplier>();
+                TotalSuppliersCount = 0;
+                TotalPages = 0;
+                PageStartItem = 0;
+                PageEndItem = 0;
                 SuppliersError = "Suppliers are temporarily unavailable because the database connection timed out. Please try again shortly.";
             }
         }
