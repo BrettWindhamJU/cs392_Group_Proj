@@ -18,7 +18,6 @@ namespace cs392_demo.Data
         }
 
         public DbSet<Business> Business { get; set; } = default!;
-        public DbSet<TestModelClass> TestModelClass { get; set; } = default!;
         public DbSet<Inventory_Location> Inventory_Location { get; set; } = default!;
         public DbSet<Inventory_Activity_Log> Inventory_Activity_Log { get; set; } = default!;
         public DbSet<Stock> Stock { get; set; } = default!;
