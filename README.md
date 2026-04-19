@@ -18,9 +18,6 @@ the ability to manage the inventory of that location. The Owner also has the abi
 
 ### Installing
 
-* How/where to download your program
-* Any modifications needed to be made to files/folders
-
 * 1.You need to download the zip file and export it
 
 * 2.Open it in Visual studio
@@ -45,13 +42,11 @@ the ability to manage the inventory of that location. The Owner also has the abi
 
 ## Help
 
-Any advise for common problems or issues.
-```
 Make sure you replace the needed code before running(API key, model name etc)
 
 Make sure the MongoDB Database is setup first before putting the needed info in
 https://www.mongodb.com/
-```
+
 
 ## Authors
 
