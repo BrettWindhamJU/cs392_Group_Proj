@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using cs392_demo.Data;
 
@@ -11,9 +12,11 @@ using cs392_demo.Data;
 namespace cs392_demo.Migrations
 {
     [DbContext(typeof(cs392_demoContext))]
-    partial class cs392_demoContextModelSnapshot : ModelSnapshot
+    [Migration("20260416174102_AddPurchaseOrders")]
+    partial class AddPurchaseOrders
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -252,68 +255,6 @@ namespace cs392_demo.Migrations
                     b.ToTable("Business");
                 });
 
-            modelBuilder.Entity("cs392_demo.models.ChatMessage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ChatSessionId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ChatSessionId");
-
-                    b.ToTable("ChatMessage");
-                });
-
-            modelBuilder.Entity("cs392_demo.models.ChatSession", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("BusinessId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ChatSession");
-                });
-
             modelBuilder.Entity("cs392_demo.models.Inventory_Activity_Log", b =>
                 {
                     b.Property<string>("Log_ID")
@@ -456,9 +397,6 @@ namespace cs392_demo.Migrations
 
                     b.Property<DateTime?>("ExpectedDeliveryDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("LocationId")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(max)");
@@ -670,17 +608,6 @@ namespace cs392_demo.Migrations
                     b.Navigation("Business");
                 });
 
-            modelBuilder.Entity("cs392_demo.models.ChatMessage", b =>
-                {
-                    b.HasOne("cs392_demo.models.ChatSession", "Session")
-                        .WithMany("Messages")
-                        .HasForeignKey("ChatSessionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Session");
-                });
-
             modelBuilder.Entity("cs392_demo.models.Inventory_Activity_Log", b =>
                 {
                     b.HasOne("cs392_demo.models.Business", "Business")
@@ -738,11 +665,6 @@ namespace cs392_demo.Migrations
                     b.Navigation("Locations");
 
                     b.Navigation("Users");
-                });
-
-            modelBuilder.Entity("cs392_demo.models.ChatSession", b =>
-                {
-                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("cs392_demo.models.PurchaseOrder", b =>

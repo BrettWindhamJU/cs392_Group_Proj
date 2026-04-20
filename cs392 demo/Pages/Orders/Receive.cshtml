@@ -1,0 +1,105 @@
+@page "{id:int}"
+@model cs392_demo.Pages.Orders.ReceiveModel
+
+@{
+    ViewData["Title"] = $"Receive — {Model.Order.PONumber}";
+    var o = Model.Order;
+}
+
+<section class="inventory-list-shell">
+
+    <div class="inventory-list-header">
+        <div class="po-page-header-row">
+            <div>
+                <a class="inventory-header-link" asp-page="./Details" asp-route-id="@o.Id">← Back to Order</a>
+                <h1>Receive Stock — @o.PONumber</h1>
+                <p class="inventory-subtitle">
+                    Supplier: <strong>@o.SupplierName</strong>
+                    @if (o.ExpectedDeliveryDate.HasValue)
+                    {
+                        <text> · Expected @o.ExpectedDeliveryDate.Value.ToString("MMM d, yyyy")</text>
+                    }
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <form method="post" asp-route-id="@o.Id">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3"></div>
+
+        <div class="po-form-card">
+            <h2 class="po-form-card-title">Enter Quantities Received</h2>
+            <p class="text-muted small mb-3">
+                Enter the quantity received for each item. Leave as 0 to skip.
+                For items linked to inventory, stock will be updated automatically.
+            </p>
+
+            <div class="po-receive-header d-none d-md-grid mb-1">
+                <span class="small fw-semibold text-muted">Item</span>
+                <span class="small fw-semibold text-muted text-end">Ordered</span>
+                <span class="small fw-semibold text-muted text-end">Already Received</span>
+                <span class="small fw-semibold text-muted text-end">Remaining</span>
+                <span class="small fw-semibold text-muted text-end">Receive Now</span>
+            </div>
+
+            @for (int i = 0; i < Model.Lines.Count; i++)
+            {
+                var line   = Model.Lines[i];
+                var remaining = line.QuantityOrdered - line.QuantityReceived;
+                <input type="hidden" name="Lines[@i].LineItemId"        value="@line.LineItemId" />
+                <input type="hidden" name="Lines[@i].ItemName"          value="@line.ItemName" />
+                <input type="hidden" name="Lines[@i].QuantityOrdered"   value="@line.QuantityOrdered" />
+                <input type="hidden" name="Lines[@i].QuantityReceived"  value="@line.QuantityReceived" />
+
+                <div class="po-receive-row @(remaining <= 0 ? "po-receive-row--done" : "")">
+                    <div class="po-receive-name">
+                        @line.ItemName
+                        @if (remaining <= 0)
+                        {
+                            <span class="badge bg-success ms-1">Complete</span>
+                        }
+                    </div>
+                    <div class="text-end text-muted">@line.QuantityOrdered</div>
+                    <div class="text-end text-muted">@line.QuantityReceived</div>
+                    <div class="text-end @(remaining > 0 ? "text-warning fw-semibold" : "text-success")">
+                        @remaining
+                    </div>
+                    <div class="text-end">
+                        @if (remaining > 0)
+                        {
+                            <input type="number"
+                                   name="Lines[@i].QuantityToReceive"
+                                   class="form-control form-control-sm po-receive-qty-input"
+                                   value="0"
+                                   min="0"
+                                   max="@remaining" />
+                        }
+                        else
+                        {
+                            <input type="hidden" name="Lines[@i].QuantityToReceive" value="0" />
+                            <span class="text-muted small">—</span>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="d-flex gap-2 justify-content-end mb-4">
+            <a class="btn btn-outline-secondary" asp-page="./Details" asp-route-id="@o.Id">Cancel</a>
+            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="fillMax()">Fill Max</button>
+            <button type="submit" class="btn btn-success">Confirm Receipt</button>
+        </div>
+    </form>
+
+</section>
+
+@section Scripts {
+<script>
+function fillMax() {
+    document.querySelectorAll('.po-receive-qty-input').forEach(function(inp) {
+        inp.value = inp.max;
+    });
+}
+</script>
+}

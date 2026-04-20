@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using cs392_demo.Data;
 
@@ -11,9 +12,11 @@ using cs392_demo.Data;
 namespace cs392_demo.Migrations
 {
     [DbContext(typeof(cs392_demoContext))]
-    partial class cs392_demoContextModelSnapshot : ModelSnapshot
+    [Migration("20260419235318_MoveLocationIdToOrderHeader")]
+    partial class MoveLocationIdToOrderHeader
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

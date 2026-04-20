@@ -22,6 +22,10 @@ namespace cs392_demo.Data
         public DbSet<Inventory_Activity_Log> Inventory_Activity_Log { get; set; } = default!;
         public DbSet<Stock> Stock { get; set; } = default!;
         public DbSet<ManagerInvitation> ManagerInvitation { get; set; } = default!;
+        public DbSet<PurchaseOrder> PurchaseOrder { get; set; } = default!;
+        public DbSet<PurchaseOrderLineItem> PurchaseOrderLineItem { get; set; } = default!;
+        public DbSet<ChatSession> ChatSession { get; set; } = default!;
+        public DbSet<ChatMessage> ChatMessage { get; set; } = default!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -76,6 +80,19 @@ namespace cs392_demo.Data
             modelBuilder.Entity<ManagerInvitation>()
                 .HasIndex(i => i.Token)
                 .IsUnique();
+
+            // PurchaseOrder -> PurchaseOrderLineItem (cascade delete)
+            modelBuilder.Entity<PurchaseOrder>()
+                .HasMany(o => o.LineItems)
+                .WithOne(li => li.PurchaseOrder)
+                .HasForeignKey(li => li.PurchaseOrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<PurchaseOrder>()
+                .HasIndex(o => new { o.BusinessId, o.CreatedAt });
+
+            modelBuilder.Entity<PurchaseOrder>()
+                .HasIndex(o => new { o.BusinessId, o.PONumber });
         }
     }
 }

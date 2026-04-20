@@ -18,9 +18,6 @@ namespace CS392_Demo3.Pages.Curriculum
 {
     public class ChatbotModel : PageModel
     {
-        private const string ChatSessionKey = "Chat_Page_Conversation";
-        private const int MaxMessagesToKeep = 40;
-
         private readonly AIService _ai;
         private readonly ILogger<ChatbotModel> _logger;
         private readonly MongoDBService _mongoService;
@@ -40,49 +37,127 @@ namespace CS392_Demo3.Pages.Curriculum
 
         public class ChatMessage
         {
-            public string Role { get; set; } = string.Empty;  // "User" or "AI"
+            public string Role { get; set; } = string.Empty;
             public string Content { get; set; } = string.Empty;
         }
 
         public List<ChatMessage> ChatHistory { get; set; } = new();
+        public List<cs392_demo.models.ChatSession> PastSessions { get; set; } = new();
+        public cs392_demo.models.ChatSession? ActiveSession { get; set; }
 
         [BindProperty]
         public string UserMessage { get; set; } = string.Empty;
 
+        [BindProperty(SupportsGet = true)]
+        public int? SessionId { get; set; }
+
         public bool IsProcessing { get; private set; }
 
-        public void OnGet()
+        public async Task<IActionResult> OnPostDeleteSessionAsync(int deleteId)
         {
-            ChatHistory = LoadChatHistory();
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var session = await _context.ChatSession.FirstOrDefaultAsync(s => s.Id == deleteId && s.UserId == userId);
+            if (session != null)
+            {
+                var messages = _context.ChatMessage.Where(m => m.ChatSessionId == deleteId);
+                _context.ChatMessage.RemoveRange(messages);
+                _context.ChatSession.Remove(session);
+                await _context.SaveChangesAsync();
+            }
+            // If we deleted the active session, go to fresh chat
+            var redirectId = SessionId == deleteId ? (int?)null : SessionId;
+            return RedirectToPage(new { sessionId = redirectId });
         }
 
-        public IActionResult OnPostClear()
+        public async Task OnGetAsync()
         {
-            HttpContext.Session.Remove(ChatSessionKey);
-            return RedirectToPage();
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(userId)) return;
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            var businessId = user?.BusinessId;
+            if (string.IsNullOrWhiteSpace(businessId)) return;
+
+            PastSessions = await _context.ChatSession
+                .Where(s => s.UserId == userId && s.BusinessId == businessId)
+                .OrderByDescending(s => s.UpdatedAt)
+                .Take(30)
+                .ToListAsync();
+
+            if (SessionId.HasValue)
+            {
+                ActiveSession = PastSessions.FirstOrDefault(s => s.Id == SessionId.Value);
+                if (ActiveSession != null)
+                {
+                    var msgs = await _context.ChatMessage
+                        .Where(m => m.ChatSessionId == ActiveSession.Id)
+                        .OrderBy(m => m.CreatedAt)
+                        .ToListAsync();
+                    ChatHistory = msgs.Select(m => new ChatMessage { Role = m.Role, Content = m.Content }).ToList();
+                }
+            }
+        }
+
+        public async Task<IActionResult> OnPostClearAsync()
+        {
+            // Start a new chat by redirecting with no session ID
+            return RedirectToPage(new { sessionId = (int?)null });
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
             IsProcessing = true;
-            ChatHistory = LoadChatHistory();
 
             try
             {
                 if (string.IsNullOrWhiteSpace(UserMessage))
                 {
                     ModelState.AddModelError(string.Empty, "Please enter a message.");
+                    await OnGetAsync();
                     return Page();
                 }
 
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+                var businessId = user?.BusinessId ?? string.Empty;
+
                 var userQuestion = UserMessage.Trim();
 
-                // Add user message
-                ChatHistory.Add(new ChatMessage
+                // Get or create persistent session
+                cs392_demo.models.ChatSession? session = null;
+                if (SessionId.HasValue)
+                    session = await _context.ChatSession.FirstOrDefaultAsync(s => s.Id == SessionId.Value && s.UserId == userId);
+
+                if (session == null)
                 {
+                    session = new cs392_demo.models.ChatSession
+                    {
+                        UserId = userId ?? string.Empty,
+                        BusinessId = businessId,
+                        Title = userQuestion.Length > 60 ? userQuestion[..60] + "…" : userQuestion,
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow
+                    };
+                    _context.ChatSession.Add(session);
+                    await _context.SaveChangesAsync();
+                    SessionId = session.Id;
+                }
+
+                // Save user message to DB
+                _context.ChatMessage.Add(new cs392_demo.models.ChatMessage
+                {
+                    ChatSessionId = session.Id,
                     Role = "User",
-                    Content = userQuestion
+                    Content = userQuestion,
+                    CreatedAt = DateTime.UtcNow
                 });
+
+                // Load history for context
+                var dbMessages = await _context.ChatMessage
+                    .Where(m => m.ChatSessionId == session.Id)
+                    .OrderBy(m => m.CreatedAt)
+                    .ToListAsync();
+                ChatHistory = dbMessages.Select(m => new ChatMessage { Role = m.Role, Content = m.Content }).ToList();
 
                 string response;
                 string supplierContext;
@@ -95,15 +170,11 @@ namespace CS392_Demo3.Pages.Curriculum
                     _logger.LogWarning(ex, "MongoDB is unavailable while building supplier context.");
                     response = "I can help with supplier questions, but I cannot reach the supplier database right now. Please try again in a moment.";
 
-                    ChatHistory.Add(new ChatMessage
-                    {
-                        Role = "AI",
-                        Content = response
-                    });
-
-                    SaveChatHistory(ChatHistory);
+                    _context.ChatMessage.Add(new cs392_demo.models.ChatMessage { ChatSessionId = session.Id, Role = "AI", Content = response, CreatedAt = DateTime.UtcNow });
+                    session.UpdatedAt = DateTime.UtcNow;
+                    await _context.SaveChangesAsync();
                     UserMessage = string.Empty;
-                    return RedirectToPage();
+                    return RedirectToPage(new { sessionId = session.Id });
                 }
 
                 if (string.IsNullOrWhiteSpace(supplierContext))
@@ -131,19 +202,20 @@ namespace CS392_Demo3.Pages.Curriculum
                     }
                 }
 
-                // Add AI response
-                ChatHistory.Add(new ChatMessage
+                // Save AI response to DB
+                _context.ChatMessage.Add(new cs392_demo.models.ChatMessage
                 {
+                    ChatSessionId = session.Id,
                     Role = "AI",
-                    Content = response
+                    Content = response,
+                    CreatedAt = DateTime.UtcNow
                 });
+                session.UpdatedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
 
-                SaveChatHistory(ChatHistory);
-
-                // Clear input
                 UserMessage = string.Empty;
 
-                return RedirectToPage();
+                return RedirectToPage(new { sessionId = session.Id });
             }
             catch (System.Exception ex)
             {
@@ -157,36 +229,6 @@ namespace CS392_Demo3.Pages.Curriculum
             }
         }
 
-        private List<ChatMessage> LoadChatHistory()
-        {
-            try
-            {
-                var raw = HttpContext.Session.GetString(ChatSessionKey);
-                if (string.IsNullOrWhiteSpace(raw))
-                {
-                    return new List<ChatMessage>();
-                }
-
-                var history = JsonSerializer.Deserialize<List<ChatMessage>>(raw) ?? new List<ChatMessage>();
-                return history;
-            }
-            catch
-            {
-                return new List<ChatMessage>();
-            }
-        }
-
-        private void SaveChatHistory(List<ChatMessage> history)
-        {
-            if (history.Count > MaxMessagesToKeep)
-            {
-                history = history.TakeLast(MaxMessagesToKeep).ToList();
-            }
-
-            var raw = JsonSerializer.Serialize(history);
-            HttpContext.Session.SetString(ChatSessionKey, raw);
-            ChatHistory = history;
-        }
 
         private static bool IsMongoConnectionIssue(System.Exception ex)
         {

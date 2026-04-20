@@ -1,0 +1,199 @@
+@page
+@using cs392_demo.models
+@model cs392_demo.Pages.Orders.IndexModel
+
+@{
+    ViewData["Title"] = "Purchase Orders";
+    var canPage = Model.TotalPages > 1;
+    var pageWindowStart = Math.Max(1, Model.PageNumber - 1);
+    var pageWindowEnd = Math.Min(Model.TotalPages, pageWindowStart + 2);
+    pageWindowStart = Math.Max(1, pageWindowEnd - 2);
+
+    string BadgeClass(PurchaseOrderStatus s) => s switch
+    {
+        PurchaseOrderStatus.Draft             => "po-badge po-badge-draft",
+        PurchaseOrderStatus.Submitted         => "po-badge po-badge-submitted",
+        PurchaseOrderStatus.Approved          => "po-badge po-badge-approved",
+        PurchaseOrderStatus.Ordered           => "po-badge po-badge-ordered",
+        PurchaseOrderStatus.PartiallyReceived => "po-badge po-badge-partial",
+        PurchaseOrderStatus.Received          => "po-badge po-badge-received",
+        PurchaseOrderStatus.Cancelled         => "po-badge po-badge-cancelled",
+        _                                     => "po-badge"
+    };
+
+    string StatusLabel(PurchaseOrderStatus s) => s switch
+    {
+        PurchaseOrderStatus.PartiallyReceived => "Partial",
+        _ => s.ToString()
+    };
+
+    var selStatus    = Model.StatusFilter;
+    var selSupplier  = Model.SupplierFilter;
+}
+
+<section class="inventory-list-shell">
+
+    <div class="inventory-list-header">
+        <div>
+            <h1>Purchase Orders</h1>
+            <p class="inventory-subtitle">Restock inventory from your suppliers</p>
+            <a class="inventory-header-link" asp-page="./Create">+ New Order</a>
+        </div>
+
+        <!-- Status chips -->
+        <div class="stock-controls-bar stock-controls-under-header mt-2">
+            <div class="inventory-status-chips stock-controls-chips">
+                <a class="inventory-chip stock-chip-icon @(string.IsNullOrWhiteSpace(selStatus) ? "stock-chip-active" : "")"
+                   asp-page="./Index" asp-route-supplierFilter="@selSupplier">All (@Model.TotalOrdersCount)</a>
+                <a class="inventory-chip stock-chip-icon @(selStatus == "Draft" ? "stock-chip-active" : "")"
+                   asp-page="./Index" asp-route-statusFilter="Draft" asp-route-supplierFilter="@selSupplier">Draft (@Model.DraftCount)</a>
+                <a class="inventory-chip stock-chip-icon @(selStatus == "Active" ? "stock-chip-active" : "")"
+                   asp-page="./Index" asp-route-statusFilter="Active" asp-route-supplierFilter="@selSupplier">Active (@Model.ActiveCount)</a>
+                <a class="inventory-chip stock-chip-icon stock-chip-good @(selStatus == "Received" ? "stock-chip-active" : "")"
+                   asp-page="./Index" asp-route-statusFilter="Received" asp-route-supplierFilter="@selSupplier">Received (@Model.ReceivedCount)</a>
+                <a class="inventory-chip stock-chip-icon stock-chip-low @(selStatus == "Cancelled" ? "stock-chip-active" : "")"
+                   asp-page="./Index" asp-route-statusFilter="Cancelled" asp-route-supplierFilter="@selSupplier">Cancelled (@Model.CancelledCount)</a>
+            </div>
+
+            <form method="get" class="po-filter-bar" id="orderSearchForm">
+                <input type="hidden" name="statusFilter" value="@selStatus" />
+                <div class="stock-search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" name="searchQuery" id="orderSearch"
+                           value="@Model.SearchQuery" placeholder="Search PO#, supplier, item..."
+                           autocomplete="off" />
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (Model.Orders.Count == 0)
+    {
+        <div class="inventory-empty-state">
+            <h2>No purchase orders found</h2>
+            <p>Create your first purchase order to start restocking inventory.</p>
+            <a class="inventory-header-link" asp-page="./Create">Create Purchase Order</a>
+        </div>
+    }
+    else
+    {
+        <div class="inventory-table-only-card">
+            <table class="table inventory-table mb-0">
+                <thead>
+                    <tr>
+                        <th>PO #</th>
+                        <th>Supplier</th>
+                        <th>Created</th>
+                        <th>Status</th>
+                        <th>Items</th>
+                        <th>Total</th>
+                        <th>Expected Delivery</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model.Orders)
+                    {
+                        <tr data-search="@( ($"{order.PONumber} {order.SupplierName} {order.Status} {order.Notes}").ToLower() )">
+                            <td><strong>@order.PONumber</strong></td>
+                            <td>@order.SupplierName</td>
+                            <td>
+                                <div>@order.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")</div>
+                                <div class="inventory-product-meta">by @order.CreatedByUserName</div>
+                            </td>
+                            <td><span class="@BadgeClass(order.Status)">@StatusLabel(order.Status)</span></td>
+                            <td>@order.LineItems.Count</td>
+                            <td>@order.TotalAmount.ToString("C")</td>
+                            <td>
+                                @if (order.ExpectedDeliveryDate.HasValue)
+                                {
+                                    @order.ExpectedDeliveryDate.Value.ToString("MMM d, yyyy")
+                                }
+                                else
+                                {
+                                    <span class="text-muted">—</span>
+                                }
+                            </td>
+                            <td class="inventory-actions-cell">
+                                <a asp-page="./Details" asp-route-id="@order.Id"
+                                   class="btn btn-sm btn-outline-secondary">View</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (canPage)
+        {
+            <div class="inventory-pagination-shell" aria-label="Orders pagination">
+                <div class="inventory-pagination-meta">
+                    Showing @Model.PageStartItem-@Model.PageEndItem of @Model.TotalOrdersCount
+                </div>
+                <div class="inventory-pagination-controls">
+                    @if (Model.PageNumber > 1)
+                    {
+                        <a class="inventory-page-btn" asp-route-pageNumber="1" asp-route-statusFilter="@selStatus" asp-route-supplierFilter="@selSupplier" aria-label="First page">&laquo;</a>
+                        <a class="inventory-page-btn" asp-route-pageNumber="@(Model.PageNumber - 1)" asp-route-statusFilter="@selStatus" asp-route-supplierFilter="@selSupplier" aria-label="Previous page">&lsaquo;</a>
+                    }
+                    else
+                    {
+                        <span class="inventory-page-btn is-disabled" aria-hidden="true">&laquo;</span>
+                        <span class="inventory-page-btn is-disabled" aria-hidden="true">&lsaquo;</span>
+                    }
+                    @for (var pageIndex = pageWindowStart; pageIndex <= pageWindowEnd; pageIndex++)
+                    {
+                        if (pageIndex == Model.PageNumber)
+                        {
+                            <span class="inventory-page-btn is-current" aria-current="page">@pageIndex</span>
+                        }
+                        else
+                        {
+                            <a class="inventory-page-btn" asp-route-pageNumber="@pageIndex" asp-route-statusFilter="@selStatus" asp-route-supplierFilter="@selSupplier">@pageIndex</a>
+                        }
+                    }
+                    @if (Model.PageNumber < Model.TotalPages)
+                    {
+                        <a class="inventory-page-btn" asp-route-pageNumber="@(Model.PageNumber + 1)" asp-route-statusFilter="@selStatus" asp-route-supplierFilter="@selSupplier" aria-label="Next page">&rsaquo;</a>
+                        <a class="inventory-page-btn" asp-route-pageNumber="@Model.TotalPages" asp-route-statusFilter="@selStatus" asp-route-supplierFilter="@selSupplier" aria-label="Last page">&raquo;</a>
+                    }
+                    else
+                    {
+                        <span class="inventory-page-btn is-disabled" aria-hidden="true">&rsaquo;</span>
+                        <span class="inventory-page-btn is-disabled" aria-hidden="true">&raquo;</span>
+                    }
+                </div>
+            </div>
+        }
+    }
+
+</section>
+
+@section Scripts {
+<script>
+    (function () {
+        const input = document.getElementById('orderSearch');
+        if (!input) return;
+
+        // Each data row gets a data search attribute with searchable text
+        const rows = document.querySelectorAll('tbody tr[data-search]');
+
+        input.addEventListener('input', function () {
+            const q = this.value.trim().toLowerCase();
+            rows.forEach(function (row) {
+                row.style.display = !q || row.dataset.search.includes(q) ? '' : 'none';
+            });
+        });
+
+        // On Enter, fall back to server search (for paginated results)
+        input.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                document.getElementById('orderSearchForm').submit();
+            }
+        });
+    })();
+</script>
+}
