@@ -10,48 +10,80 @@
         <span>Back to Suppliers</span>
     </a>
 
-    <div class="sw-chat-container">
-        <div class="sw-chat-header">
-            <div>
-                <div class="sw-chat-title-block">
-                    <div class="sw-chat-kicker">StockWise</div>
-                    <h1 class="sw-chat-title">
-                        <span class="sw-chat-title-icon" aria-hidden="true">✦</span>
-                        <span>Supplier Assistant</span>
-                    </h1>
-                </div>
+    <div class="sw-chat-layout">
+        <!-- Sidebar: past sessions -->
+        <aside class="sw-chat-sidebar">
+            <div class="sw-chat-sidebar-header">
+                <span>Chats</span>
+                <a asp-page="/Chat_Page/Chatbot" class="sw-chat-new-btn" title="New Chat">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </a>
             </div>
-            <div class="sw-chat-header-actions">
-                <form method="post" asp-page-handler="Clear">
-                    <button type="submit" class="btn btn-sm sw-chat-clear-btn">
+            <ul class="sw-chat-session-list">
+                @if (!Model.PastSessions.Any())
+                {
+                    <li class="sw-chat-session-empty">No previous chats</li>
+                }
+                @foreach (var s in Model.PastSessions)
+                {
+                    <li class="sw-chat-session-item @(Model.SessionId == s.Id ? "active" : "")">
+                        <a asp-page="/Chat_Page/Chatbot" asp-route-sessionId="@s.Id" class="sw-chat-session-link">
+                            <span class="sw-chat-session-title">@s.Title</span>
+                            <span class="sw-chat-session-date">@s.UpdatedAt.ToLocalTime().ToString("MMM d")</span>
+                        </a>
+                        <form method="post" class="sw-chat-session-delete-form" asp-page-handler="DeleteSession">
+                            <input type="hidden" name="deleteId" value="@s.Id" />
+                            <input type="hidden" name="SessionId" value="@Model.SessionId" />
+                            <button type="submit" class="sw-chat-session-delete-btn" title="Delete chat" onclick="return confirm('Delete this chat?')">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                            </button>
+                        </form>
+                    </li>
+                }
+            </ul>
+        </aside>
+
+        <!-- Main chat area -->
+        <div class="sw-chat-container">
+            <div class="sw-chat-header">
+                <div>
+                    <div class="sw-chat-title-block">
+                        <div class="sw-chat-kicker">StockWise</div>
+                        <h1 class="sw-chat-title">
+                            <span class="sw-chat-title-icon" aria-hidden="true">✦</span>
+                            <span>Supplier Assistant</span>
+                        </h1>
+                    </div>
+                </div>
+                <div class="sw-chat-header-actions">
+                    <a asp-page="/Chat_Page/Chatbot" class="btn btn-sm sw-chat-clear-btn">
                         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                             <path d="M4.5 6.2a2.7 2.7 0 0 1 2.7-2.7h9.6a2.7 2.7 0 0 1 2.7 2.7v6.2a2.7 2.7 0 0 1-2.7 2.7h-6l-3.7 3v-3H7.2a2.7 2.7 0 0 1-2.7-2.7V6.2Z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"></path>
                         </svg>
                         <span>New Chat</span>
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        <div class="sw-chat-box" id="chatBox">
-
-
-            @foreach (var msg in Model.ChatHistory)
-            {
-                <div class="sw-chat-row @(msg.Role == "User" ? "sw-chat-row-user" : "sw-chat-row-ai")">
-                    <div class="sw-chat-bubble @(msg.Role == "User" ? "sw-chat-bubble-user" : "sw-chat-bubble-ai")">@msg.Content</div>
+                    </a>
                 </div>
-            }
+            </div>
+
+            <div class="sw-chat-box" id="chatBox">
+                @foreach (var msg in Model.ChatHistory)
+                {
+                    <div class="sw-chat-row @(msg.Role == "User" ? "sw-chat-row-user" : "sw-chat-row-ai")">
+                        <div class="sw-chat-bubble @(msg.Role == "User" ? "sw-chat-bubble-user" : "sw-chat-bubble-ai")">@msg.Content</div>
+                    </div>
+                }
+            </div>
+
+            <div class="sw-chat-validation" asp-validation-summary="All"></div>
+
+            <form method="post" class="sw-chat-input" id="chatForm">
+                <input type="hidden" name="SessionId" value="@Model.SessionId" />
+                <textarea asp-for="UserMessage" rows="2" id="chatMessageInput" placeholder="Ask about supplier status, delivery time, payment terms, or MOQ..." class="form-control"></textarea>
+                <button type="submit" class="btn btn-primary sw-chat-send-btn" @(Model.IsProcessing ? "disabled" : null)>
+                    Send
+                </button>
+            </form>
         </div>
-
-        <div class="sw-chat-validation" asp-validation-summary="All"></div>
-
-        <form method="post" class="sw-chat-input" id="chatForm">
-            <textarea asp-for="UserMessage" rows="2" id="chatMessageInput" placeholder="Ask about supplier status, delivery time, payment terms, or MOQ..." class="form-control"></textarea>
-            <button type="submit" class="btn btn-primary sw-chat-send-btn" @(Model.IsProcessing ? "disabled" : null)>
-                Send
-            </button>
-        </form>
     </div>
 </div>
 

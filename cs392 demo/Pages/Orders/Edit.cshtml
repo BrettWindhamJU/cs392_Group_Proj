@@ -1,0 +1,331 @@
+
+@page "{id:int}"
+@model cs392_demo.Pages.Orders.EditModel
+
+@{
+    ViewData["Title"] = $"Edit {Model.Order.PONumber}";
+    var stockJson = System.Text.Json.JsonSerializer.Serialize(
+        Model.StockItems.Select(s => new {
+            stockId = s.Stock_ID,
+            name    = s.Item_Name,
+            sku     = s.SKU ?? string.Empty,
+            amount  = s.Amount,
+            danger  = s.Danger_Range,
+            isLow   = s.Amount <= s.Danger_Range
+        }));
+}
+
+<section class="inventory-list-shell">
+
+    <div class="inventory-list-header">
+        <div class="po-page-header-row">
+            <div>
+                <a class="inventory-header-link" asp-page="./Details" asp-route-id="@Model.Order.Id">← Back to Order</a>
+                <h1>Edit @Model.Order.PONumber</h1>
+                <p class="inventory-subtitle">Update this draft order</p>
+            </div>
+        </div>
+    </div>
+
+
+
+    <form method="post" asp-route-id="@Model.Order.Id">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3"></div>
+
+        <div class="po-form-card">
+            <h2 class="po-form-card-title">Order Details</h2>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Supplier <span class="text-danger">*</span></label>
+                    @if (!Model.Suppliers.Any())
+                    {
+                        <p class="text-warning mb-0">No active suppliers found.
+                            <a asp-page="/Suppliers/Create">Add a supplier first.</a>
+                        </p>
+                    }
+                    else
+                    {
+                        <select class="form-select" id="supplierSelect"
+                                asp-for="Input.SupplierMongoId" required
+                                onchange="syncSupplierName(this)">
+                            <option value="">Select supplier…</option>
+                            @foreach (var s in Model.Suppliers)
+                            {
+                                var sel = s.Id == Model.Input.SupplierMongoId ? "selected" : null;
+                                <option value="@s.Id" data-name="@s.Name"
+                                        data-leadtime="@s.Terms.LeadTimeDays"
+                                        selected="@sel">@s.Name</option>
+                            }
+                        </select>
+                        <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            if (window.Choices) {
+                                var supplierSelect = document.getElementById('supplierSelect');
+                                if (supplierSelect && !supplierSelect.classList.contains('choices-initialized')) {
+                                    new Choices(supplierSelect, {
+                                        searchEnabled: true,
+                                        itemSelectText: '',
+                                        shouldSort: false
+                                    });
+                                    supplierSelect.classList.add('choices-initialized');
+                                }
+                            }
+                        });
+                        </script>
+                    }
+                    <input type="hidden" asp-for="Input.SupplierName" id="supplierNameHidden" />
+                    <span asp-validation-for="Input.SupplierMongoId" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Destination Location <span class="text-danger">*</span></label>
+                    <select class="form-select" asp-for="Input.LocationId" required>
+                        <option value="">Select location…</option>
+                        @foreach (var loc in Model.Locations)
+                        {
+                            var isLoc = loc.location_id == Model.Input.LocationId ? "selected" : null;
+                            <option value="@loc.location_id" selected="@isLoc">@loc.Location_name</option>
+                        }
+                    </select>
+                    <span asp-validation-for="Input.LocationId" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold" asp-for="Input.ExpectedDeliveryDate">Expected Delivery</label>
+                    <input type="date" class="form-control" asp-for="Input.ExpectedDeliveryDate" id="deliveryDateInput" />
+                    <span asp-validation-for="Input.ExpectedDeliveryDate" class="text-danger small"></span>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label fw-semibold" asp-for="Input.Notes">Notes</label>
+                    <textarea class="form-control" asp-for="Input.Notes" rows="2"
+                              placeholder="Any notes for this order…"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="po-form-card">
+
+            <div class="d-none d-md-flex row g-2 mb-1 px-2">
+                <div class="col-md-2"><span class="small fw-semibold text-muted">Stock Item</span></div>
+                <div class="col-md-3"><span class="small fw-semibold text-muted">Item Name *</span></div>
+                <div class="col-md-2"><span class="small fw-semibold text-muted">SKU</span></div>
+                <div class="col-md-1"><span class="small fw-semibold text-muted">Qty *</span></div>
+                <div class="col-md-2"><span class="small fw-semibold text-muted">Unit Cost</span></div>
+                <div class="col-md-1"><span class="small fw-semibold text-muted">Subtotal</span></div>
+                <div class="col"></div>
+            </div>
+
+            <div id="lineItemsContainer">
+                @for (var i = 0; i < Model.Input.LineItems.Count; i++)
+                {
+                    var li  = Model.Input.LineItems[i];
+                    var idx = i;
+                    <div class="po-line-item-row" data-idx="@idx">
+                        <input type="hidden" name="Input.LineItems[@idx].Id" value="@li.Id" />
+                        <div class="row g-2 align-items-end">
+                            <div class="col-12 col-md-2">
+                                <select class="form-select form-select-sm stock-picker"
+                                        onchange="fillFromStock(this, @idx)" aria-label="Stock item">
+                                    <option value="">-- Select from inventory --</option>
+                                    @foreach (var s in Model.StockItems)
+                                    {
+                                        var isSelected = s.Stock_ID == li.StockId ? "selected" : null;
+                                        <option value="@s.Stock_ID"
+                                                data-name="@s.Item_Name"
+                                                data-sku="@(s.SKU ?? "")"
+                                                data-danger="@s.Danger_Range"
+                                                data-amount="@s.Amount"
+                                                selected="@isSelected">
+                                            @s.Item_Name@(s.SKU != null ? $" ({s.SKU})" : "")@(s.Amount <= s.Danger_Range ? " ⚠" : "")
+                                        </option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-12 col-md-3">
+                                <input type="text" name="Input.LineItems[@idx].ItemName"
+                                       class="form-control form-control-sm item-name"
+                                       required placeholder="Item name" value="@li.ItemName" />
+                            </div>
+                            <div class="col-6 col-md-2">
+                                <input type="text" name="Input.LineItems[@idx].SKU"
+                                       class="form-control form-control-sm item-sku"
+                                       placeholder="SKU" value="@li.SKU" />
+                            </div>
+                            <input type="hidden" name="Input.LineItems[@idx].StockId"
+                                   class="item-stockid" value="@li.StockId" />
+                            <div class="col-3 col-md-1">
+                                <input type="number" name="Input.LineItems[@idx].QuantityOrdered"
+                                       class="form-control form-control-sm item-qty"
+                                       value="@li.QuantityOrdered" min="1" required
+                                       oninput="recalcRow(this)" />
+                            </div>
+                            <div class="col-3 col-md-2">
+                                <input type="number" name="Input.LineItems[@idx].UnitCost"
+                                       class="form-control form-control-sm item-cost"
+                                       value="@li.UnitCost.ToString("F2")" step="0.01" min="0" required
+                                       readonly oninput="recalcRow(this)" />
+                            </div>
+                            <div class="col-3 col-md-1 po-subtotal-cell">
+                                <span class="item-subtotal small text-muted">$0.00</span>
+                            </div>
+                            <div class="col-auto">
+                                <button type="button" class="po-remove-line-btn"
+                                        onclick="removeLine(this)" title="Remove" aria-label="Remove item">×</button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <button type="button" class="po-add-line-btn mt-2" onclick="addLineItem()">+ Add Item</button>
+        </div>
+
+        <div class="d-flex gap-2 justify-content-end mb-4 po-action-row">
+            <button type="submit" name="Input.SaveAsDraft" value="true" class="po-action-btn po-action-secondary">Save as Draft</button>
+            <button type="submit" name="Input.SaveAsDraft" value="false" class="po-action-btn po-action-primary">Submit Order</button>
+            <a class="po-action-btn po-action-cancel" asp-page="./Details" asp-route-id="@Model.Order.Id">Cancel</a>
+        </div>
+    </form>
+
+</section>
+
+@section Scripts {
+<script>
+var stockItems = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+    Model.StockItems.Select(s => new {
+        stockId = s.Stock_ID,
+        name    = s.Item_Name,
+        sku     = s.SKU ?? "",
+        amount  = s.Amount,
+        danger  = s.Danger_Range,
+        isLow   = s.Amount <= s.Danger_Range
+    })));
+
+var supplierCatalogs = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+    Model.Suppliers.ToDictionary(
+        s => s.Id,
+        s => s.Catalog.Select(c => new {
+            stockId       = c.StockId,
+            supplierSku   = c.SupplierSku,
+            lastUnitPrice = c.LastUnitPrice
+        }))));
+
+var lineIndex = @Model.Input.LineItems.Count;
+
+function getActiveCatalog() {
+    var supplierId = document.getElementById('supplierSelect').value;
+    return supplierId && supplierCatalogs[supplierId] ? supplierCatalogs[supplierId] : null;
+}
+
+function syncSupplierName(sel) {
+    var opt = sel.options[sel.selectedIndex];
+    document.getElementById('supplierNameHidden').value = opt.dataset.name || '';
+    document.querySelectorAll('.stock-picker').forEach(function(picker) {
+        var currentVal = picker.value;
+        picker.innerHTML = buildStockOptions();
+        picker.value = currentVal;
+    });
+}
+
+function buildStockOptions() {
+    var catalog = getActiveCatalog();
+    var items = stockItems;
+    if (catalog && catalog.length > 0) {
+        var catalogIds = catalog.map(function(c) { return c.stockId; });
+        items = stockItems.filter(function(s) { return catalogIds.includes(s.stockId); });
+    }
+    var html = catalog
+        ? '<option value="">-- Supplier items (' + items.length + ') --</option>'
+        : '<option value="">-- Select from inventory --</option>';
+    items.forEach(function(s) {
+        var catEntry = catalog ? catalog.find(function(c) { return c.stockId === s.stockId; }) : null;
+        var label = s.name + (s.sku ? ' (' + s.sku + ')' : '') + (s.isLow ? ' ⚠' : '');
+        var price = catEntry && catEntry.lastUnitPrice != null ? catEntry.lastUnitPrice : '';
+        html += '<option value="' + esc(s.stockId) + '" data-name="' + esc(s.name) + '" data-sku="' + esc(s.sku) + '" data-danger="' + s.danger + '" data-amount="' + s.amount + '" data-price="' + price + '">' + esc(label) + '</option>';
+    });
+    return html;
+}
+
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function addLineItem(prefill) {
+    var idx = lineIndex++;
+    var div = document.createElement('div');
+    div.className = 'po-line-item-row';
+    div.dataset.idx = idx;
+    var p = prefill || {};
+    div.innerHTML =
+        '<input type="hidden" name="Input.LineItems[' + idx + '].Id" value="0" />' +
+        '<div class="row g-2 align-items-end">' +
+          '<div class="col-12 col-md-2"><select class="form-select form-select-sm stock-picker" onchange="fillFromStock(this,' + idx + ')" aria-label="Stock item">' + buildStockOptions() + '</select></div>' +
+          '<div class="col-12 col-md-3"><input type="text" name="Input.LineItems[' + idx + '].ItemName" class="form-control form-control-sm item-name" required placeholder="Item name" value="' + esc(p.name||'') + '" /></div>' +
+          '<div class="col-6 col-md-2"><input type="text" name="Input.LineItems[' + idx + '].SKU" class="form-control form-control-sm item-sku" placeholder="SKU" value="' + esc(p.sku||'') + '" /></div>' +
+          '<input type="hidden" name="Input.LineItems[' + idx + '].StockId" class="item-stockid" value="' + esc(p.stockId||'') + '" />' +
+          '<div class="col-3 col-md-1"><input type="number" name="Input.LineItems[' + idx + '].QuantityOrdered" class="form-control form-control-sm item-qty" value="' + (p.qty||1) + '" min="1" required oninput="recalcAll()" /></div>' +
+          '<div class="col-3 col-md-2"><input type="number" name="Input.LineItems[' + idx + '].UnitCost" class="form-control form-control-sm item-cost" value="' + (p.cost||'0.00') + '" step="0.01" min="0" required readonly oninput="recalcAll()" /></div>' +
+          '<div class="col-3 col-md-1 po-subtotal-cell"><span class="item-subtotal small text-muted">$0.00</span></div>' +
+          '<div class="col-auto"><button type="button" class="po-remove-line-btn" onclick="removeLine(this)" title="Remove" aria-label="Remove item">×</button></div>' +
+        '</div>';
+    document.getElementById('lineItemsContainer').appendChild(div);
+    recalcAll();
+}
+
+function fillFromStock(sel, idx) {
+    var opt = sel.options[sel.selectedIndex];
+    var row = sel.closest('.po-line-item-row');
+    if (opt.value) {
+        // Check if this stock item is already selected in another row
+        var duplicate = Array.from(document.querySelectorAll('.po-line-item-row .item-stockid'))
+            .some(function(hiddenInput) {
+                return hiddenInput.value === opt.value &&
+                       hiddenInput.closest('.po-line-item-row') !== row;
+            });
+        if (duplicate) {
+            sel.value = '';
+            alert('"' + opt.text.replace(/ ⚠$/, '') + '" is already on this order. Adjust the quantity on the existing line instead.');
+            return;
+        }
+    }
+    if (opt.dataset.name) {
+        row.querySelector('.item-name').value    = opt.dataset.name;
+        row.querySelector('.item-sku').value     = opt.dataset.sku || '';
+        row.querySelector('.item-stockid').value = sel.value;
+        var danger = parseInt(opt.dataset.danger || '0');
+        var amount = parseInt(opt.dataset.amount || '0');
+        if (danger > 0 && amount <= danger)
+            row.querySelector('.item-qty').value = Math.max(1, danger - amount + danger);
+        if (opt.dataset.price)
+            row.querySelector('.item-cost').value = parseFloat(opt.dataset.price).toFixed(2);
+    }
+    recalcAll();
+}
+
+function removeLine(btn) { btn.closest('.po-line-item-row').remove(); recalcAll(); }
+
+function recalcAll() {
+    var total = 0;
+    document.querySelectorAll('.po-line-item-row').forEach(function(row) {
+        var qty  = parseFloat(row.querySelector('.item-qty')?.value  || 0) || 0;
+        var cost = parseFloat(row.querySelector('.item-cost')?.value || 0) || 0;
+        var sub  = qty * cost;
+        total += sub;
+        var span = row.querySelector('.item-subtotal');
+        if (span) span.textContent = '$' + sub.toFixed(2);
+    });
+    document.getElementById('grandTotal').textContent = '$' + total.toFixed(2);
+}
+
+function fillFromLowStock() {
+    document.getElementById('lineItemsContainer').innerHTML = '';
+    lineIndex = 0;
+    stockItems.filter(s => s.isLow).forEach(function(s) {
+        addLineItem({ stockId: s.stockId, name: s.name, sku: s.sku,
+                      qty: Math.max(1, s.danger - s.amount + s.danger), cost: '0.00' });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', recalcAll);
+</script>
+}

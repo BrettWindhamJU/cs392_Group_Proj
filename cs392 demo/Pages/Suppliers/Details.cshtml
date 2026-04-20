@@ -10,55 +10,110 @@
         <h1>Supplier Details</h1>
     </header>
 
-    <div class="details-card">
-        <dl class="details-grid">
-            <dt>Supplier ID</dt>
-            <dd>@Model.Supplier.SupplierId</dd>
+    <div class="details-card" style="padding-bottom: 0;">
+        <!-- Tabs -->
+        <ul class="nav nav-tabs supplier-detail-tabs" id="supplierTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#tab-info" type="button" role="tab">Details</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="catalog-tab" data-bs-toggle="tab" data-bs-target="#tab-catalog" type="button" role="tab">
+                    Catalog
+                    @if (Model.Supplier.Catalog.Any())
+                    {
+                        <span class="badge supplier-catalog-badge ms-1">@Model.Supplier.Catalog.Count</span>
+                    }
+                </button>
+            </li>
+        </ul>
 
-            <dt>Name</dt>
-            <dd>@Model.Supplier.Name</dd>
+        <div class="tab-content supplier-tab-content">
+            <!-- Details tab -->
+            <div class="tab-pane fade show active" id="tab-info" role="tabpanel" style="padding-bottom: 0.5rem;">
+                <dl class="details-grid">
+                    <dt>Supplier ID</dt>
+                    <dd>@Model.Supplier.SupplierId</dd>
 
-            <dt>Status</dt>
-            <dd>@Model.Supplier.Status</dd>
+                    <dt>Name</dt>
+                    <dd>@Model.Supplier.Name</dd>
 
-            <dt>Primary Contact</dt>
-            <dd>@Model.Supplier.Contact.PrimaryName</dd>
+                    <dt>Status</dt>
+                    <dd>@Model.Supplier.Status</dd>
 
-            <dt>Email</dt>
-            <dd>@Model.Supplier.Contact.Email</dd>
+                    <dt>Primary Contact</dt>
+                    <dd>@Model.Supplier.Contact.PrimaryName</dd>
 
-            <dt>Phone</dt>
-            <dd>@Model.Supplier.Contact.Phone</dd>
+                    <dt>Email</dt>
+                    <dd>@Model.Supplier.Contact.Email</dd>
 
-            <dt>Address</dt>
-            <dd>@Model.Supplier.Address.Line1, @Model.Supplier.Address.City, @Model.Supplier.Address.State @Model.Supplier.Address.PostalCode, @Model.Supplier.Address.Country</dd>
+                    <dt>Phone</dt>
+                    <dd>@Model.Supplier.Contact.Phone</dd>
 
-            <dt>Categories</dt>
-            <dd>@string.Join(", ", Model.Supplier.Categories)</dd>
+                    <dt>Address</dt>
+                    <dd>@Model.Supplier.Address.Line1, @Model.Supplier.Address.City, @Model.Supplier.Address.State @Model.Supplier.Address.PostalCode, @Model.Supplier.Address.Country</dd>
 
-            <dt>Delivery Time</dt>
-            <dd>@(Model.Supplier.Terms.LeadTimeDays.HasValue ? $"{Model.Supplier.Terms.LeadTimeDays.Value} day{(Model.Supplier.Terms.LeadTimeDays.Value == 1 ? string.Empty : "s")}" : "-")</dd>
+                    <dt>Categories</dt>
+                    <dd>@string.Join(", ", Model.Supplier.Categories)</dd>
 
-            <dt>Minimum Order</dt>
-            <dd>@(Model.Supplier.Terms.MinimumOrderAmount.HasValue ? $"{Model.Supplier.Terms.MinimumOrderAmount.Value}" : "-")</dd>
+                    <dt>Delivery Time</dt>
+                    <dd>@(Model.Supplier.Terms.LeadTimeDays.HasValue ? $"{Model.Supplier.Terms.LeadTimeDays.Value} day{(Model.Supplier.Terms.LeadTimeDays.Value == 1 ? string.Empty : "s")}" : "-")</dd>
 
-            <dt>Payment Terms</dt>
-            <dd>@Model.Supplier.Terms.PaymentTerms</dd>
+                    <dt>Minimum Order</dt>
+                    <dd>@(Model.Supplier.Terms.MinimumOrderAmount.HasValue ? $"{Model.Supplier.Terms.MinimumOrderAmount.Value}" : "-")</dd>
 
-            <dt>Delivery Days</dt>
-            <dd>@string.Join(", ", Model.Supplier.Terms.DeliveryDays)</dd>
+                    <dt>Payment Terms</dt>
+                    <dd>@Model.Supplier.Terms.PaymentTerms</dd>
 
-            <dt>Reliability Score</dt>
-            <dd>@Model.Supplier.Performance.ReliabilityScore</dd>
+                    <dt>Delivery Days</dt>
+                    <dd>@string.Join(", ", Model.Supplier.Terms.DeliveryDays)</dd>
 
-            <dt>Last Delivery</dt>
-            <dd>@(Model.Supplier.Performance.LastDeliveryAtUtc.HasValue ? Model.Supplier.Performance.LastDeliveryAtUtc.Value.ToString("g") : "-")</dd>
+                    <dt>Reliability Score</dt>
+                    <dd>@Model.Supplier.Performance.ReliabilityScore</dd>
 
-            <dt>Notes</dt>
-            <dd>@Model.Supplier.Notes</dd>
-        </dl>
+                    <dt>Last Delivery</dt>
+                    <dd>@(Model.Supplier.Performance.LastDeliveryAtUtc.HasValue ? Model.Supplier.Performance.LastDeliveryAtUtc.Value.ToString("g") : "-")</dd>
 
-        <div class="details-actions">
+                    <dt>Notes</dt>
+                    <dd>@Model.Supplier.Notes</dd>
+                </dl>
+            </div>
+
+            <!-- Catalog tab -->
+            <div class="tab-pane fade" id="tab-catalog" role="tabpanel">
+                @if (!Model.Supplier.Catalog.Any())
+                {
+                    <p class="text-muted" style="padding: 1.5rem 0;">No catalog items have been added for this supplier.</p>
+                }
+                else
+                {
+                    <table class="supplier-catalog-table">
+                        <thead>
+                            <tr>
+                                <th>STOCK ID</th>
+                                <th>SUPPLIER SKU</th>
+                                <th>UNIT</th>
+                                <th>PACK SIZE</th>
+                                <th>LAST UNIT PRICE</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Supplier.Catalog.OrderBy(c => c.StockId))
+                            {
+                                <tr>
+                                    <td>@item.StockId</td>
+                                    <td class="text-muted">@item.SupplierSku</td>
+                                    <td class="text-muted">@item.Unit</td>
+                                    <td class="text-muted">@item.PackSize</td>
+                                    <td>@(item.LastUnitPrice.HasValue ? $"${item.LastUnitPrice.Value:F2}" : "—")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+
+        <div class="details-actions" style="padding-top: 1rem; padding-bottom: 0.75rem;">
             @if (User.IsInRole("Owner") || User.IsInRole("Manager"))
             {
                 <a asp-page="/Suppliers/Edit" asp-route-id="@Model.Supplier.SupplierId">Edit</a>
