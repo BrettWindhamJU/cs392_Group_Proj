@@ -23,10 +23,17 @@ namespace cs392_demo.models
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
             var aiSettings = config.GetSection("AISettings");
-            _apiKey = aiSettings["ApiKey"]
-                ?? config["GOOGLE_API_KEY"]
-                ?? config["GEMINI_API_KEY"]
-                ?? throw new InvalidOperationException("Gemini API key is not configured. Set AISettings:ApiKey, GOOGLE_API_KEY, or GEMINI_API_KEY.");
+
+            // Empty strings in appsettings should not block fallback to user secrets/env vars.
+            var configuredApiKey = aiSettings["ApiKey"];
+            if (string.IsNullOrWhiteSpace(configuredApiKey))
+                configuredApiKey = config["GOOGLE_API_KEY"];
+            if (string.IsNullOrWhiteSpace(configuredApiKey))
+                configuredApiKey = config["GEMINI_API_KEY"];
+
+            _apiKey = !string.IsNullOrWhiteSpace(configuredApiKey)
+                ? configuredApiKey
+                : throw new InvalidOperationException("Gemini API key is not configured. Set AISettings:ApiKey, GOOGLE_API_KEY, or GEMINI_API_KEY.");
             _model = aiSettings["Model"] ?? "gemini-2.5-flash";
 
             var baseAddress = aiSettings["BaseAddress"]
