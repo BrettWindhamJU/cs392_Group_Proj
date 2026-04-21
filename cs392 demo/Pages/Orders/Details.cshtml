@@ -1,0 +1,242 @@
+@page "{id:int}"
+@model cs392_demo.Pages.Orders.DetailsModel
+@using cs392_demo.models
+
+@{
+    ViewData["Title"] = $"Order {Model.Order.PONumber}";
+    var o = Model.Order;
+
+    string BadgeClass(PurchaseOrderStatus s) => s switch
+    {
+        PurchaseOrderStatus.Draft             => "po-badge po-badge-draft",
+        PurchaseOrderStatus.Submitted         => "po-badge po-badge-submitted",
+        PurchaseOrderStatus.Approved          => "po-badge po-badge-approved",
+        PurchaseOrderStatus.Ordered           => "po-badge po-badge-ordered",
+        PurchaseOrderStatus.PartiallyReceived => "po-badge po-badge-partial",
+        PurchaseOrderStatus.Received          => "po-badge po-badge-received",
+        PurchaseOrderStatus.Cancelled         => "po-badge po-badge-cancelled",
+        _                                     => "po-badge"
+    };
+
+    string StatusLabel(PurchaseOrderStatus s) => s switch
+    {
+        PurchaseOrderStatus.Draft             => "Draft",
+        PurchaseOrderStatus.Submitted         => "Submitted",
+        PurchaseOrderStatus.Approved          => "Approved",
+        PurchaseOrderStatus.Ordered           => "Ordered",
+        PurchaseOrderStatus.PartiallyReceived => "Partial",
+        PurchaseOrderStatus.Received          => "Received",
+        PurchaseOrderStatus.Cancelled         => "Cancelled",
+        _                                     => s.ToString()
+    };
+}
+
+<section class="inventory-list-shell">
+
+    @if (TempData["Error"] is string err)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @err<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+
+    <div class="inventory-list-header">
+        <a class="inventory-header-link" asp-page="./Index">← Back to Orders</a>
+        <div class="po-page-header-row">
+            <div>
+                <h1>@o.PONumber <span class="@BadgeClass(o.Status)">@StatusLabel(o.Status)</span></h1>
+                <p class="inventory-subtitle">
+                    Created @o.CreatedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt")
+                    @if (!string.IsNullOrEmpty(o.CreatedByUserName))
+                    { <text> by @o.CreatedByUserName</text> }
+                </p>
+            </div>
+            <div class="d-flex gap-2 align-items-start flex-wrap">
+                @if (o.IsEditable && (User.IsInRole("Owner") || User.IsInRole("Manager")))
+                {
+                    <a class="btn btn-outline-secondary btn-sm" asp-page="./Edit" asp-route-id="@o.Id">Edit Draft</a>
+                }
+                @if (o.CanReceive && (User.IsInRole("Owner") || User.IsInRole("Manager")))
+                {
+                    <a class="btn btn-success btn-sm" asp-page="./Receive" asp-route-id="@o.Id">Receive Stock</a>
+                }
+                @if (o.Status == PurchaseOrderStatus.Submitted && Model.IsOwner)
+                {
+                    <form method="post" asp-page-handler="Approve" asp-route-id="@o.Id" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-primary btn-sm">Approve</button>
+                    </form>
+                }
+                @if (o.Status == PurchaseOrderStatus.Approved && (User.IsInRole("Owner") || User.IsInRole("Manager")))
+                {
+                    <form method="post" asp-page-handler="MarkOrdered" asp-route-id="@o.Id" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-sm" style="background-color:#1a5f6b;border-color:#1a5f6b;color:#fff;">Submit Order</button>
+                    </form>
+                }
+                @if (o.IsCancellable && (User.IsInRole("Owner") || User.IsInRole("Manager")))
+                {
+                    <form method="post" asp-page-handler="Cancel" asp-route-id="@o.Id" class="d-inline"
+                          onsubmit="return confirm('Cancel this order?')">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-outline-danger btn-sm">Cancel Order</button>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <!-- Left: order meta -->
+        <div class="col-md-6">
+            <div class="po-form-card h-100 p-3">
+                <h2 class="po-form-card-title">Order Info</h2>
+                <dl class="row mb-0">
+                    <dt class="col-5">Supplier</dt>
+                    <dd class="col-7 fw-semibold mb-0">@o.SupplierName</dd>
+
+                    @if (Model.SupplierAddress != null && !string.IsNullOrWhiteSpace(Model.SupplierAddress.Line1))
+                    {
+                        <dt class="col-5 mt-n1"></dt>
+                        <dd class="col-7 small text-muted mt-n1">
+                            @Model.SupplierAddress.Line1<br />
+                            @Model.SupplierAddress.City, @Model.SupplierAddress.State @Model.SupplierAddress.PostalCode@if (!string.IsNullOrWhiteSpace(Model.SupplierAddress.Country)){<text>, @Model.SupplierAddress.Country</text>}
+                        </dd>
+                    }
+
+                    @if (Model.SupplierContact != null && (!string.IsNullOrWhiteSpace(Model.SupplierContact.PrimaryName) || !string.IsNullOrWhiteSpace(Model.SupplierContact.Email) || !string.IsNullOrWhiteSpace(Model.SupplierContact.Phone)))
+                    {
+                        <dt class="col-5 mt-n1"></dt>
+                        <dd class="col-7 small text-muted mt-n1">
+                            @string.Join(" · ", new[]{ Model.SupplierContact.PrimaryName, Model.SupplierContact.Email }.Where(x => !string.IsNullOrWhiteSpace(x)))
+                            @if (!string.IsNullOrWhiteSpace(Model.SupplierContact.Phone))
+                            {
+                                <br />@Model.SupplierContact.Phone
+                            }
+                        </dd>
+                    }
+
+                    @if (Model.LocationName != null)
+                    {
+                        <dt class="col-5 pt-2">Destination</dt>
+                        <dd class="col-7 fw-semibold pt-2 mb-0">@Model.LocationName</dd>
+                        @if (!string.IsNullOrWhiteSpace(Model.LocationAddress))
+                        {
+                            <dt class="col-5 mt-n1"></dt>
+                            <dd class="col-7 small text-muted mt-n1">@Model.LocationAddress</dd>
+                        }
+                    }
+
+                    <dt class="col-5 pt-2">Expected Delivery</dt>
+                    <dd class="col-7 pt-2">
+                        @(o.ExpectedDeliveryDate.HasValue
+                            ? o.ExpectedDeliveryDate.Value.ToString("MMM d, yyyy")
+                            : "—")
+                    </dd>
+
+                    @if (o.SubmittedAt.HasValue)
+                    {
+                        <dt class="col-5">Submitted</dt>
+                        <dd class="col-7">@o.SubmittedAt.Value.ToLocalTime().ToString("MMM d, yyyy")</dd>
+                    }
+                    @if (o.ApprovedAt.HasValue)
+                    {
+                        <dt class="col-5">Approved</dt>
+                        <dd class="col-7">
+                            @o.ApprovedAt.Value.ToLocalTime().ToString("MMM d, yyyy")
+                            @if (!string.IsNullOrEmpty(o.ApprovedByUserName))
+                            { <span class="text-muted small">by @o.ApprovedByUserName</span> }
+                        </dd>
+                    }
+                    @if (o.ReceivedAt.HasValue)
+                    {
+                        <dt class="col-5">Received</dt>
+                        <dd class="col-7">
+                            @o.ReceivedAt.Value.ToLocalTime().ToString("MMM d, yyyy")
+                            @if (!string.IsNullOrEmpty(o.ReceivedByUserName))
+                            { <span class="text-muted small">by @o.ReceivedByUserName</span> }
+                        </dd>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(o.Notes))
+                    {
+                        <dt class="col-5">Notes</dt>
+                        <dd class="col-7">@o.Notes</dd>
+                    }
+                </dl>
+            </div>
+        </div>
+
+        <!-- Right: totals -->
+        <div class="col-md-6">
+            <div class="po-form-card h-100 p-3">
+                <h2 class="po-form-card-title">Summary</h2>
+                <dl class="row mb-0">
+                    @if (!string.IsNullOrWhiteSpace(Model.SupplierAccountNumber))
+                    {
+                        <dt class="col-6 fw-normal small">Acct #</dt>
+                        <dd class="col-6 small">@Model.SupplierAccountNumber</dd>
+                    }
+                    <dt class="col-6">Items</dt>
+                    <dd class="col-6">@o.LineItems.Count</dd>
+
+                    <dt class="col-6">Total Qty Ordered</dt>
+                    <dd class="col-6">@o.LineItems.Sum(li => li.QuantityOrdered)</dd>
+
+                    <dt class="col-6">Total Qty Received</dt>
+                    <dd class="col-6">@o.LineItems.Sum(li => li.QuantityReceived)</dd>
+
+                    <dt class="col-6 fw-bold">Order Total</dt>
+                    <dd class="col-6 fw-bold">@o.TotalAmount.ToString("C")</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <!-- Line items table -->
+    <div class="inventory-table-only-card">
+        <table class="inventory-table table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Item Name</th>
+                    <th>SKU</th>
+                    <th class="text-end">Qty Ordered</th>
+                    <th class="text-end">Qty Received</th>
+                    <th class="text-end">Remaining</th>
+                    <th class="text-end">Unit Cost</th>
+                    <th class="text-end">Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var li in o.LineItems)
+                {
+                    <tr>
+                        <td>@li.ItemName</td>
+                        <td class="text-muted">@(li.SKU ?? "—")</td>
+                        <td class="text-end">@li.QuantityOrdered</td>
+                        <td class="text-end">@li.QuantityReceived</td>
+                        <td class="text-end">
+                            @if (li.QuantityRemaining > 0)
+                            {
+                                <span class="text-warning fw-semibold">@li.QuantityRemaining</span>
+                            }
+                            else
+                            {
+                                <span class="text-success">0</span>
+                            }
+                        </td>
+                        <td class="text-end">@li.UnitCost.ToString("C")</td>
+                        <td class="text-end">@li.Subtotal.ToString("C")</td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="6" class="text-end fw-bold">Total</td>
+                    <td class="text-end fw-bold">@o.TotalAmount.ToString("C")</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+</section>

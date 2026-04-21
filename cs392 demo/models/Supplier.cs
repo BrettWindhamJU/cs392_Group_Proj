@@ -45,6 +45,10 @@ namespace cs392_demo.models
         [BsonElement("performance")]
         public SupplierPerformance Performance { get; set; } = new();
 
+        [BsonElement("accountNumber")]
+        [Display(Name = "Account Number")]
+        public string AccountNumber { get; set; } = string.Empty;
+
         [BsonElement("notes")]
         public string Notes { get; set; } = string.Empty;
 
