@@ -114,7 +114,7 @@ namespace cs392_demo.models
         }
 
 
-        private static string BuildPrompt(string userMessage, string? dataContext = null)
+        private static string BuildPromptSupplier(string userMessage, string? dataContext = null)
         {
             var contextSection = string.IsNullOrWhiteSpace(dataContext)
                 ? ""
@@ -144,14 +144,47 @@ User question:
 {userMessage}
 ";
         }
+        private static string BuildPromptAnalytics(string userMessage, string? dataContext = null)
+        {
+            var contextSection = string.IsNullOrWhiteSpace(dataContext)
+                ? ""
+                : $@"
+Data context from your system:
+{dataContext}
 
-    
+";
+
+            return $@"
+@""Return ONLY valid JSON.
+
+DO NOT include:
+- markdown
+- ```json
+- explanations
+- comments
+
+If unsure, return an empty object {{}}.
+
+Format:
+{{
+  """"stockId"""": [
+    {{ """"date"""": number, """"amount"""": number }}
+  ]
+}}"",
+{contextSection}
+User question:
+{userMessage}
+";
+        }
+
+
+
         public async Task<string> SendPromptAsync(string message)
         {
             if (string.IsNullOrWhiteSpace(message))
                 throw new ArgumentNullException(nameof(message));
 
-            var prompt = BuildPrompt(message);
+            var prompt = BuildPromptSupplier(message);
 
             var payload = new
             {
@@ -178,17 +211,29 @@ User question:
             return await SendRequestAsync(payload);
         }
 
-        public async Task<string> SendPromptWithContextAsync(string message, string dataContext)
+        public async Task<string> SendPromptWithContextAsync(string message, string dataContext, string type)
         {
             if (string.IsNullOrWhiteSpace(message))
                 throw new ArgumentNullException(nameof(message));
-
-            var prompt = BuildPrompt(message, dataContext);
-
-            var payload = new
+            
+            string prompt;
+            if (type == null)
             {
-                contents = new[]
+                _logger.LogInformation("calling BuildPromptSupplier with ", message.ToString(), " and ", message.ToString());
+                prompt = BuildPromptSupplier(message, dataContext);
+                _logger.LogInformation("BuildPromptSupplier called with response ", prompt.ToString());
+
+            }
+            else
+            {
+                _logger.LogInformation("calling BuildPromptAnalytics with ", message.ToString(), " and ", message.ToString());
+                prompt = BuildPromptAnalytics(message, dataContext);
+                _logger.LogInformation("BuildPromptAnalytics called with response ", prompt.ToString());
+            }
+                var payload = new
                 {
+                    contents = new[]
+                    {
                     new
                     {
                         role = "user",
@@ -198,14 +243,14 @@ User question:
                         }
                     }
                 },
-                generationConfig = new
-                {
-                    temperature = 0.2,
-                    topP = 0.8,
-                    topK = 40,
-                    maxOutputTokens = 1024
-                }
-            };
+                    generationConfig = new
+                    {
+                        temperature = 0.2,
+                        topP = 0.8,
+                        topK = 40,
+                        maxOutputTokens = 1024
+                    }
+                };
 
             return await SendRequestAsync(payload);
         }

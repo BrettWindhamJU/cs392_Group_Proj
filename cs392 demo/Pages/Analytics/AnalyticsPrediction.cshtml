@@ -1,0 +1,26 @@
+﻿@page
+@model AnalyticsPrediction
+@using System.Text.Json
+
+
+<h2>Stock Predictions</h2>
+
+<pre id="output"></pre>
+
+<pre>@Model.PredictionJson</pre>
+<script>
+    const raw = @Html.Raw(JsonSerializer.Serialize(Model.PredictionJson));
+    console.log ("JSON data: ", raw);
+
+    // Remove ```json and ```
+    //raw = raw.replace(/```json/g, "").replace(/```/g, "").trim();
+
+    let data = {};
+    try {
+        data = JSON.parse(raw);
+    } catch (e) {
+        console.error("Invalid JSON from AI:", raw);
+    }
+
+    console.log("Predictions:", data);
+</script>
