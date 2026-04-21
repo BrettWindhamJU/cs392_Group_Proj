@@ -47,6 +47,13 @@ namespace cs392_demo.Services
                 .FirstOrDefaultAsync();
         }
 
+        public async Task<Supplier?> GetByMongoIdAsync(string mongoId)
+        {
+            return await _supplierCollection
+                .Find(s => s.Id == mongoId)
+                .FirstOrDefaultAsync();
+        }
+
         public async Task CreateAsync(Supplier supplier)
         {
             await _supplierCollection.InsertOneAsync(supplier);

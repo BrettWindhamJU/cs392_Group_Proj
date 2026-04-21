@@ -51,12 +51,16 @@
                             @foreach (var s in Model.Suppliers)
                             {
                                 <option value="@s.Id" data-name="@s.Name"
-                                        data-leadtime="@s.Terms.LeadTimeDays">@s.Name</option>
+                                        data-leadtime="@s.Terms.LeadTimeDays"
+                                        data-accountnumber="@s.AccountNumber">@s.Name</option>
                             }
                         </select>
                     }
                     <input type="hidden" asp-for="Input.SupplierName" id="supplierNameHidden" />
                     <span asp-validation-for="Input.SupplierMongoId" class="text-danger small"></span>
+                    <div id="accountNumberHint" class="form-text d-none">
+                        Account #: <span id="accountNumberDisplay" class="fw-semibold"></span>
+                    </div>
                 </div>
 
                 <div class="col-md-4">
@@ -219,6 +223,14 @@ function syncSupplierName(sel) {
         document.getElementById('leadTimeHint').textContent = 'Suggested: ' + lead + '-day lead time';
     } else {
         document.getElementById('leadTimeHint').textContent = '';
+    }
+    var acct = opt.dataset.accountnumber || '';
+    var hintDiv = document.getElementById('accountNumberHint');
+    if (acct) {
+        document.getElementById('accountNumberDisplay').textContent = acct;
+        hintDiv.classList.remove('d-none');
+    } else {
+        hintDiv.classList.add('d-none');
     }
     // Re-render every existing stock picker with the new filtered list
     document.querySelectorAll('.stock-picker').forEach(function(picker) {

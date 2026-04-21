@@ -94,7 +94,13 @@
                 <h2 class="po-form-card-title">Order Info</h2>
                 <dl class="row mb-0">
                     <dt class="col-5">Supplier</dt>
-                    <dd class="col-7">@o.SupplierName</dd>
+                    <dd class="col-7">
+                        @o.SupplierName
+                        @if (!string.IsNullOrWhiteSpace(Model.SupplierAccountNumber))
+                        {
+                            <br /><small class="text-muted">Acct #: @Model.SupplierAccountNumber</small>
+                        }
+                    </dd>
 
                     @if (Model.LocationName != null)
                     {
