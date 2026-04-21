@@ -15,6 +15,14 @@
         }));
 }
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2/dist/css/tom-select.bootstrap5.min.css">
+<style>
+.ts-wrapper.form-select-sm { padding: 0; }
+.ts-wrapper.form-select-sm .ts-control { min-height: 31px; padding: .25rem .5rem; font-size: .875rem; flex-wrap: nowrap; align-items: center; }
+.ts-wrapper.form-select-sm .ts-control input { flex: 1 1 auto; min-width: 2ch; width: auto !important; padding: 0 !important; margin: 0 !important; }
+.ts-wrapper.form-select-sm .ts-control .item { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+</style>
+
 <section class="inventory-list-shell">
 
     <div class="inventory-list-header">
@@ -236,6 +244,7 @@
 </section>
 
 @section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2/dist/js/tom-select.complete.min.js"></script>
 <script>
 var stockItems = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
     Model.StockItems.Select(s => new {
@@ -289,8 +298,10 @@ function syncSupplierName(sel) {
     updateAddressPreview();
     document.querySelectorAll('.stock-picker').forEach(function(picker) {
         var currentVal = picker.value;
+        if (picker.tomselect) picker.tomselect.destroy();
         picker.innerHTML = buildStockOptions();
-        picker.value = currentVal;
+        initTomSelect(picker);
+        picker.tomselect.setValue(currentVal, true);
     });
 }
 
@@ -352,6 +363,8 @@ function addLineItem(prefill) {
           '<div class="col-auto"><button type="button" class="po-remove-line-btn" onclick="removeLine(this)" title="Remove" aria-label="Remove item">×</button></div>' +
         '</div>';
     document.getElementById('lineItemsContainer').appendChild(div);
+    var newPicker = div.querySelector('.stock-picker');
+    initTomSelect(newPicker);
     recalcAll();
 }
 
@@ -409,6 +422,19 @@ function fillFromLowStock() {
     });
 }
 
-document.addEventListener('DOMContentLoaded', recalcAll);
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.stock-picker').forEach(function(sel) { initTomSelect(sel); });
+    recalcAll();
+});
+
+function initTomSelect(sel) {
+    return new TomSelect(sel, {
+        maxOptions: 500,
+        placeholder: sel.options[0] ? sel.options[0].text : '-- Select --',
+        render: {
+            no_results: function() { return '<div class="no-results px-3 py-2 text-muted small">No matching items</div>'; }
+        }
+    });
+}
 </script>
 }
