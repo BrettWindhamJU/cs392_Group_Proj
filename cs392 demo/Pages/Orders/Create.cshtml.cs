@@ -7,13 +7,14 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
+using InventoryLocation = cs392_demo.models.Inventory_Location;
 
 namespace cs392_demo.Pages.Orders
 {
     [Authorize(Roles = "Owner,Manager")]
     public class CreateModel : PageModel
     {
-        public List<Inventory_Location> Locations { get; set; } = new();
+        public List<cs392_demo.models.Inventory_Location> Locations { get; set; } = new();
         private readonly cs392_demoContext _context;
         private readonly MongoDBService _mongoService;
 
@@ -38,7 +39,7 @@ namespace cs392_demo.Pages.Orders
             var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
             var businessId = currentUser?.BusinessId;
             Locations = string.IsNullOrWhiteSpace(businessId)
-                ? new List<Inventory_Location>()
+                ? new List<cs392_demo.models.Inventory_Location>()
                 : await _context.Inventory_Location.Where(l => l.BusinessId == businessId).ToListAsync();
             if (!Input.LineItems.Any())
                 Input.LineItems.Add(new LineItemInput());   // start with one blank row
@@ -51,7 +52,7 @@ namespace cs392_demo.Pages.Orders
             var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
             var businessId = currentUser?.BusinessId;
             Locations = string.IsNullOrWhiteSpace(businessId)
-                ? new List<Inventory_Location>()
+                ? new List<cs392_demo.models.Inventory_Location>()
                 : await _context.Inventory_Location.Where(l => l.BusinessId == businessId).ToListAsync();
 
             Input.LineItems = Input.LineItems

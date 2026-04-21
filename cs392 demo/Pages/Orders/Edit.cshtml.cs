@@ -7,13 +7,14 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
+using InventoryLocation = cs392_demo.models.Inventory_Location;
 
 namespace cs392_demo.Pages.Orders
 {
     [Authorize(Roles = "Owner,Manager")]
     public class EditModel : PageModel
     {
-        public List<Inventory_Location> Locations { get; set; } = new();
+        public List<cs392_demo.models.Inventory_Location> Locations { get; set; } = new();
         private readonly cs392_demoContext _context;
         private readonly MongoDBService _mongoService;
 
@@ -40,7 +41,7 @@ namespace cs392_demo.Pages.Orders
             Order = order;
             await LoadDataAsync(order.BusinessId);
             Locations = string.IsNullOrWhiteSpace(order.BusinessId)
-                ? new List<Inventory_Location>()
+                ? new List<cs392_demo.models.Inventory_Location>()
                 : await _context.Inventory_Location.Where(l => l.BusinessId == order.BusinessId).ToListAsync();
 
             Input = new EditOrderInput
@@ -74,7 +75,7 @@ namespace cs392_demo.Pages.Orders
             if (!order.IsEditable) return RedirectToPage("./Details", new { id });
 
             Locations = string.IsNullOrWhiteSpace(order.BusinessId)
-                ? new List<Inventory_Location>()
+                ? new List<cs392_demo.models.Inventory_Location>()
                 : await _context.Inventory_Location.Where(l => l.BusinessId == order.BusinessId).ToListAsync();
 
             Input.LineItems = Input.LineItems
