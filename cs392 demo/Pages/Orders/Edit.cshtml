@@ -55,6 +55,7 @@
                                 var sel = s.Id == Model.Input.SupplierMongoId ? "selected" : null;
                                 <option value="@s.Id" data-name="@s.Name"
                                         data-leadtime="@s.Terms.LeadTimeDays"
+                                        data-accountnumber="@s.AccountNumber"
                                         selected="@sel">@s.Name</option>
                             }
                         </select>
@@ -76,6 +77,9 @@
                     }
                     <input type="hidden" asp-for="Input.SupplierName" id="supplierNameHidden" />
                     <span asp-validation-for="Input.SupplierMongoId" class="text-danger small"></span>
+                    <div id="accountNumberHint" class="form-text @(string.IsNullOrWhiteSpace(Model.Suppliers.FirstOrDefault(s => s.Id == Model.Input.SupplierMongoId)?.AccountNumber) ? "d-none" : "")">
+                        Account #: <span id="accountNumberDisplay">@(Model.Suppliers.FirstOrDefault(s => s.Id == Model.Input.SupplierMongoId)?.AccountNumber)</span>
+                    </div>
                 </div>
 
                 <div class="col-md-4">
@@ -222,6 +226,14 @@ function getActiveCatalog() {
 function syncSupplierName(sel) {
     var opt = sel.options[sel.selectedIndex];
     document.getElementById('supplierNameHidden').value = opt.dataset.name || '';
+    var acct = opt.dataset.accountnumber || '';
+    var hintDiv = document.getElementById('accountNumberHint');
+    if (acct) {
+        document.getElementById('accountNumberDisplay').textContent = acct;
+        hintDiv.classList.remove('d-none');
+    } else {
+        hintDiv.classList.add('d-none');
+    }
     document.querySelectorAll('.stock-picker').forEach(function(picker) {
         var currentVal = picker.value;
         picker.innerHTML = buildStockOptions();

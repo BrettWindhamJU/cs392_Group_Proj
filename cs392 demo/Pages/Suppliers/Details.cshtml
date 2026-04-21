@@ -73,6 +73,12 @@
                     <dt>Last Delivery</dt>
                     <dd>@(Model.Supplier.Performance.LastDeliveryAtUtc.HasValue ? Model.Supplier.Performance.LastDeliveryAtUtc.Value.ToString("g") : "-")</dd>
 
+                    @if (!string.IsNullOrWhiteSpace(Model.Supplier.AccountNumber))
+                    {
+                        <dt>Account Number</dt>
+                        <dd>@Model.Supplier.AccountNumber</dd>
+                    }
+
                     <dt>Notes</dt>
                     <dd>@Model.Supplier.Notes</dd>
                 </dl>
