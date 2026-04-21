@@ -1,9 +1,19 @@
 ﻿@page
 @model AnalyticsModel
+
 <head>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.css" />
 </head>
+
 <h2>Inventory Analytics</h2>
+
+<!-- STOCK GRID (SORTED) -->
+<div id="stockGrid" style="
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap:8px;
+    margin-bottom:15px;
+"></div>
 
 <canvas id="stockChart"></canvas>
 
@@ -25,6 +35,11 @@
 
     let chart;
 
+    // Convert to sorted array (by name)
+    const stocks = Object.entries(dataFromServer)
+        .map(([id, stock]) => ({ id, ...stock }))
+        .sort((a, b) => a.name.localeCompare(b.name));
+
     // Flatten timestamps
     const allDates = Object.values(dataFromServer)
         .flatMap(s => s.data)
@@ -44,14 +59,14 @@
     function buildChart(startTime, endTime) {
         const datasets = [];
 
-        for (const stockId in dataFromServer) {
-            const stock = dataFromServer[stockId];
+        // Use sorted stocks
+        for (const stock of stocks) {
 
             const filtered = stock.data.filter(p =>
                 p.date >= startTime && p.date <= endTime
             );
 
-               datasets.push({
+            datasets.push({
                 label: stock.name,
                 data: filtered.map(p => ({
                     x: p.date,
@@ -75,7 +90,7 @@
             data: { datasets },
             options: {
                 parsing: false,
-                   scales: {
+                scales: {
                     x: {
                         type: "time",
                         time: {
@@ -91,6 +106,10 @@
         });
     }
 
+    function formatDate(ms) {
+        return new Date(ms).toLocaleDateString();
+    }
+
     // INIT NOUISLIDER
     const slider = document.getElementById("dateSlider");
 
@@ -101,7 +120,7 @@
             min: minTime,
             max: maxTime
         },
-        step: 1 // allow full smooth range (milliseconds)
+        step: 1
     });
 
     slider.noUiSlider.on("update", function (values) {
@@ -115,6 +134,8 @@
     });
 
     // initial render
+    renderStockGrid();
+
     const initial = slider.noUiSlider.get();
     buildChart(Number(initial[0]), Number(initial[1]));
 </script>
