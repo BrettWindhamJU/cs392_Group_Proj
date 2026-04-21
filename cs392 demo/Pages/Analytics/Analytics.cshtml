@@ -1,55 +1,141 @@
 ﻿@page
 @model AnalyticsModel
 
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.css" />
+</head>
+
 <h2>Inventory Analytics</h2>
+
+<!-- STOCK GRID (SORTED) -->
+<div id="stockGrid" style="
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap:8px;
+    margin-bottom:15px;
+"></div>
 
 <canvas id="stockChart"></canvas>
 
+<div style="margin-top: 25px;">
+    <div id="dateSlider"></div>
+
+    <div style="display:flex; justify-content:space-between; margin-top:8px;">
+        <small id="startLabel"></small>
+        <small id="endLabel"></small>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.js"></script>
 
 <script>
-    // Use pre-serialized JSON from backend
     const dataFromServer = @Html.Raw(Model.StockDataJson);
 
-    const datasets = [];
+    let chart;
 
-    for (const stockId in dataFromServer) {
-        const points = dataFromServer[stockId];
+    // Convert to sorted array (by name)
+    const stocks = Object.entries(dataFromServer)
+        .map(([id, stock]) => ({ id, ...stock }))
+        .sort((a, b) => a.name.localeCompare(b.name));
 
-        datasets.push({
-            label: stockId,
-            data: points.map(p => ({
-                x: p.date,
-                y: Number(p.amount)
-            })),
-            borderWidth: 2,
-            fill: false
-        });
-       
-        console.log(points.map(p => p.date || p.Date));
-        console.log(new Date(points[0].date || points[0].Date));
+    // Flatten timestamps
+    const allDates = Object.values(dataFromServer)
+        .flatMap(s => s.data)
+        .map(p => p.date)
+        .sort((a, b) => a - b);
+
+    const minTime = allDates[0];
+    const maxTime = allDates[allDates.length - 1];
+
+    const startLabel = document.getElementById("startLabel");
+    const endLabel = document.getElementById("endLabel");
+
+    function formatDate(ms) {
+        return new Date(ms).toLocaleDateString();
     }
-    
-    const maxY = Math.max(...datasets.flatMap(ds => ds.data.map(d => d.y)));
 
-    const ctx = document.getElementById('stockChart').getContext('2d');
+    function buildChart(startTime, endTime) {
+        const datasets = [];
 
-    new Chart(ctx, {
-        type: 'line',
-        data: { datasets },
-        options: {
-            parsing: false,
-            scales: {
-                x: {
-                    type: 'time',
-                    time: { unit: 'day' }
-                },
-                y: {
-                    beginAtZero: true,
-                    suggestedMax: maxY * 1.1
+        // Use sorted stocks
+        for (const stock of stocks) {
+
+            const filtered = stock.data.filter(p =>
+                p.date >= startTime && p.date <= endTime
+            );
+
+            datasets.push({
+                label: stock.name,
+                data: filtered.map(p => ({
+                    x: p.date,
+                    y: Number(p.amount)
+                })),
+                borderWidth: 2,
+                fill: false,
+
+                // smoothing
+                tension: 0.3,
+                cubicInterpolationMode: 'monotone',
+            });
+        }
+
+        const ctx = document.getElementById("stockChart").getContext("2d");
+
+        if (chart) chart.destroy();
+
+        chart = new Chart(ctx, {
+            type: "line",
+            data: { datasets },
+            options: {
+                parsing: false,
+                scales: {
+                    x: {
+                        type: "time",
+                        time: {
+                            unit: "day",
+                            tooltipFormat: "PP"
+                        }
+                    },
+                    y: {
+                        beginAtZero: true
+                    }
                 }
             }
-        }
+        });
+    }
+
+    function formatDate(ms) {
+        return new Date(ms).toLocaleDateString();
+    }
+
+    // INIT NOUISLIDER
+    const slider = document.getElementById("dateSlider");
+
+    noUiSlider.create(slider, {
+        start: [minTime, maxTime],
+        connect: true,
+        range: {
+            min: minTime,
+            max: maxTime
+        },
+        step: 1
     });
+
+    slider.noUiSlider.on("update", function (values) {
+        const startTime = Number(values[0]);
+        const endTime = Number(values[1]);
+
+        startLabel.textContent = "From: " + formatDate(startTime);
+        endLabel.textContent = "To: " + formatDate(endTime);
+
+        buildChart(startTime, endTime);
+    });
+
+    // initial render
+    renderStockGrid();
+
+    const initial = slider.noUiSlider.get();
+    buildChart(Number(initial[0]), Number(initial[1]));
 </script>

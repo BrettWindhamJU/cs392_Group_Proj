@@ -1,47 +1,69 @@
+using cs392_demo.models;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
 public class AnalyticsModel : PageModel
 {
+    private readonly cs392_demo.Data.cs392_demoContext _context;
+
+    public AnalyticsModel(cs392_demo.Data.cs392_demoContext context)
+    {
+        _context = context;
+    }
+
+    public IList<Inventory_Activity_Log> Inventory_Activity_Log { get; set; } = default!;
+
     public string StockDataJson { get; set; } = string.Empty;
 
     public void OnGet()
     {
+        // Load data from database
+        Inventory_Activity_Log = _context.Inventory_Activity_Log.ToList();
+        var stocks = _context.Stock.ToList();
 
-        // Example: replace with DB call
-        var stockData = new Dictionary<string, List<StockPoint>>
-        {
-            ["Item A"] = new List<StockPoint>
-            {
-                new StockPoint { date = DateTime.Now.AddDays(-10), amount = 55 },
-                new StockPoint { date = DateTime.Now.AddDays(-9), amount = 43 },
-                new StockPoint { date = DateTime.Now.AddDays(-8), amount = 40 },
-                new StockPoint { date = DateTime.Now.AddDays(-7), amount = 39 },
-                new StockPoint { date = DateTime.Now.AddDays(-6), amount = 37 },
-                new StockPoint { date = DateTime.Now.AddDays(-5), amount = 32 },
-                new StockPoint { date = DateTime.Now.AddDays(-4), amount = 58 }
-            },
-            ["Item B"] = new List<StockPoint>
-            {
-                new StockPoint { date = DateTime.Now.AddDays(-10), amount = 25 },
-                new StockPoint { date = DateTime.Now.AddDays(-9), amount = 23 },
-                new StockPoint { date = DateTime.Now.AddDays(-8), amount = 20 },
-                new StockPoint { date = DateTime.Now.AddDays(-7), amount = 19 },
-                new StockPoint { date = DateTime.Now.AddDays(-6), amount = 17 },
-                new StockPoint { date = DateTime.Now.AddDays(-5), amount = 12 },
-                new StockPoint { date = DateTime.Now.AddDays(-4), amount = 38 }
-            }
-        };
+        // Create lookup: Stock_ID -> Stock Name
+        var stockNameLookup = stocks
+            .DistinctBy(s => s.Stock_ID)
+            .ToDictionary(s => s.Stock_ID, s => s.Item_Name);
 
+        // Group logs by Stock ID and attach stock names
+        var stockData = Inventory_Activity_Log
+            .GroupBy(log => log.Stock_ID_Log)
+            .ToDictionary(
+                group => group.Key.ToString(),
+                group => new
+                {
+                    Name = stockNameLookup.ContainsKey(group.Key)
+                        ? stockNameLookup[group.Key]
+                        : "Unknown Item",
+
+                    Data = group
+                        .OrderBy(log => log.Changed_At)
+                        .Select(log => new StockPoint
+                        {
+                            date = log.Changed_At,
+                            amount = log.Quantity_After
+                        })
+                        .ToList()
+                }
+            );
+
+        // Serialize for frontend usage
         StockDataJson = JsonSerializer.Serialize(
             stockData.ToDictionary(
                 k => k.Key,
-                v => v.Value.Select(p => new {
-                    date = new DateTimeOffset(p.date).ToUnixTimeMilliseconds(),
-                    amount = p.amount
-                })
+                v => new
+                {
+                    name = v.Value.Name,
+                    data = v.Value.Data.Select(p => new
+                    {
+                        date = new DateTimeOffset(p.date).ToUnixTimeMilliseconds(),
+                        amount = p.amount
+                    })
+                }
             )
-);
+        );
     }
 }
 
