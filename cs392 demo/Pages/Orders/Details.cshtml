@@ -105,6 +105,18 @@
                         </dd>
                     }
 
+                    @if (Model.SupplierContact != null && (!string.IsNullOrWhiteSpace(Model.SupplierContact.PrimaryName) || !string.IsNullOrWhiteSpace(Model.SupplierContact.Email) || !string.IsNullOrWhiteSpace(Model.SupplierContact.Phone)))
+                    {
+                        <dt class="col-5 mt-n1"></dt>
+                        <dd class="col-7 small text-muted mt-n1">
+                            @string.Join(" · ", new[]{ Model.SupplierContact.PrimaryName, Model.SupplierContact.Email }.Where(x => !string.IsNullOrWhiteSpace(x)))
+                            @if (!string.IsNullOrWhiteSpace(Model.SupplierContact.Phone))
+                            {
+                                <br />@Model.SupplierContact.Phone
+                            }
+                        </dd>
+                    }
+
                     @if (Model.LocationName != null)
                     {
                         <dt class="col-5 pt-2">Destination</dt>

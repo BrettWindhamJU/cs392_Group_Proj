@@ -27,6 +27,7 @@ namespace cs392_demo.Pages.Orders
         public string? LocationAddress { get; set; }
         public string? SupplierAccountNumber { get; set; }
         public SupplierAddress? SupplierAddress { get; set; }
+        public SupplierContact? SupplierContact { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
@@ -58,6 +59,7 @@ namespace cs392_demo.Pages.Orders
                 var supplier = await _mongo.GetByMongoIdAsync(order.SupplierMongoId);
                 SupplierAccountNumber = supplier?.AccountNumber;
                 SupplierAddress = supplier?.Address;
+                SupplierContact = supplier?.Contact;
             }
 
             return Page();
