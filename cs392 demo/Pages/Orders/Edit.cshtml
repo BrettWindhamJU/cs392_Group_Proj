@@ -56,6 +56,11 @@
                                 <option value="@s.Id" data-name="@s.Name"
                                         data-leadtime="@s.Terms.LeadTimeDays"
                                         data-accountnumber="@s.AccountNumber"
+                                        data-addr1="@s.Address.Line1"
+                                        data-addrcity="@s.Address.City"
+                                        data-addrstate="@s.Address.State"
+                                        data-addrzip="@s.Address.PostalCode"
+                                        data-addrcountry="@s.Address.Country"
                                         selected="@sel">@s.Name</option>
                             }
                         </select>
@@ -77,19 +82,17 @@
                     }
                     <input type="hidden" asp-for="Input.SupplierName" id="supplierNameHidden" />
                     <span asp-validation-for="Input.SupplierMongoId" class="text-danger small"></span>
-                    <div id="accountNumberHint" class="form-text @(string.IsNullOrWhiteSpace(Model.Suppliers.FirstOrDefault(s => s.Id == Model.Input.SupplierMongoId)?.AccountNumber) ? "d-none" : "")">
-                        Account #: <span id="accountNumberDisplay">@(Model.Suppliers.FirstOrDefault(s => s.Id == Model.Input.SupplierMongoId)?.AccountNumber)</span>
-                    </div>
                 </div>
 
                 <div class="col-md-4">
                     <label class="form-label fw-semibold">Destination Location <span class="text-danger">*</span></label>
-                    <select class="form-select" asp-for="Input.LocationId" required>
+                    <select class="form-select" id="locationSelect" asp-for="Input.LocationId" required
+                            onchange="syncLocationAddress(this)">
                         <option value="">Select location…</option>
                         @foreach (var loc in Model.Locations)
                         {
                             var isLoc = loc.location_id == Model.Input.LocationId ? "selected" : null;
-                            <option value="@loc.location_id" selected="@isLoc">@loc.Location_name</option>
+                            <option value="@loc.location_id" data-address="@loc.Address_Location" selected="@isLoc">@loc.Location_name</option>
                         }
                     </select>
                     <span asp-validation-for="Input.LocationId" class="text-danger small"></span>
@@ -99,6 +102,43 @@
                     <label class="form-label fw-semibold" asp-for="Input.ExpectedDeliveryDate">Expected Delivery</label>
                     <input type="date" class="form-control" asp-for="Input.ExpectedDeliveryDate" id="deliveryDateInput" />
                     <span asp-validation-for="Input.ExpectedDeliveryDate" class="text-danger small"></span>
+                </div>
+
+                <!-- Address preview row -->
+                @{
+                    var _curSupplier = Model.Suppliers.FirstOrDefault(s => s.Id == Model.Input.SupplierMongoId);
+                    var _curLoc = Model.Locations.FirstOrDefault(l => l.location_id == Model.Input.LocationId);
+                    var _previewVisible = _curSupplier != null || _curLoc != null;
+                }
+                <div class="col-12 @(_previewVisible ? "" : "d-none")" id="addressPreview">
+                    @if (!string.IsNullOrWhiteSpace(_curSupplier?.AccountNumber))
+                    {
+                        <div id="supplierAcctRow" class="mb-2">
+                            <span class="text-muted small">Supplier Account #: </span><span class="fw-semibold small" id="previewSupplierAcct">@_curSupplier!.AccountNumber</span>
+                        </div>
+                    }
+                    else
+                    {
+                        <div id="supplierAcctRow" class="mb-2 d-none">
+                            <span class="text-muted small">Supplier Account #: </span><span class="fw-semibold small" id="previewSupplierAcct"></span>
+                        </div>
+                    }
+                    <div class="row g-3">
+                        <div class="col-md-6 d-flex">
+                            <div class="p-3 bg-light rounded border w-100">
+                                <div class="small fw-semibold text-muted text-uppercase mb-2">Ship From (Supplier)</div>
+                                <div class="fw-semibold" id="previewSupplierName">@(_curSupplier?.Name ?? "")</div>
+                                <div class="small text-muted mt-1" id="previewSupplierAddr" style="white-space:pre-line">@(_curSupplier != null && !string.IsNullOrWhiteSpace(_curSupplier.Address.Line1) ? _curSupplier.Address.Line1 + "\n" + string.Join(", ", new[]{_curSupplier.Address.City, _curSupplier.Address.State, _curSupplier.Address.PostalCode}.Where(x => !string.IsNullOrWhiteSpace(x))) + (string.IsNullOrWhiteSpace(_curSupplier.Address.Country) ? "" : ", " + _curSupplier.Address.Country) : "")</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 d-flex">
+                            <div class="p-3 bg-light rounded border w-100">
+                                <div class="small fw-semibold text-muted text-uppercase mb-2">Ship To (Destination)</div>
+                                <div class="fw-semibold" id="previewLocationName">@(_curLoc?.Location_name ?? "")</div>
+                                <div class="small text-muted mt-1" id="previewLocationAddr">@(_curLoc?.Address_Location ?? "")</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="col-12">
@@ -226,19 +266,50 @@ function getActiveCatalog() {
 function syncSupplierName(sel) {
     var opt = sel.options[sel.selectedIndex];
     document.getElementById('supplierNameHidden').value = opt.dataset.name || '';
+    var name = opt.dataset.name || '';
     var acct = opt.dataset.accountnumber || '';
-    var hintDiv = document.getElementById('accountNumberHint');
+    var addr1 = opt.dataset.addr1 || '';
+    var city  = opt.dataset.addrcity || '';
+    var state = opt.dataset.addrstate || '';
+    var zip   = opt.dataset.addrzip || '';
+    var country = opt.dataset.addrcountry || '';
+    document.getElementById('previewSupplierName').textContent = name;
+    var acctRow = document.getElementById('supplierAcctRow');
     if (acct) {
-        document.getElementById('accountNumberDisplay').textContent = acct;
-        hintDiv.classList.remove('d-none');
+        document.getElementById('previewSupplierAcct').textContent = acct;
+        acctRow.classList.remove('d-none');
     } else {
-        hintDiv.classList.add('d-none');
+        acctRow.classList.add('d-none');
     }
+    var addrLine = '';
+    if (addr1) addrLine += addr1 + '\n';
+    if (city || state || zip) addrLine += [city, state, zip].filter(Boolean).join(', ');
+    if (country) addrLine += (addrLine ? ', ' : '') + country;
+    document.getElementById('previewSupplierAddr').innerText = addrLine;
+    updateAddressPreview();
     document.querySelectorAll('.stock-picker').forEach(function(picker) {
         var currentVal = picker.value;
         picker.innerHTML = buildStockOptions();
         picker.value = currentVal;
     });
+}
+
+function syncLocationAddress(sel) {
+    var opt = sel.options[sel.selectedIndex];
+    document.getElementById('previewLocationName').textContent = opt.text || '';
+    document.getElementById('previewLocationAddr').textContent = opt.dataset.address || '';
+    updateAddressPreview();
+}
+
+function updateAddressPreview() {
+    var hasSupplier = document.getElementById('supplierSelect').value !== '';
+    var hasLocation = document.getElementById('locationSelect').value !== '';
+    var preview = document.getElementById('addressPreview');
+    if (hasSupplier || hasLocation) {
+        preview.classList.remove('d-none');
+    } else {
+        preview.classList.add('d-none');
+    }
 }
 
 function buildStockOptions() {

@@ -90,26 +90,34 @@
     <div class="row g-3 mb-4">
         <!-- Left: order meta -->
         <div class="col-md-6">
-            <div class="po-form-card h-100">
+            <div class="po-form-card h-100 p-3">
                 <h2 class="po-form-card-title">Order Info</h2>
                 <dl class="row mb-0">
                     <dt class="col-5">Supplier</dt>
-                    <dd class="col-7">
-                        @o.SupplierName
-                        @if (!string.IsNullOrWhiteSpace(Model.SupplierAccountNumber))
-                        {
-                            <br /><small class="text-muted">Acct #: @Model.SupplierAccountNumber</small>
-                        }
-                    </dd>
+                    <dd class="col-7 fw-semibold mb-0">@o.SupplierName</dd>
+
+                    @if (Model.SupplierAddress != null && !string.IsNullOrWhiteSpace(Model.SupplierAddress.Line1))
+                    {
+                        <dt class="col-5 mt-n1"></dt>
+                        <dd class="col-7 small text-muted mt-n1">
+                            @Model.SupplierAddress.Line1<br />
+                            @Model.SupplierAddress.City, @Model.SupplierAddress.State @Model.SupplierAddress.PostalCode@if (!string.IsNullOrWhiteSpace(Model.SupplierAddress.Country)){<text>, @Model.SupplierAddress.Country</text>}
+                        </dd>
+                    }
 
                     @if (Model.LocationName != null)
                     {
-                        <dt class="col-5">Destination</dt>
-                        <dd class="col-7">@Model.LocationName</dd>
+                        <dt class="col-5 pt-2">Destination</dt>
+                        <dd class="col-7 fw-semibold pt-2 mb-0">@Model.LocationName</dd>
+                        @if (!string.IsNullOrWhiteSpace(Model.LocationAddress))
+                        {
+                            <dt class="col-5 mt-n1"></dt>
+                            <dd class="col-7 small text-muted mt-n1">@Model.LocationAddress</dd>
+                        }
                     }
 
-                    <dt class="col-5">Expected Delivery</dt>
-                    <dd class="col-7">
+                    <dt class="col-5 pt-2">Expected Delivery</dt>
+                    <dd class="col-7 pt-2">
                         @(o.ExpectedDeliveryDate.HasValue
                             ? o.ExpectedDeliveryDate.Value.ToString("MMM d, yyyy")
                             : "—")
@@ -149,9 +157,14 @@
 
         <!-- Right: totals -->
         <div class="col-md-6">
-            <div class="po-form-card h-100">
+            <div class="po-form-card h-100 p-3">
                 <h2 class="po-form-card-title">Summary</h2>
                 <dl class="row mb-0">
+                    @if (!string.IsNullOrWhiteSpace(Model.SupplierAccountNumber))
+                    {
+                        <dt class="col-6 fw-normal small">Acct #</dt>
+                        <dd class="col-6 small">@Model.SupplierAccountNumber</dd>
+                    }
                     <dt class="col-6">Items</dt>
                     <dd class="col-6">@o.LineItems.Count</dd>
 

@@ -24,7 +24,9 @@ namespace cs392_demo.Pages.Orders
         public PurchaseOrder Order { get; set; } = null!;
         public bool IsOwner { get; set; }
         public string? LocationName { get; set; }
+        public string? LocationAddress { get; set; }
         public string? SupplierAccountNumber { get; set; }
+        public SupplierAddress? SupplierAddress { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
@@ -48,12 +50,14 @@ namespace cs392_demo.Pages.Orders
                 var loc = await _context.Inventory_Location
                     .FirstOrDefaultAsync(l => l.location_id == order.LocationId && l.BusinessId == businessId);
                 LocationName = loc?.Location_name ?? order.LocationId;
+                LocationAddress = loc?.Address_Location;
             }
 
             if (!string.IsNullOrWhiteSpace(order.SupplierMongoId))
             {
                 var supplier = await _mongo.GetByMongoIdAsync(order.SupplierMongoId);
                 SupplierAccountNumber = supplier?.AccountNumber;
+                SupplierAddress = supplier?.Address;
             }
 
             return Page();

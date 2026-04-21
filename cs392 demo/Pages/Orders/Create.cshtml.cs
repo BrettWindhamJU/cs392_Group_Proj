@@ -103,7 +103,7 @@ namespace cs392_demo.Pages.Orders
                 Supplier? selectedSupplier = null;
                 try
                 {
-                    var allSuppliers = await _mongoService.GetByBusinessAsync(businessId);
+                    var allSuppliers = await _mongoService.GetByBusinessAsync(businessId ?? string.Empty);
                     selectedSupplier = allSuppliers.FirstOrDefault(s => s.Id == Input.SupplierMongoId);
                 }
                 catch { }
@@ -140,7 +140,7 @@ namespace cs392_demo.Pages.Orders
 
             var order = new PurchaseOrder
             {
-                BusinessId         = businessId,
+                BusinessId         = businessId ?? string.Empty,
                 PONumber           = $"PO-{nextNum:D4}",
                 SupplierMongoId    = Input.SupplierMongoId,
                 SupplierName       = Input.SupplierName,
