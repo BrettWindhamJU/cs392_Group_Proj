@@ -226,16 +226,16 @@ User question:
             string prompt;
             if (type == null)
             {
-                _logger.LogInformation("calling BuildPromptSupplier with ", message.ToString(), " and ", message.ToString());
+                _logger.LogInformation("calling BuildPromptSupplier with {Message1} and {Message2}", message.ToString(), message.ToString());
                 prompt = BuildPromptSupplier(message, dataContext);
-                _logger.LogInformation("BuildPromptSupplier called with response ", prompt.ToString());
+                _logger.LogInformation("BuildPromptSupplier called with response {Prompt}", prompt.ToString());
 
             }
             else
             {
-                _logger.LogInformation("calling BuildPromptAnalytics with ", message.ToString(), " and ", message.ToString());
+                _logger.LogInformation("calling BuildPromptAnalytics with {Message1} and {Message2}", message.ToString(), message.ToString());
                 prompt = BuildPromptAnalytics(message, dataContext);
-                _logger.LogInformation("BuildPromptAnalytics called with response ", prompt.ToString());
+                _logger.LogInformation("BuildPromptAnalytics called with response {Prompt}", prompt.ToString());
             }
                 var payload = new
                 {

@@ -185,7 +185,7 @@ namespace CS392_Demo3.Pages.Curriculum
                 {
                     try
                     {
-                        response = await _ai.SendPromptWithContextAsync(userQuestion, supplierContext, null);
+                        response = await _ai.SendPromptWithContextAsync(userQuestion, supplierContext, "");
                     }
                     catch (System.Exception ex)
                     {

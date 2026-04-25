@@ -1,141 +1,117 @@
 ﻿@page
 @model AnalyticsModel
 
-<head>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.css" />
-</head>
-
 <h2>Inventory Analytics</h2>
 
-<!-- STOCK GRID (SORTED) -->
-<div id="stockGrid" style="
-    display:grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap:8px;
-    margin-bottom:15px;
-"></div>
-
-<canvas id="stockChart"></canvas>
-
-<div style="margin-top: 25px;">
-    <div id="dateSlider"></div>
-
-    <div style="display:flex; justify-content:space-between; margin-top:8px;">
-        <small id="startLabel"></small>
-        <small id="endLabel"></small>
+<form id="analyticsFilterForm" method="get" class="d-flex align-items-end gap-3 mb-4 flex-wrap">
+    <div>
+        <label class="form-label mb-1">Location</label>
+        <select name="FilterLocation" class="form-select form-select-sm" onchange="this.form.submit()">
+            <option value="">All Locations</option>
+            @foreach (var loc in Model.LocationOptions)
+            {
+                <option value="@loc.Id" selected="@(Model.FilterLocation == loc.Id)">@loc.Name</option>
+            }
+        </select>
     </div>
-</div>
+    <div>
+        <label class="form-label mb-1">Item</label>
+        <select name="FilterItem" class="form-select form-select-sm" onchange="this.form.submit()">
+            <option value="">All Items</option>
+            @foreach (var item in Model.ItemOptions)
+            {
+                <option value="@item" selected="@(Model.FilterItem == item)">@item</option>
+            }
+        </select>
+    </div>
+    <input type="hidden" id="StartDate" name="StartDate" value="@(Model.StartDate ?? Model.MinDate)" />
+    <input type="hidden" id="EndDate" name="EndDate" value="@(Model.EndDate ?? Model.MaxDate)" />
+</form>
 
+@if (Model.StockDataJson == "[]")
+{
+    <p class="text-muted">No activity data found for the selected filters.</p>
+}
+else
+{
+    <canvas id="stockChart"></canvas>
+    <div style="max-width:700px;margin:32px auto 0 auto;">
+        <label class="form-label mb-1">Date Range</label>
+        <div id="dateSlider"></div>
+        <div style="display:flex; justify-content:space-between; margin-top:8px;">
+            <small id="startLabel"></small>
+            <small id="endLabel"></small>
+        </div>
+    </div>
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.css" />
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.js"></script>
-
 <script>
-    const dataFromServer = @Html.Raw(Model.StockDataJson);
-
-    let chart;
-
-    // Convert to sorted array (by name)
-    const stocks = Object.entries(dataFromServer)
-        .map(([id, stock]) => ({ id, ...stock }))
-        .sort((a, b) => a.name.localeCompare(b.name));
-
-    // Flatten timestamps
-    const allDates = Object.values(dataFromServer)
-        .flatMap(s => s.data)
-        .map(p => p.date)
-        .sort((a, b) => a - b);
-
-    const minTime = allDates[0];
-    const maxTime = allDates[allDates.length - 1];
-
-    const startLabel = document.getElementById("startLabel");
-    const endLabel = document.getElementById("endLabel");
-
-    function formatDate(ms) {
-        return new Date(ms).toLocaleDateString();
-    }
-
-    function buildChart(startTime, endTime) {
-        const datasets = [];
-
-        // Use sorted stocks
-        for (const stock of stocks) {
-
-            const filtered = stock.data.filter(p =>
-                p.date >= startTime && p.date <= endTime
-            );
-
-            datasets.push({
-                label: stock.name,
-                data: filtered.map(p => ({
-                    x: p.date,
-                    y: Number(p.amount)
-                })),
-                borderWidth: 2,
-                fill: false,
-
-                // smoothing
-                tension: 0.3,
-                cubicInterpolationMode: 'monotone',
-            });
-        }
-
-        const ctx = document.getElementById("stockChart").getContext("2d");
-
-        if (chart) chart.destroy();
-
-        chart = new Chart(ctx, {
-            type: "line",
+    const stockData = @Html.Raw(Model.StockDataJson);
+    let mainChart;
+    if (stockData.length > 0) {
+        const palette = [
+            '#4e79a7','#f28e2b','#e15759','#76b7b2','#59a14f',
+            '#edc948','#b07aa1','#ff9da7','#9c755f','#bab0ac'
+        ];
+        // Main chart datasets
+        const datasets = stockData.map((stock, i) => ({
+            label: stock.name,
+            data: stock.data.map(p => ({ x: p.date, y: p.amount })),
+            borderColor: palette[i % palette.length],
+            borderWidth: 2,
+            fill: false,
+            tension: 0.3,
+            cubicInterpolationMode: 'monotone',
+            pointRadius: stock.data.length < 20 ? 4 : 2
+        }));
+        mainChart = new Chart(document.getElementById('stockChart').getContext('2d'), {
+            type: 'line',
             data: { datasets },
             options: {
                 parsing: false,
+                responsive: true,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { position: 'bottom' }
+                },
                 scales: {
-                    x: {
-                        type: "time",
-                        time: {
-                            unit: "day",
-                            tooltipFormat: "PP"
-                        }
-                    },
-                    y: {
-                        beginAtZero: true
-                    }
+                    x: { type: 'time', time: { unit: 'day', tooltipFormat: 'PP' } },
+                    y: { beginAtZero: true }
                 }
             }
         });
+        // Slider
+        const allDates = stockData.flatMap(s => s.data.map(p => p.date));
+        const minTime = Math.min(...allDates);
+        const maxTime = Math.max(...allDates);
+        const slider = document.getElementById("dateSlider");
+        noUiSlider.create(slider, {
+            start: [minTime, maxTime],
+            connect: true,
+            range: { min: minTime, max: maxTime },
+            step: 24 * 60 * 60 * 1000 // 1 day in ms
+        });
+        const startLabel = document.getElementById("startLabel");
+        const endLabel = document.getElementById("endLabel");
+        function formatDate(ms) {
+            return new Date(Number(ms)).toLocaleDateString();
+        }
+        slider.noUiSlider.on("update", function (values) {
+            startLabel.textContent = "From: " + formatDate(values[0]);
+            endLabel.textContent = "To: " + formatDate(values[1]);
+            // Zoom chart
+            mainChart.options.scales.x.min = Number(values[0]);
+            mainChart.options.scales.x.max = Number(values[1]);
+            mainChart.update('none');
+        });
+        slider.noUiSlider.on("change", function (values) {
+            document.getElementById("StartDate").value = Math.floor(values[0]);
+            document.getElementById("EndDate").value = Math.floor(values[1]);
+            document.getElementById("analyticsFilterForm").submit();
+        });
     }
-
-    function formatDate(ms) {
-        return new Date(ms).toLocaleDateString();
-    }
-
-    // INIT NOUISLIDER
-    const slider = document.getElementById("dateSlider");
-
-    noUiSlider.create(slider, {
-        start: [minTime, maxTime],
-        connect: true,
-        range: {
-            min: minTime,
-            max: maxTime
-        },
-        step: 1
-    });
-
-    slider.noUiSlider.on("update", function (values) {
-        const startTime = Number(values[0]);
-        const endTime = Number(values[1]);
-
-        startLabel.textContent = "From: " + formatDate(startTime);
-        endLabel.textContent = "To: " + formatDate(endTime);
-
-        buildChart(startTime, endTime);
-    });
-
-    // initial render
-    renderStockGrid();
-
-    const initial = slider.noUiSlider.get();
-    buildChart(Number(initial[0]), Number(initial[1]));
 </script>
